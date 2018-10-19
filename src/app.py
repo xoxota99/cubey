@@ -5,16 +5,15 @@ import stepper
 import numpy as np
 import time
 from cam import Camera
+from config import cfg
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
 
-CMD = './kociemba/solve'
+CMD = cfg['app']['solverCMD']
 
-cam1 = Camera(
-    "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.2:1.0-video-index0")
-cam2 = Camera(
-    "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.4:1.0-video-index0")
+camera_FR = Camera(cfg, cfg['app']['camera_FR_deviceName'])
+camera_BL = Camera(cfg, cfg['app']['camera_BL_deviceName'])
 
 
 def solve(t=None):
@@ -61,55 +60,55 @@ def scan_state():
     # scan front
     logging.info("Scanning FRONT")
 
-    state['F'][2], state['R'][0], state['F'][5], state['R'][3], state['F'][8], state['R'][6] = cam1.get_colors()
+    state['F'][2], state['R'][0], state['F'][5], state['R'][3], state['F'][8], state['R'][6] = camera_FR.get_colors()
 
     stepper.rot_90(stepper.FRONT)
-    state['F'][0], state['U'][6], state['F'][1], state['U'][7], _, state['U'][8] = cam1.get_colors()
+    state['F'][0], state['U'][6], state['F'][1], state['U'][7], _, state['U'][8] = camera_FR.get_colors()
 
     stepper.rot_90(stepper.FRONT)
-    state['F'][6], state['L'][8], state['F'][3], state['L'][5], _, state['L'][2] = cam1.get_colors()
+    state['F'][6], state['L'][8], state['F'][3], state['L'][5], _, state['L'][2] = camera_FR.get_colors()
 
     stepper.rot_90(stepper.FRONT)
-    _, state['D'][2], state['F'][7], state['D'][1], _, state['D'][0] = cam1.get_colors()
+    _, state['D'][2], state['F'][7], state['D'][1], _, state['D'][0] = camera_FR.get_colors()
 
     stepper.rot_90(stepper.FRONT)   # back to origin
 
     # scan right
     logging.info("Scanning RIGHT")
     stepper.rot_90(stepper.RIGHT)
-    _, _, state['D'][5], state['R'][7], state['D'][8], state['R'][8] = cam1.get_colors()
+    _, _, state['D'][5], state['R'][7], state['D'][8], state['R'][8] = camera_FR.get_colors()
 
     stepper.rot_90(stepper.RIGHT)
-    state['B'][6], _, state['B'][3], state['R'][5], state['B'][0], state['R'][2] = cam1.get_colors()
+    state['B'][6], _, state['B'][3], state['R'][5], state['B'][0], state['R'][2] = camera_FR.get_colors()
 
     stepper.rot_90(stepper.RIGHT)
-    state['U'][2], _, state['U'][5], state['R'][1], _, _ = cam1.get_colors()
+    state['U'][2], _, state['U'][5], state['R'][1], _, _ = camera_FR.get_colors()
 
     stepper.rot_90(stepper.RIGHT)  # back to origin
 
     # scan back
     logging.info("Scanning BACK")
-    state['B'][2], state['L'][0], state['B'][5], state['L'][3], state['B'][8], state['L'][6] = cam2.get_colors()
+    state['B'][2], state['L'][0], state['B'][5], state['L'][3], state['B'][8], state['L'][6] = camera_BL.get_colors()
 
     stepper.rot_90(stepper.BACK)
-    _, _, state['B'][1], state['U'][1], _, state['U'][0] = cam2.get_colors()
+    _, _, state['B'][1], state['U'][1], _, state['U'][0] = camera_BL.get_colors()
 
     # skip one edge. We've got the data already.
 
     stepper.rot_180(stepper.BACK)
-    _, state['D'][6], state['B'][7], state['D'][7], _, _ = cam2.get_colors()
+    _, state['D'][6], state['B'][7], state['D'][7], _, _ = camera_BL.get_colors()
 
     stepper.rot_90(stepper.BACK)   # back to origin
 
     # scan left
     logging.info("Scanning LEFT")
     stepper.rot_90(stepper.LEFT)
-    _, _, state['D'][3], state['L'][7], _, _ = cam2.get_colors()
+    _, _, state['D'][3], state['L'][7], _, _ = camera_BL.get_colors()
 
     # skip one edge. We've got the data already.
 
     stepper.rot_180(stepper.RIGHT)
-    _, _, state['U'][3], state['L'][1], _, _ = cam2.get_colors()
+    _, _, state['U'][3], state['L'][1], _, _ = camera_BL.get_colors()
 
     stepper.rot_90(stepper.RIGHT)  # back to origin
 

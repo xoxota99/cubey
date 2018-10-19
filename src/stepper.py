@@ -1,18 +1,20 @@
-from time import sleep
 from __future__ import division
+from time import sleep
 import math
 import pigpio
+from config import cfg
 
 # We are only spinning one motor at a time, so only need one DIR pin.
 # (All motors are on the same DIR bus).
-DIR = 17                # Direction GPIO Pin
+pins = cfg['stepper']['pins']
+DIR = pins['dir']                # Direction GPIO Pin
 
-UP = 18
-RIGHT = 3
-FRONT = 14
-DOWN = 5
-LEFT = 4
-BACK = 2
+UP = pins['up']                  # UP face stepper
+RIGHT = pins['right']            # RIGHT face stepper
+FRONT = pins['front']            # FRONT face stepper
+DOWN = pins['down']              # DOWN face stepper
+LEFT = pins['left']              # LEFT face stepper
+BACK = pins['back']              # BACK face stepper
 
 MOTOR_PIN = [UP, RIGHT, FRONT, DOWN, LEFT, BACK]  # Step GPIO Pins
 STEP_NAME = ["U", "R", "F", "D", "L", "B"]
@@ -24,8 +26,9 @@ STEP_MAP = {
     "L": LEFT,
     "R": RIGHT
 }
-RPM = 60  # complete revolutions (360 deg.) per minute
-STEPS_PER_REVOLUTION = 200  # steps per revolution (varies by motor)
+RPM = cfg['rpm']  # complete revolutions (360 deg.) per minute
+# steps per revolution (varies by motor)
+STEPS_PER_REVOLUTION = cfg['steps_per_rev']
 STEPS_PER_DEGREE = 360.0 / STEPS_PER_REVOLUTION
 PULSE_LENGTH_US = 1000000 // (STEPS_PER_REVOLUTION * RPM // 60)
 # e.g. 4 revolutions per second = 800 steps per second.
@@ -49,13 +52,14 @@ ALLOWED_FREQS = [
 ]
 is_init = False
 
-# initialize a frequency ramp for a turn of the specified number of degrees (typically 90 or 180 for our case).
-# A frequency ramp is basically a list, with each element a pair of integers, [Frequency, Steps]. This ramp
-# acts like a set of instructions to pigpiod, "Cycle the specified GPIO pin this many steps, at this frequency,
-# then move on to the next item in the list."
-
 
 def init_ramp(degrees):
+    """ 
+    initialize a frequency ramp for a turn of the specified number of degrees (typically 90 or 180 for our case).
+    A frequency ramp is basically a list, with each element a pair of integers, [Frequency, Steps]. This ramp
+    acts like a set of instructions to pigpiod, "Cycle the specified GPIO pin this many steps, at this frequency,
+    then move on to the next item in the list."
+    """
     retval = []  # the ramp to return.
     deg = 0  # the last absolue angle that we saw
     lastfreq = 0  # the last frequency we saw in the loop.
@@ -103,6 +107,9 @@ def init_ramp(degrees):
 
 
 def init(force=False):
+    """
+    Initialize stepper motor frequency / PWM ramps for 90 and 180-degree turns
+    """
     global ramp_90, ramp_180, is_init
 
     if force or not is_init:
@@ -122,8 +129,10 @@ def init(force=False):
 
 
 def generate_ramp(pin, ramp):
-    """Generate ramp wave forms.
-    ramp:  List of [Frequency, Steps]
+    """
+    Generate ramp wave forms. 
+    param:pin - The pin on which to pulse.
+    param:ramp - List of [Frequency, Steps]
     """
     pi.wave_clear()     # clear existing waves
     length = len(ramp)  # number of ramp levels
@@ -150,41 +159,47 @@ def generate_ramp(pin, ramp):
     pi.wave_chain(chain)  # Transmit chain.
 
 
-# rotate 90 degrees in the specified direction (CW or CCW)
-# param:motor_pin - One of UP, RIGHT, FRONT, DOWN, LEFT, or BACK, as defined above.
-# param:direction - One of CW or CCW, as defined above.
 def rot_90(motor_pin, direction=CW):
+    """
+    rotate 90 degrees in the specified direction (CW or CCW)
+    param:motor_pin - One of UP, RIGHT, FRONT, DOWN, LEFT, or BACK, as defined above.
+    param:direction - One of CW or CCW, as defined above.
+    """
     if not is_init:
         init()
     pi.write(DIR, direction)
     generate_ramp(motor_pin, ramp_90)
 
 
-# rotate 180 degrees in the specified direction (CW or CCW)
-# param:motor_pin - One of UP, RIGHT, FRONT, DOWN, LEFT, or BACK, as defined above.
-# param:direction - One of CW or CCW, as defined above. Default is CW
 def rot_180(motor_pin, direction=CW):
+    """
+    rotate 180 degrees in the specified direction (CW or CCW)
+    param:motor_pin - One of UP, RIGHT, FRONT, DOWN, LEFT, or BACK, as defined above.
+    param:direction - One of CW or CCW, as defined above. Default is CW
+    """
     if not is_init:
         init()
     pi.write(DIR, direction)
     generate_ramp(motor_pin, ramp_180)
 
 
-# take a recipe, of the form (e.g.) "R L2 F B U' F' D F' U B2 L' U2 B2 U D' B2 U2 L2 D' R2 D2"
-# and execute it using the attached stepper motors.
 def execute(recipe_str):
+    """
+    Take a recipe, of the form (e.g.) "R L2 F B U' F' D F' U B2 L' U2 B2 U D' B2 U2 L2 D' R2 D2"
+    and execute it using the attached stepper motors.
+    """
     recipe = recipe_str.split()
     for step_str in recipe:
         base = step_str[0]
-        mot = STEP_MAP[base]
+        pin = STEP_MAP[base]
         if (len(step_str) >= 2):
             xtra = step_str[-1:]
             if (xtra == "'"):
-                rot_90(mot, CCW)
+                rot_90(pin, CCW)
             elif (xtra == "2"):
-                rot_180(mot)
+                rot_180(pin)
         else:
-            rot_90(mot)
+            rot_90(pin)
 
 
 if __name__ == "__main__":

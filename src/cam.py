@@ -1,51 +1,49 @@
 import cv2
 import numpy as np
 import os.path
+from config import cfg
 
 # define a list of colors, with an error bar. The color "Center" is the idealized color,
 # and the "radius" is how far off the pixel color can be from the idealized color and
 # still be counted as that color.
-colorCenters = (
-    (np.array([147.,  147.,  147.]),  30., "W"),
-    (np.array([231.,   95.,   30.]),  60., "B"),
-    (np.array([0.,    0.,  255.]), 110., "R"),
-    (np.array([0.,  133.,  217.]),  30., "O"),
-    (np.array([53.,  176.,  176.]),  30., "Y"),
-    (np.array([160.,  198.,   0.]),  30., "G"),
-)
+
+# COLOR_CENTERS = (
+#     (np.array([147.,  147.,  147.]),  30., "W"),
+#     (np.array([231.,   95.,   30.]),  60., "B"),
+#     (np.array([0.,    0.,  255.]), 110., "R"),
+#     (np.array([0.,  133.,  217.]),  30., "O"),
+#     (np.array([53.,  176.,  176.]),  30., "Y"),
+#     (np.array([160.,  198.,   0.]),  30., "G"),
+# )
+
+colorCenters = cfg['cam']['colorCenters']
 
 # Map Color codes (OWYBGR) to Face codes (FBTLRB).
-# we take this extra step here, instead of inline in colorCenters, to allow for configuring
+# we take this extra step here, instead of inline in COLOR_CENTERS, to allow for configuring
 # the "known" position of cube faces at startup. Because we can't scan the center facelet
 # of each side (it is obscured by the gripper), we have to assume that it's a certain color for each side.
 # this is basically a config value that describes the positioning of the cube in the robot.
-COLOR_TO_FACE = {
-    "O": "F",           # Orange facing front.
-    "W": "B",           # White facing bottom.
-    "Y": "T",           # Yellow facing top.
-    "B": "L",           # Blue facing left.
-    "G": "R",           # Green facing right.
-    "R": "B",           # Red facing back.
-    "X": "X"            # UNKNOWN.
-}
+COLOR_TO_FACE = cfg['cam']['colorFaceMap']
+
+FRAME_WIDTH = cfg['cam']['frameWidth']
+FRAME_HEIGHT = cfg['cam']['frameHeight']
+FPS = cfg['cam']['fps']
 
 # X/Y coordinates from the left / top corner (0,0) of the frame
-DEFAULT_SAMPLE_COORDS = [
-    (240, 88), (352, 88),
-    (240, 240), (360, 227),
-    (240, 400), (352, 400)
-]
+DEFAULT_SAMPLE_COORDS = cfg['cam']['defaultSampleCoords']
 
-FLIP_CAMERA = False
-FLIP_CODE = 1        # 0 = vertical flip, 1 for horizontal, -1 for both.
+# Should we flip the camera image? (Some webcams mirror by default. Super annoying.)
+FLIP_CAMERA = cfg['cam']['flipCamera']
+FLIP_CODE = cfg['cam']['flipCode']
 
 
 def guessColor(v):
-    for v2, radius, code in colorCenters:
-        d = np.linalg.norm(v - v2)
-        if d < radius:
-            return code
-    return "X"
+    # for v2, radius, code in COLOR_CENTERS:
+    for v2 in colorCenters:
+        d = np.linalg.norm(v - v2['rgb'])
+        if d < v2['radius']:
+            return v2['code']  # stop checking immediately
+    return "X"  # unknown
 
 
 def devIdFromPath(path):
@@ -64,9 +62,9 @@ class Camera:
     def __init__(self, deviceName, sampleCoords=None):
         self.vidcap = cv2.VideoCapture(devIdFromPath(deviceName))
 
-        self.vidcap.set(3, 160)     # cv2.cv.CV_CAP_PROP_FRAME_WIDTH
-        self.vidcap.set(4, 120)     # cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
-        self.vidcap.set(5, 15)      # CAP_PROP_FPS
+        self.vidcap.set(3, FRAME_WIDTH)     # cv2.cv.CV_CAP_PROP_FRAME_WIDTH
+        self.vidcap.set(4, FRAME_HEIGHT)     # cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
+        self.vidcap.set(5, FPS)      # CAP_PROP_FPS
 
         # vidcap.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS,       0.20 )#0.50 default
         # vidcap.set(cv2.cv.CV_CAP_PROP_CONTRAST,         0.15 )#0.15 default
@@ -95,7 +93,7 @@ class Camera:
                 frame = cv2.flip(frame, flipCode=FLIP_CODE)
 
             for coord in self.sampleCoords:
-                x, y = coord
+                x, y = coord[0], coord[1]
 
                 # define a small square (x1,y1,x2,y2) in the frame to sample for color.
                 x1, y1 = x - 2, y - 2

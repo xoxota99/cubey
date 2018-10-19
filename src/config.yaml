@@ -1,0 +1,81 @@
+app:
+  logLevel : "DEBUG"
+  logFormat : "%(asctime)s - %(levelname)s - %(message)s"
+
+  solverCMD : "./kociemba/solve"
+
+  camera_FR_deviceName : "/dev/v4l/by-path/foo"
+  camera_BL_deviceName : "/dev/v4l/by-path/foo2"
+
+cam:
+  colorCenters: [
+    {
+      rgb: [147.0,147.0,147.0],
+      radius: 30.0,
+      code: "W"
+    },
+    {
+      rgb: [231.0,95.0,30.0],
+      radius: 60.0,
+      code: "B"
+    },
+    {
+      rgb: [0.0,0.0,255.0],
+      radius: 110.0,
+      code: "R"
+    },
+    {
+      rgb: [0.0,133.0,217.0],
+      radius: 30.0,
+      code: "O"
+    },
+    {
+      rgb: [53.0,176.0,176.0],
+      radius: 30.0,
+      code: "Y"
+    },
+    {
+      rgb: [160.0,198.0,0.0],
+      radius: 30.0,
+      code: "G"
+    }
+  ]
+
+  colorFaceMap: {
+    O: "F",           # Orange facing front.
+    W: "B",           # White facing bottom.
+    Y: "T",           # Yellow facing top.
+    B: "L",           # Blue facing left.
+    G: "R",           # Green facing right.
+    R: "B",           # Red facing back.
+    X: "X"            # UNKNOWN.
+  }
+
+  frameWidth: 640
+  frameHeight: 480
+  fps: 15
+
+  # I'd rather use a tuple for these, but that requires YAML gymnastics in config.
+  defaultSampleCoords: [
+    [240, 88], [352, 88],
+    [240, 240], [360, 227],
+    [240, 400], [352, 400]
+  ]
+
+  flipCamera: N
+  flipCode: 1       # 0 = vertical flip, 1 for horizontal, -1 for both.
+
+
+stepper:
+  pins: {
+    DIR: 17,
+    UP: 18,
+    RIGHT: 3,
+    FRONT: 14,
+    DOWN: 5,
+    LEFT: 4,
+    BACK: 2
+  }
+
+  rpm: 60
+  steps_per_rev: 200
