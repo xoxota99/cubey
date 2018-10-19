@@ -1,9 +1,9 @@
-import sys
 import os
 import subprocess
 import logging
 import stepper
 import numpy as np
+import time
 from cam import Camera
 
 logging.basicConfig(level=logging.DEBUG,
@@ -11,23 +11,15 @@ logging.basicConfig(level=logging.DEBUG,
 
 CMD = './kociemba/solve'
 
-state = {
-    'F': np.full(9, "F"),
-    'B': np.full(9, "B"),
-    'L': np.full(9, "L"),
-    'R': np.full(9, "R"),
-    'U': np.full(9, "U"),
-    'D': np.full(9, "D")
-}
-
-# TODO: Fix this.
-cam1 = Camera("dev/v4l/by-id/camera1")
-cam2 = Camera("dev/v4l/by-id/camera2")
+cam1 = Camera(
+    "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.2:1.0-video-index0")
+cam2 = Camera(
+    "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.4:1.0-video-index0")
 
 
 def solve(t=None):
     if t is None:
-        t = get_state_string()
+        t = get_state_string(scan_state())
 
     return subprocess.check_output([CMD, t], stderr=open(os.devnull, 'wb')).strip()
 
@@ -56,7 +48,6 @@ def solve(t=None):
 #
 def scan_state():
     # initialize state.
-    global state
 
     state = {
         'F': np.full(9, "F"),
@@ -122,13 +113,15 @@ def scan_state():
 
     stepper.rot_90(stepper.RIGHT)  # back to origin
 
+    return state
 
-def get_state_string():
-    # Cube state, according to the order U1, U2, U3, U4, U5, U6, U7, U8, U9, R1, R2,
-    # R3, R4, R5, R6, R7, R8, R9, F1, F2, F3, F4, F5, F6, F7, F8, F9, D1, D2, D3, D4,
-    # D5, D6, D7, D8, D9, L1, L2, L3, L4, L5, L6, L7, L8, L9, B1, B2, B3, B4, B5, B6,
-    # B7, B8, B9
 
+def get_state_string(state):
+    """ Cube state, according to the order U1, U2, U3, U4, U5, U6, U7, U8, U9, R1, R2,
+    R3, R4, R5, R6, R7, R8, R9, F1, F2, F3, F4, F5, F6, F7, F8, F9, D1, D2, D3, D4,
+    D5, D6, D7, D8, D9, L1, L2, L3, L4, L5, L6, L7, L8, L9, B1, B2, B3, B4, B5, B6,
+    B7, B8, B9
+    """
     return "".join(state['U']) \
         + "".join(state['R']) \
         + "".join(state['F']) \
@@ -139,6 +132,24 @@ def get_state_string():
 
 # scan the cube, get a solution from kociemba, then execute it on the robot.
 if __name__ == "__main__":
-    scan_state()
-    solution = solve()
+
+    print("Scanning...")
+    t0 = int(round(time.time() * 1000))
+    state_str = get_state_string(scan_state())
+    t1 = int(round(time.time() * 1000))
+    print("Scanned state: " + state_str)
+
+    print("Solving...")
+    t2 = int(round(time.time() * 1000))
+    solution = solve(state_str)
+    t3 = int(round(time.time() * 1000))
+    print("Solution: " + solution)
+
+    print("Executing...")
+    t4 = int(round(time.time() * 1000))
     stepper.execute(solution)
+    t5 = int(round(time.time() * 1000))
+
+    print('Scan time: {:d}ms'.format(t1-t0))
+    print('Solve time: {:d}ms'.format(t3-t2))
+    print('Execution time: {:d}ms'.format(t5-t4))

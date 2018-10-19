@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import os.path
 
+# define a list of colors, with an error bar. The color "Center" is the idealized color,
+# and the "radius" is how far off the pixel color can be from the idealized color and
+# still be counted as that color.
 colorCenters = (
     (np.array([147.,  147.,  147.]),  30., "W"),
     (np.array([231.,   95.,   30.]),  60., "B"),
@@ -15,19 +18,26 @@ colorCenters = (
 # we take this extra step here, instead of inline in colorCenters, to allow for configuring
 # the "known" position of cube faces at startup. Because we can't scan the center facelet
 # of each side (it is obscured by the gripper), we have to assume that it's a certain color for each side.
-# this is basically a config value.
+# this is basically a config value that describes the positioning of the cube in the robot.
 COLOR_TO_FACE = {
-    "O": "F",
-    "W": "B",
-    "Y": "T",
-    "B": "L",
-    "G": "R",
-    "R": "B",
-    "X": "X"
+    "O": "F",           # Orange facing front.
+    "W": "B",           # White facing bottom.
+    "Y": "T",           # Yellow facing top.
+    "B": "L",           # Blue facing left.
+    "G": "R",           # Green facing right.
+    "R": "B",           # Red facing back.
+    "X": "X"            # UNKNOWN.
 }
 
-DEFAULT_SAMPLE_COORDS = [(243, 50), (385, 58), (397, 67),
-                         (243, 62), (385, 71), (397, 81)]
+# X/Y coordinates from the left / top corner (0,0) of the frame
+DEFAULT_SAMPLE_COORDS = [
+    (240, 88), (352, 88),
+    (240, 240), (360, 227),
+    (240, 400), (352, 400)
+]
+
+FLIP_CAMERA = False
+FLIP_CODE = 1        # 0 = vertical flip, 1 for horizontal, -1 for both.
 
 
 def guessColor(v):
@@ -54,8 +64,10 @@ class Camera:
     def __init__(self, deviceName, sampleCoords=None):
         self.vidcap = cv2.VideoCapture(devIdFromPath(deviceName))
 
-        self.vidcap.set(3, 160)   # cv2.cv.CV_CAP_PROP_FRAME_WIDTH
-        self.vidcap.set(4, 120)  # cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
+        self.vidcap.set(3, 160)     # cv2.cv.CV_CAP_PROP_FRAME_WIDTH
+        self.vidcap.set(4, 120)     # cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
+        self.vidcap.set(5, 15)      # CAP_PROP_FPS
+
         # vidcap.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS,       0.20 )#0.50 default
         # vidcap.set(cv2.cv.CV_CAP_PROP_CONTRAST,         0.15 )#0.15 default
         # vidcap.set(cv2.cv.CV_CAP_PROP_SATURATION,       0.10 )#0.15 default
@@ -68,44 +80,43 @@ class Camera:
         else:
             self.sampleCoords = sampleCoords
 
-    # Given a camera reference, take an vertical edge-on picture of a rubik's cube, and evaluate some of the facelets.
-    # There are two cameras, Front-Right, and Back-Left.
-    # In the case of the Front-right camera, for example, return a tuple of FURBDL values that refer to the facelets
-    # in the (zero-based) F2, R0, F5, R3, F8, R6 positions.
     def get_colors(self):
+        """ Given a camera reference, take a vertical edge-on picture of the cube, and evaluate some of the facelets.
+        There are two cameras, Front-Right, and Back-Left.
+        In the case of the Front-right camera, for example, return a tuple of FURBDL values that refer to the facelets
+        in the (zero-based) F2, R0, F5, R3, F8, R6 positions.
+        """
         arr = []
 
-        camFrames = []
         _, frame = self.vidcap.read()
         if frame != None:
-            camFrames.append(frame)
 
-        if len(camFrames) == 0:
+            if FLIP_CAMERA:
+                frame = cv2.flip(frame, flipCode=FLIP_CODE)
+
+            for coord in self.sampleCoords:
+                x, y = coord
+
+                # define a small square (x1,y1,x2,y2) in the frame to sample for color.
+                x1, y1 = x - 2, y - 2
+                x2, y2 = x + 2, y + 2
+
+                block = frame[y1:y2, x1:x2]
+                block_r = block[:, :, 0]    # red
+                block_g = block[:, :, 1]    # green
+                block_b = block[:, :, 2]    # blue
+
+                # get the average color within the block, for each R/G/B component.
+                clr = np.array(
+                    (np.median(block_r), np.median(block_g), np.median(block_b)))
+                # clr /= np.linalg.norm( clr ) / 255.0
+
+                code = guessColor(clr)
+                code = COLOR_TO_FACE[code]
+
+                arr.append(code)
+
+            return tuple(arr)
+        else:
             print("no frames!")
-            return "X", "X", "X", "X", "X", "X"
-
-        camFrame = np.hstack(camFrames)  # stack some frames.
-
-        for coord in self.sampleCoords:
-            x, y = coord
-
-            # define a small square (x1,y1,x2,y2) in the frame to sample for color.
-            x1, y1 = x - 2, y - 2
-            x2, y2 = x + 2, y + 2
-
-            block = camFrame[y1:y2, x1:x2]
-            block_r = block[:, :, 0]    # red
-            block_g = block[:, :, 1]    # green
-            block_b = block[:, :, 2]    # blue
-
-            # get the average color within the block, for each R/G/B component.
-            clr = np.array(
-                (np.median(block_r), np.median(block_g), np.median(block_b)))
-            #clr /= np.linalg.norm( clr ) / 255.0
-
-            code = guessColor(clr)
-            code = COLOR_TO_FACE[code]
-
-            arr.append(code)
-
-        return tuple(arr)
+            return tuple(np.full(6, "X"))
