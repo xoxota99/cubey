@@ -32,18 +32,14 @@ def gen(camera):
                b'Content-Type: image/jpeg\r\n\r\n' + frame if frame is not None else b'' + b'\r\n')
 
 
-@app.route('/video_feed_0')
-def video_feed_0():
+@app.route('/video_feed')
+def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(Camera(0)),
+    return Response(gen(Camera(0, 1)),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
-@app.route('/video_feed_1')
-def video_feed_1():
-    """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(Camera(1)),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+# TODO: Also provide a graphic of the cube's state estimation.
+# TODO: Also provide controls for scrambling, scanning and solving.
 
 
 if __name__ == '__main__':

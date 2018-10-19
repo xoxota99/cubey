@@ -5,9 +5,9 @@
 </head>
 
 <body style="background:white">
-  <img src="/static/cubey.svg" style="width:300px" /><br />
-  <a href="back">Back Camera</a>
-  <a href="front">Front Camera</a>
+  <img src="/static/cubey.svg" style="width:300px; display: block; margin-left: auto; margin-right: auto;" />
+  <hr />
+  <img style="display: block; margin-left: auto; margin-right: auto;" src="{{ url_for('video_feed') }}" />
 </body>
 
 </html>
