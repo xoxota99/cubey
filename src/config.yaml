@@ -68,14 +68,17 @@ cam:
 
 stepper:
   pins: {
-    DIR: 17,
-    UP: 18,
-    RIGHT: 3,
-    FRONT: 14,
-    DOWN: 5,
-    LEFT: 4,
-    BACK: 2
+    dir: 17,
+    up: 18,
+    right: 3,
+    front: 14,
+    down: 5,
+    left: 4,
+    back: 2
   }
 
   rpm: 60
   steps_per_rev: 200
+  move_delay: 0.1   # seconds to wait between cube moves.
+  hertz: 500       # pulses per second. Basically speed. Do not exceed 8000 Hz.
+  step_factor: 8    # 1/8 microstepping

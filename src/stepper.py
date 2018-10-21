@@ -26,17 +26,19 @@ STEP_MAP = {
     "L": LEFT,
     "R": RIGHT
 }
-RPM = cfg['rpm']  # complete revolutions (360 deg.) per minute
+RPM = cfg['stepper']['rpm']  # complete revolutions (360 deg.) per minute
 # steps per revolution (varies by motor)
-STEPS_PER_REVOLUTION = cfg['steps_per_rev']
-STEPS_PER_DEGREE = 360.0 / STEPS_PER_REVOLUTION
+STEPS_PER_REVOLUTION = cfg['stepper']['steps_per_rev']
+STEPS_PER_DEGREE = STEPS_PER_REVOLUTION / 360.0
+STEP_FACTOR = cfg['stepper']['step_factor']
 PULSE_LENGTH_US = 1000000 // (STEPS_PER_REVOLUTION * RPM // 60)
 # e.g. 4 revolutions per second = 800 steps per second.
 # 800 steps per second = one step every 1250 uS.
 
+MOVE_DELAY = cfg['stepper']['move_delay']
+
 CW = 1
 CCW = 0
-
 
 ramp_90 = []
 ramp_180 = []
@@ -45,65 +47,13 @@ ramp_180 = []
 # Connect to pigpiod daemon
 pi = pigpio.pi()
 
+HERTZ = cfg['stepper']['hertz']
 # allowed frequencies for pigpio sample rate 5 (the default)
 ALLOWED_FREQS = [
     10, 20, 40, 50, 80, 100, 160, 200, 250, 320, 400
     # , 500, 800, 1000, 1600, 2000, 4000, 8000
 ]
 is_init = False
-
-
-def init_ramp(degrees):
-    """ 
-    initialize a frequency ramp for a turn of the specified number of degrees (typically 90 or 180 for our case).
-    A frequency ramp is basically a list, with each element a pair of integers, [Frequency, Steps]. This ramp
-    acts like a set of instructions to pigpiod, "Cycle the specified GPIO pin this many steps, at this frequency,
-    then move on to the next item in the list."
-    """
-    retval = []  # the ramp to return.
-    deg = 0  # the last absolue angle that we saw
-    lastfreq = 0  # the last frequency we saw in the loop.
-    lastfreq_count = 1  # the count of the last frequency we saw in the loop.
-
-    SLOPE_MAX = math.pi  # maximum slope of the acceleration curve.
-    # accumulator, to double-check we are generating exactly the right number of steps.
-    stepcheck = 0
-    # number of steps we should generate.
-    steps = int(STEPS_PER_DEGREE * degrees)
-    halfdeg = degrees // 2  # half the arc.
-
-    for i in range(steps):  # for each step we need
-        # what angle do we think we're at? (from 0 to degrees)
-        deg2 = halfdeg - math.cos(i / steps * math.pi) * halfdeg
-
-        # what was the last angle? Check the slope against our maximum slope.
-        slope = (deg2 - deg) / SLOPE_MAX
-
-        # keep track of the current angle for next loop.
-        deg = deg2
-
-        # figure out our frequency, from the list of allowed frequencies for pigpiod sample rate.
-        freq = ALLOWED_FREQS[int(slope * len(ALLOWED_FREQS))]
-        # if this is the same frequency as the last iteration.
-        if (lastfreq == freq):
-            lastfreq_count += 1  # accumulate it.
-        else:  # otherwise
-            # add the last iteration to the ramp, with the last count.
-            retval.append([lastfreq, lastfreq_count])
-            # accumulate the count of steps so far.
-            stepcheck += lastfreq_count
-            lastfreq = freq  # re-initialize the tracking frequency
-            lastfreq_count = 1  # and count.
-
-    # escaped the loop. Add the last accumulated frequency to the ramp.
-    retval.append([lastfreq, lastfreq_count])
-    stepcheck += lastfreq_count
-
-    # assert that we have, in fact, accumulated the target number of steps, and that we will therefore turn the exact correct number of degrees.
-    assert stepcheck == steps
-
-    # return the ramp.
-    return retval
 
 
 def init(force=False):
@@ -118,45 +68,32 @@ def init(force=False):
         for i in MOTOR_PIN:
             pi.set_mode(i, pigpio.OUTPUT)
 
-        # initialize ramps
-        # 90 degrees
-        ramp_90 = init_ramp(90)
-
-        # 180 degrees
-        ramp_180 = init_ramp(180)
-
         is_init = True
 
 
-def generate_ramp(pin, ramp):
-    """
-    Generate ramp wave forms. 
-    param:pin - The pin on which to pulse.
-    param:ramp - List of [Frequency, Steps]
-    """
-    pi.wave_clear()     # clear existing waves
-    length = len(ramp)  # number of ramp levels
-    wid = [-1] * length
+def tx_pulses(pin, hertz, num, pulse_len=1):
+    assert hertz < 500000
+    length_us = int(1000000/hertz)
+    assert int(pulse_len) < length_us
+    assert num < 65536
 
-    # Generate a wave per ramp level
-    for i in range(length):
-        frequency = ramp[i][0]
-        micros = int(500000 / frequency)
-        wf = []
-        wf.append(pigpio.pulse(1 << pin, 0, micros))  # pulse on
-        wf.append(pigpio.pulse(0, 1 << pin, micros))  # pulse off
-        pi.wave_add_generic(wf)
-        wid[i] = pi.wave_create()
+    num_low = num % 256
+    num_high = num // 256
 
-    # Generate a chain of waves
-    chain = []
-    for i in range(length):
-        steps = ramp[i][1]
-        x = steps & 255
-        y = steps >> 8
-        chain += [255, 0, wid[i], 255, 1, x, y]
+    wf = []
 
-    pi.wave_chain(chain)  # Transmit chain.
+    wf.append(pigpio.pulse(1 << pin, 0, pulse_len))
+    wf.append(pigpio.pulse(0, 1 << pin, length_us - pulse_len))
+
+    pi.wave_add_generic(wf)
+
+    wid = pi.wave_create()
+
+    if wid >= 0:
+        pi.wave_chain([255, 0, wid, 255, 1, num_low, num_high])
+        while pi.wave_tx_busy():
+            sleep(0.01)
+        pi.wave_delete(wid)
 
 
 def rot_90(motor_pin, direction=CW):
@@ -168,7 +105,7 @@ def rot_90(motor_pin, direction=CW):
     if not is_init:
         init()
     pi.write(DIR, direction)
-    generate_ramp(motor_pin, ramp_90)
+    tx_pulses(motor_pin, HERTZ, int(90 * STEPS_PER_DEGREE * STEP_FACTOR))
 
 
 def rot_180(motor_pin, direction=CW):
@@ -180,7 +117,7 @@ def rot_180(motor_pin, direction=CW):
     if not is_init:
         init()
     pi.write(DIR, direction)
-    generate_ramp(motor_pin, ramp_180)
+    tx_pulses(motor_pin, HERTZ, int(180 * STEPS_PER_DEGREE * STEP_FACTOR))
 
 
 def execute(recipe_str):
@@ -200,15 +137,18 @@ def execute(recipe_str):
                 rot_180(pin)
         else:
             rot_90(pin)
+        sleep(MOVE_DELAY)
 
 
 if __name__ == "__main__":
     init()
     print("Stepper test.")
-    delay = 0.25
+    delay = MOVE_DELAY
 
     # rotate each side 90 degrees, four times, with a pause between each rotation.
     for s, mot in zip(STEP_NAME, MOTOR_PIN):
+        # s = "U"
+        mot = STEP_MAP[s]
         for _ in range(4):
             print(s)
             rot_90(mot, CW)
