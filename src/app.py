@@ -4,6 +4,7 @@ import logging
 import stepper
 import numpy as np
 import time
+import random
 from cam import Camera
 from config import cfg
 
@@ -127,6 +128,24 @@ def get_state_string(state):
         + "".join(state['D']) \
         + "".join(state['L']) \
         + "".join(state['B'])
+
+
+def scramble():
+    recipe = ""
+    move_count = random.randint(20, 41)
+
+    for _ in range(move_count):
+        move = random.choice(stepper.STEP_NAME)
+        add = random.randint(0, 3)
+        if add == 1:
+            move = move + "'"
+        elif add == 2:
+            move = "2" + move
+
+        recipe = recipe + move + " "
+
+    print("Random Scramble: " + recipe)
+    stepper.execute(recipe)
 
 
 # scan the cube, get a solution from kociemba, then execute it on the robot.
