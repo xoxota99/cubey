@@ -12,9 +12,11 @@ logging.basicConfig(
     level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
 
 CMD = cfg['app']['solverCMD']
+MIN_SCRAMBLE_MOVES = cfg['app']['min_scramble_moves']
+MAX_SCRAMBLE_MOVES = cfg['app']['max_scramble_moves']
 
-camera_FR = Camera(cfg, cfg['app']['camera_FR_deviceName'])
-camera_BL = Camera(cfg, cfg['app']['camera_BL_deviceName'])
+camera_FR = None  # Camera(cfg, cfg['app']['camera_FR_deviceName'])
+camera_BL = None  # Camera(cfg, cfg['app']['camera_BL_deviceName'])
 
 
 def solve(t=None):
@@ -132,24 +134,30 @@ def get_state_string(state):
 
 def scramble():
     recipe = ""
-    move_count = random.randint(20, 41)
-
+    move_count = random.randint(MIN_SCRAMBLE_MOVES, MAX_SCRAMBLE_MOVES+1)
+    base = "X"
+    last_base = "X"
     for _ in range(move_count):
-        move = random.choice(stepper.STEP_NAME)
-        add = random.randint(0, 3)
-        if add == 1:
-            move = move + "'"
-        elif add == 2:
-            move = "2" + move
+        while base == last_base:
+            base = random.choice(stepper.STEP_NAME)
 
-        recipe = recipe + move + " "
+        last_base = base
+        add = random.randint(0, 3)
+        xtra = ""
+
+        if add == 1:
+            xtra = "'"
+        elif add == 2:
+            xtra = "2"
+
+        recipe = recipe + base + xtra + " "
 
     print("Random Scramble: " + recipe)
     stepper.execute(recipe)
 
 
-# scan the cube, get a solution from kociemba, then execute it on the robot.
-if __name__ == "__main__":
+def main():
+    """scan the cube, get a solution from kociemba, then execute it on the robot."""
 
     print("Scanning...")
     t0 = int(round(time.time() * 1000))
@@ -171,3 +179,7 @@ if __name__ == "__main__":
     print('Scan time: {:d}ms'.format(t1-t0))
     print('Solve time: {:d}ms'.format(t3-t2))
     print('Execution time: {:d}ms'.format(t5-t4))
+
+
+if __name__ == "__main__":
+    scramble()

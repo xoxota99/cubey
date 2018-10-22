@@ -7,6 +7,9 @@ app:
   camera_FR_deviceName : "/dev/v4l/by-path/foo"
   camera_BL_deviceName : "/dev/v4l/by-path/foo2"
 
+  min_scramble_moves : 50
+  max_scramble_moves : 100
+
 cam:
   colorCenters: [
     {
@@ -67,7 +70,7 @@ cam:
 
 
 stepper:
-  pins: {
+  pins_cubey_v1: {       # This is for the cubey PCB board.
     dir: 17,
     up: 18,
     right: 3,
@@ -77,8 +80,18 @@ stepper:
     back: 2
   }
 
+  pins: {           # cubey_v2 edition
+    dir: 15,
+    up: 14,
+    right: 18,
+    front: 21,
+    down: 16,
+    left: 20,
+    back: 23
+  }
+
   rpm: 60
   steps_per_rev: 200
-  move_delay: 0.1   # seconds to wait between cube moves.
-  hertz: 500       # pulses per second. Basically speed. Do not exceed 8000 Hz.
+  move_delay: 0.05   # seconds to wait between cube moves.
+  hertz: 5000       # pulses per second. Basically speed. Do not exceed 6000 Hz.
   step_factor: 8    # 1/8 microstepping
