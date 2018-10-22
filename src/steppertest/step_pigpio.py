@@ -3,6 +3,46 @@
 import time
 import pigpio
 
+UP = 14
+RIGHT = 18
+FRONT = 21
+DOWN = 16
+LEFT = 20
+BACK = 23
+
+STEP_MAP = {
+    "U": UP,
+    "R": RIGHT,
+    "F": FRONT,
+    "D": DOWN,
+    "L": LEFT,
+    "B": BACK
+}
+
+# STEP = RIGHT
+DIR = 15
+CW = 0
+CCW = 1
+
+SPR = 200  # steps per revolution
+STEP_FACTOR = 8  # micro-stepping at 1/8
+
+faces = [UP, RIGHT, FRONT, DOWN, LEFT, BACK]
+dirnames = ["CW", "CCW"]
+
+
+def spaz():
+    step_count = SPR * STEP_FACTOR  # one complete revolution
+    for speed in [500, 800]:
+        for STEP in faces:
+            for d in [CW, CCW]:
+                pi.write(DIR, d)
+                pi.set_mode(STEP, pigpio.OUTPUT)
+                print("{:s}:{:d}, {:d}".format(
+                    dirnames[d], speed * STEP_FACTOR, STEP))
+                tx_pulses(pi, STEP, speed, step_count)
+                time.sleep(1)
+
 
 def tx_pulses(pi, GPIO, hertz, num, pulse_len=1):
     assert hertz < 500000
@@ -29,34 +69,54 @@ def tx_pulses(pi, GPIO, hertz, num, pulse_len=1):
         pi.wave_delete(wid)
 
 
-pi = pigpio.pi()
-if not pi.connected:
-    print("NOT CONNECTED.")
-    exit()
+if __name__ == "__main__":
+    speed = 4000
+    pi = pigpio.pi()
+    if not pi.connected:
+        print("NOT CONNECTED.")
+        exit()
 
-STEP = 18
-DIR = 17
-CW = 1
-CCW = 0
+    pi.set_mode(DIR, pigpio.OUTPUT)
+    for mot in faces:
+        pi.set_mode(mot, pigpio.OUTPUT)
 
-SPR = 200  # steps per revolution
-STEP_FACTOR = 8  # micro-stepping at 1/8
-step_count = SPR * STEP_FACTOR
+    from cmd import Cmd
 
-pi.set_mode(STEP, pigpio.OUTPUT)
-pi.set_mode(DIR, pigpio.OUTPUT)
-pi.write(DIR, CW)
+    class MyPrompt(Cmd):
 
-tx_pulses(pi, STEP, 1000, step_count)  # 250 pulses @ 1000 Hz
-time.sleep(1)
+        def default(self, inp):
+            if inp == "Q" or inp == "EOF":
+                return self.do_q(inp)
 
-tx_pulses(pi, STEP, 4000, step_count)  # 2391 pulses @ 5000 Hz
-time.sleep(1)
+            recipe = inp.upper().split()
+            for step_str in recipe:
+                base = step_str[0]
+                if base in STEP_MAP:
+                    pin = STEP_MAP[base]
+                    if (len(step_str) >= 2):
+                        xtra = step_str[-1:]
+                        print(base+xtra)
+                        if (xtra == "'"):
+                            pi.write(DIR, CCW)
+                            tx_pulses(pi, pin, speed, SPR * STEP_FACTOR // 4)
+                        elif (xtra == "2"):
+                            pi.write(DIR, CW)
+                            tx_pulses(pi, pin, speed, SPR * STEP_FACTOR // 2)
+                    else:
+                        pi.write(DIR, CW)
+                        print(base)
+                        tx_pulses(pi, pin, speed, SPR * STEP_FACTOR // 4)
+                else:
+                    print("*** Unknown cube face '" + base +
+                          "' in move '" + step_str + "'")
+                    # return True
 
-tx_pulses(pi, STEP, 5000, step_count)  # 2391 pulses @ 5000 Hz
-time.sleep(1)
+        def do_q(self, inp):
+            print("Bye")
+            return True
 
-tx_pulses(pi, STEP, 8000, step_count)  # 2391 pulses @ 5000 Hz
-time.sleep(1)
+    p = MyPrompt()
+    p.prompt = "Cubey > "
+    p.cmdloop()
 
-pi.stop()
+    pi.stop()
