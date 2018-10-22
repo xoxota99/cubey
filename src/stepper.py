@@ -20,11 +20,11 @@ MOTOR_PIN = [UP, RIGHT, FRONT, DOWN, LEFT, BACK]  # Step GPIO Pins
 STEP_NAME = ["U", "R", "F", "D", "L", "B"]
 STEP_MAP = {
     "U": UP,
-    "D": DOWN,
+    "R": RIGHT,
     "F": FRONT,
-    "B": BACK,
+    "D": DOWN,
     "L": LEFT,
-    "R": RIGHT
+    "B": BACK
 }
 RPM = cfg['stepper']['rpm']  # complete revolutions (360 deg.) per minute
 # steps per revolution (varies by motor)

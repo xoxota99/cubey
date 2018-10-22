@@ -1,8 +1,16 @@
 from time import sleep
 import RPi.GPIO as GPIO
 
-STEP = 18           # STEP GPIO pin
-DIR = 17                # Direction GPIO Pin
+
+UP = 14
+RIGHT = 18
+FRONT = 21
+DOWN = 16
+LEFT = 20
+BACK = 23
+
+STEP = UP           # STEP GPIO pin
+DIR = 15                # Direction GPIO Pin
 
 CW = 1     # Clockwise Rotation
 CCW = 0    # Counterclockwise Rotation
