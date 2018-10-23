@@ -80,12 +80,12 @@ def tx_pulses(pin, hertz, num, pulse_len=1):
     num_low = num % 256
     num_high = num // 256
 
-    wf = []
+    waveform = []
 
-    wf.append(pigpio.pulse(1 << pin, 0, pulse_len))
-    wf.append(pigpio.pulse(0, 1 << pin, length_us - pulse_len))
+    waveform.append(pigpio.pulse(1 << pin, 0, pulse_len))
+    waveform.append(pigpio.pulse(0, 1 << pin, length_us - pulse_len))
 
-    pi.wave_add_generic(wf)
+    pi.wave_add_generic(waveform)
 
     wid = pi.wave_create()
 
@@ -128,6 +128,7 @@ def execute(recipe_str):
     recipe = recipe_str.split()
     for step_str in recipe:
         base = step_str[0]
+        # TODO: We can execut opposite side simultaneously, if the NEXT item in the list is OPPOSITE this item AND has the SAME orientation (CW or CCW) as this item.
         pin = STEP_MAP[base]
         if (len(step_str) >= 2):
             xtra = step_str[-1:]

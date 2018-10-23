@@ -31,19 +31,6 @@ faces = [UP, RIGHT, FRONT, DOWN, LEFT, BACK]
 dirnames = ["CW", "CCW"]
 
 
-def spaz():
-    step_count = SPR * STEP_FACTOR  # one complete revolution
-    for speed in [500, 800]:
-        for STEP in faces:
-            for d in [CW, CCW]:
-                pi.write(DIR, d)
-                pi.set_mode(STEP, pigpio.OUTPUT)
-                print("{:s}:{:d}, {:d}".format(
-                    dirnames[d], speed * STEP_FACTOR, STEP))
-                tx_pulses(pi, STEP, speed, step_count)
-                time.sleep(1)
-
-
 def tx_pulses(pi, GPIO, hertz, num, pulse_len=1):
     assert hertz < 500000
     length_us = int(1000000/hertz)
