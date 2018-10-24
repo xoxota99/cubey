@@ -6407,6 +6407,43 @@ Source: AVX .. aphvc.pdf</description>
 <pinref part="SJ3" gate="1" pin="2"/>
 </segment>
 </net>
+<net name="!EN_MOT" class="0">
+<segment>
+<pinref part="JP1" gate="A" pin="1"/>
+<wire x1="121.92" y1="223.52" x2="104.14" y2="223.52" width="0.1524" layer="91"/>
+<label x="106.68" y="223.52" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="JP7" gate="A" pin="1"/>
+<wire x1="215.9" y1="223.52" x2="198.12" y2="223.52" width="0.1524" layer="91"/>
+<label x="200.66" y="223.52" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="JP3" gate="A" pin="1"/>
+<wire x1="121.92" y1="154.94" x2="104.14" y2="154.94" width="0.1524" layer="91"/>
+<label x="106.68" y="154.94" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="JP9" gate="A" pin="1"/>
+<wire x1="215.9" y1="154.94" x2="198.12" y2="154.94" width="0.1524" layer="91"/>
+<label x="200.66" y="154.94" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="JP5" gate="A" pin="1"/>
+<wire x1="121.92" y1="86.36" x2="104.14" y2="86.36" width="0.1524" layer="91"/>
+<label x="106.68" y="86.36" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="JP11" gate="A" pin="1"/>
+<wire x1="215.9" y1="86.36" x2="198.12" y2="86.36" width="0.1524" layer="91"/>
+<label x="200.66" y="86.36" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="K1" gate="G$1" pin="22"/>
+<wire x1="58.42" y1="149.86" x2="73.66" y2="149.86" width="0.1524" layer="91"/>
+<label x="66.04" y="149.86" size="1.778" layer="95"/>
+</segment>
+</net>
 </nets>
 </sheet>
 </sheets>
