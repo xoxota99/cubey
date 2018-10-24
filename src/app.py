@@ -1,11 +1,11 @@
 import os
-import subprocess
+import sys
 import logging
+import subprocess
 import stepper
-import numpy as np
 import time
 import random
-from cam import Camera
+import scanner
 from config import cfg
 
 logging.basicConfig(
@@ -15,124 +15,30 @@ CMD = cfg['app']['solverCMD']
 MIN_SCRAMBLE_MOVES = cfg['app']['min_scramble_moves']
 MAX_SCRAMBLE_MOVES = cfg['app']['max_scramble_moves']
 
-camera_FR = None  # Camera(cfg, cfg['app']['camera_FR_deviceName'])
-camera_BL = None  # Camera(cfg, cfg['app']['camera_BL_deviceName'])
-
 
 def solve(t=None):
+    """
+    Given a cube state estimation, in the form of a state string, 
+    generate a solution by calling the command-line kociemba solver, 
+    and return that solution in the form of a string.
+
+    Example input:  "DLRUULBDFLFFDRBBRRDLUFFFBRDUDLRDFRDULBRLLUBULDBFRBUFBU"
+    Example output: "U R' B2 D F' U' D' R F' U2 F' L2 F2 B2 D2 F2 D' F2 B2 U' B2"
+    """
     if t is None:
-        t = get_state_string(scan_state())
+        t = scanner.get_state_string(scanner.scan_state())
 
     return subprocess.check_output([CMD, t], stderr=open(os.devnull, 'wb')).strip()
 
 
-# Record cube state, according to:
-#
-#              |------------|
-#              |*U0**U1**U2*|
-#              |------------|
-#              |*U3**U4**U5*|
-#              |------------|
-#              |*U6**U7**U8*|
-# |------------|============|------------|------------|
-# |*L0**L1**L2*|*F0**F1**F2*|*R0**R1**R2*|*B0**B1**B2*|
-# |------------|------------|------------|------------|
-# |*L3**L4**L5*|*F3**F4**F5*|*R3**R4**R5*|*B3**B4**B5*|
-# |------------|------------|------------|------------|
-# |*L6**L7**L8*|*F6**F7**F8*|*R6**R7**R8*|*B6**B7**B8*|
-# |------------|============|------------|------------|
-#              |*D0**D1**D2*|
-#              |------------|
-#              |*D3**D4**D5*|
-#              |------------|
-#              |*D6**D7**D8*|
-#              |------------|
-#
-def scan_state():
-    # initialize state.
-
-    state = {
-        'F': np.full(9, "F"),
-        'B': np.full(9, "B"),
-        'L': np.full(9, "L"),
-        'R': np.full(9, "R"),
-        'U': np.full(9, "U"),
-        'D': np.full(9, "D")
-    }
-
-    # scan front
-    logging.info("Scanning FRONT")
-
-    state['F'][2], state['R'][0], state['F'][5], state['R'][3], state['F'][8], state['R'][6] = camera_FR.get_colors()
-
-    stepper.rot_90(stepper.FRONT)
-    state['F'][0], state['U'][6], state['F'][1], state['U'][7], _, state['U'][8] = camera_FR.get_colors()
-
-    stepper.rot_90(stepper.FRONT)
-    state['F'][6], state['L'][8], state['F'][3], state['L'][5], _, state['L'][2] = camera_FR.get_colors()
-
-    stepper.rot_90(stepper.FRONT)
-    _, state['D'][2], state['F'][7], state['D'][1], _, state['D'][0] = camera_FR.get_colors()
-
-    stepper.rot_90(stepper.FRONT)   # back to origin
-
-    # scan right
-    logging.info("Scanning RIGHT")
-    stepper.rot_90(stepper.RIGHT)
-    _, _, state['D'][5], state['R'][7], state['D'][8], state['R'][8] = camera_FR.get_colors()
-
-    stepper.rot_90(stepper.RIGHT)
-    state['B'][6], _, state['B'][3], state['R'][5], state['B'][0], state['R'][2] = camera_FR.get_colors()
-
-    stepper.rot_90(stepper.RIGHT)
-    state['U'][2], _, state['U'][5], state['R'][1], _, _ = camera_FR.get_colors()
-
-    stepper.rot_90(stepper.RIGHT)  # back to origin
-
-    # scan back
-    logging.info("Scanning BACK")
-    state['B'][2], state['L'][0], state['B'][5], state['L'][3], state['B'][8], state['L'][6] = camera_BL.get_colors()
-
-    stepper.rot_90(stepper.BACK)
-    _, _, state['B'][1], state['U'][1], _, state['U'][0] = camera_BL.get_colors()
-
-    # skip one edge. We've got the data already.
-
-    stepper.rot_180(stepper.BACK)
-    _, state['D'][6], state['B'][7], state['D'][7], _, _ = camera_BL.get_colors()
-
-    stepper.rot_90(stepper.BACK)   # back to origin
-
-    # scan left
-    logging.info("Scanning LEFT")
-    stepper.rot_90(stepper.LEFT)
-    _, _, state['D'][3], state['L'][7], _, _ = camera_BL.get_colors()
-
-    # skip one edge. We've got the data already.
-
-    stepper.rot_180(stepper.RIGHT)
-    _, _, state['U'][3], state['L'][1], _, _ = camera_BL.get_colors()
-
-    stepper.rot_90(stepper.RIGHT)  # back to origin
-
-    return state
-
-
-def get_state_string(state):
-    """ Cube state, according to the order U1, U2, U3, U4, U5, U6, U7, U8, U9, R1, R2,
-    R3, R4, R5, R6, R7, R8, R9, F1, F2, F3, F4, F5, F6, F7, F8, F9, D1, D2, D3, D4,
-    D5, D6, D7, D8, D9, L1, L2, L3, L4, L5, L6, L7, L8, L9, B1, B2, B3, B4, B5, B6,
-    B7, B8, B9
-    """
-    return "".join(state['U']) \
-        + "".join(state['R']) \
-        + "".join(state['F']) \
-        + "".join(state['D']) \
-        + "".join(state['L']) \
-        + "".join(state['B'])
-
-
 def scramble():
+    """
+    Generate a move list to scramble the cube. Then scramble the cube and return the move list. 
+
+    The number of moves in the scramble is determined by the config settings app.min_scramble_moves and app.max_scramble_moves
+
+    Example output: "U R' B2 D F' U' D' R F' U2 F' L2 F2 B2 D2 F2 D' F2 B2 U' B2"
+    """
     recipe = ""
     move_count = random.randint(MIN_SCRAMBLE_MOVES, MAX_SCRAMBLE_MOVES+1)
     base = "X"
@@ -152,34 +58,75 @@ def scramble():
 
         recipe = recipe + base + xtra + " "
 
-    print("Random Scramble: " + recipe)
+    logging.info("Random Scramble: " + recipe)
     stepper.execute(recipe)
+    return recipe
 
 
-def main():
+def descramble(recipe_str):
+    """
+    Fun but useless function to take a known scramble recipe, and play it backwards. 
+    So we can scramble the cube, then descramble it. Could be useful for running 
+    mechanical stress testing ending in a known cube state?
+    """
+    recipe_arr = recipe_str.split()
+    rec2 = ""
+    for step in reversed(recipe_arr):
+        if("'" in step):
+            rec2 += step.replace("'", "") + " "
+        elif ("2" not in step):
+            rec2 += step + "' "
+        else:
+            rec2 += step + " "
+
+    logging.info("Descramble: " + rec2)
+    stepper.execute(rec2)
+    return rec2
+
+
+def main(scramble=False):
     """scan the cube, get a solution from kociemba, then execute it on the robot."""
+    t6 = t7 = 0
+    if (scramble):
+        logging.info("Scrambling...")
+        t6 = round(time.time() * 1000)
+        scramble()
+        t7 = round(time.time() * 1000)
+        time.sleep(1)
 
-    print("Scanning...")
-    t0 = int(round(time.time() * 1000))
-    state_str = get_state_string(scan_state())
-    t1 = int(round(time.time() * 1000))
-    print("Scanned state: " + state_str)
+    logging.info("Scanning...")
+    t0 = round(time.time() * 1000)
+    state_str = scanner.get_state_string(scanner.scan_state())
+    t1 = round(time.time() * 1000)
+    logging.info("Scanned state: " + state_str)
 
-    print("Solving...")
-    t2 = int(round(time.time() * 1000))
+    time.sleep(1)
+
+    logging.info("Solving...")
+    t2 = round(time.time() * 1000)
     solution = solve(state_str)
-    t3 = int(round(time.time() * 1000))
-    print("Solution: " + solution)
+    t3 = round(time.time() * 1000)
+    logging.info("Solution: " + solution)
 
-    print("Executing...")
-    t4 = int(round(time.time() * 1000))
+    logging.info("Executing...\n")
+    t4 = round(time.time() * 1000)
     stepper.execute(solution)
-    t5 = int(round(time.time() * 1000))
+    t5 = round(time.time() * 1000)
 
-    print('Scan time: {:d}ms'.format(t1-t0))
-    print('Solve time: {:d}ms'.format(t3-t2))
-    print('Execution time: {:d}ms'.format(t5-t4))
+    if (scramble):
+        logging.info('Scramble time: {:d}ms'.format(t6-t7))
+    logging.info('Scan time: {:d}ms'.format(t1-t0))
+    logging.info('Solve time: {:d}ms'.format(t3-t2))
+    logging.info('Execution time: {:d}ms'.format(t5-t4))
+
+    return(0)
 
 
 if __name__ == "__main__":
-    scramble()
+    if len(sys.argv) > 1 and sys.argv[1].upper() == "DEMO":
+        rec = scramble()
+        logging.info("Wait 2 seconds...")
+        time.sleep(2)
+        descramble(rec)
+    else:
+        sys.exit(main(len(sys.argv) > 1 and sys.argv[1].upper() == "S"))

@@ -29,9 +29,6 @@ FRAME_WIDTH = cfg['cam']['frameWidth']
 FRAME_HEIGHT = cfg['cam']['frameHeight']
 FPS = cfg['cam']['fps']
 
-# X/Y coordinates from the left / top corner (0,0) of the frame
-DEFAULT_SAMPLE_COORDS = cfg['cam']['defaultSampleCoords']
-
 # Should we flip the camera image? (Some webcams mirror by default. Super annoying.)
 FLIP_CAMERA = cfg['cam']['flipCamera']
 FLIP_CODE = cfg['cam']['flipCode']
@@ -59,12 +56,13 @@ class Camera:
 
     sampleCoords = []
 
-    def __init__(self, deviceName, sampleCoords=None):
+    def __init__(self, deviceName, sampleCoords):
         self.vidcap = cv2.VideoCapture(devIdFromPath(deviceName))
 
         self.vidcap.set(3, FRAME_WIDTH)     # cv2.cv.CV_CAP_PROP_FRAME_WIDTH
         self.vidcap.set(4, FRAME_HEIGHT)     # cv2.cv.CV_CAP_PROP_FRAME_HEIGHT
         self.vidcap.set(5, FPS)      # CAP_PROP_FPS
+        self.sampleCoords = sampleCoords
 
         # vidcap.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS,       0.20 )#0.50 default
         # vidcap.set(cv2.cv.CV_CAP_PROP_CONTRAST,         0.15 )#0.15 default
@@ -72,11 +70,6 @@ class Camera:
         # vidcap.set(cv2.cv.CV_CAP_PROP_GAIN,             0.15 )#0.15 default
         # vidcap.set(cv2.cv.CV_CAP_PROP_EXPOSURE, 0.5 ) #not supported by C310
         # vidcap.set(21, 0.0)#CV_CAP_PROP_AUTO_EXPOSURE #not supported by C310
-
-        if sampleCoords is None:
-            self.sampleCoords = DEFAULT_SAMPLE_COORDS
-        else:
-            self.sampleCoords = sampleCoords
 
     def get_colors(self):
         """ Given a camera reference, take a vertical edge-on picture of the cube, and evaluate some of the facelets.
