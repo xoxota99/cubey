@@ -15,6 +15,10 @@ FRONT = pins['front']            # FRONT face stepper
 DOWN = pins['down']              # DOWN face stepper
 LEFT = pins['left']              # LEFT face stepper
 BACK = pins['back']              # BACK face stepper
+DISABLE = 0
+
+if 'disable' in pins:
+    DISABLE = pins['disable']
 
 MOTOR_PIN = [UP, RIGHT, FRONT, DOWN, LEFT, BACK]  # Step GPIO Pins
 STEP_NAME = ["U", "R", "F", "D", "L", "B"]
@@ -31,7 +35,7 @@ RPM = cfg['stepper']['rpm']  # complete revolutions (360 deg.) per minute
 STEPS_PER_REVOLUTION = cfg['stepper']['steps_per_rev']
 STEPS_PER_DEGREE = STEPS_PER_REVOLUTION / 360.0
 STEP_FACTOR = cfg['stepper']['step_factor']
-PULSE_LENGTH_US = 1000000 // (STEPS_PER_REVOLUTION * RPM // 60)
+# PULSE_LENGTH_US = 1000000 // (STEPS_PER_REVOLUTION * RPM // 60)
 # e.g. 4 revolutions per second = 800 steps per second.
 # 800 steps per second = one step every 1250 uS.
 
@@ -40,29 +44,27 @@ MOVE_DELAY = cfg['stepper']['move_delay']
 CW = 1
 CCW = 0
 
-ramp_90 = []
-ramp_180 = []
-
-
-# Connect to pigpiod daemon
-pi = pigpio.pi()
-
 HERTZ = cfg['stepper']['hertz']
-# allowed frequencies for pigpio sample rate 5 (the default)
-ALLOWED_FREQS = [
-    10, 20, 40, 50, 80, 100, 160, 200, 250, 320, 400
-    # , 500, 800, 1000, 1600, 2000, 4000, 8000
-]
+
+pi = None       # pigpio reference
 is_init = False
 
 
-def init(force=False):
+def _init(force=False):
     """
-    Initialize stepper motor frequency / PWM ramps for 90 and 180-degree turns
+    _initialize stepper motor frequency / PWM ramps for 90 and 180-degree turns
     """
-    global ramp_90, ramp_180, is_init
+    global is_init, pi
+
+    # Connect to pigpiod daemon
+    pi = pigpio.pi()
+    sleep(0.001)
 
     if force or not is_init:
+        if DISABLE:
+            pi.set_mode(DISABLE, pigpio.OUTPUT)
+            pi.write(DISABLE, 1)
+
         # Set up pins as an output
         pi.set_mode(DIR, pigpio.OUTPUT)
         for i in MOTOR_PIN:
@@ -71,11 +73,22 @@ def init(force=False):
         is_init = True
 
 
-def tx_pulses(pin, hertz, num, pulse_len=1):
+def _stop():
+    global is_init
+    pi.stop()
+    sleep(0.001)
+    is_init = False
+
+
+def _tx_pulses(pin, hertz, num, pulse_len=1):
     assert hertz < 500000
     length_us = int(1000000/hertz)
     assert int(pulse_len) < length_us
     assert num < 65536
+
+    if DISABLE:
+        pi.write(DISABLE, 0)
+        sleep(0.001)       # one millisecond
 
     num_low = num % 256
     num_high = num // 256
@@ -92,8 +105,12 @@ def tx_pulses(pin, hertz, num, pulse_len=1):
     if wid >= 0:
         pi.wave_chain([255, 0, wid, 255, 1, num_low, num_high])
         while pi.wave_tx_busy():
-            sleep(0.01)
+            pass
         pi.wave_delete(wid)
+
+    if DISABLE:
+        pi.write(DISABLE, 1)
+        sleep(0.001)       # one millisecond
 
 
 def rot_90(motor_pin, direction=CW):
@@ -103,21 +120,22 @@ def rot_90(motor_pin, direction=CW):
     param:direction - One of CW or CCW, as defined above.
     """
     if not is_init:
-        init()
+        _init()
     pi.write(DIR, direction)
-    tx_pulses(motor_pin, HERTZ, int(90 * STEPS_PER_DEGREE * STEP_FACTOR))
+    _tx_pulses(motor_pin, HERTZ, int(90 * STEPS_PER_DEGREE * STEP_FACTOR))
 
 
-def rot_180(motor_pin, direction=CW):
+def rot_180(motor_pin, direction=None):
     """
     rotate 180 degrees in the specified direction (CW or CCW)
     param:motor_pin - One of UP, RIGHT, FRONT, DOWN, LEFT, or BACK, as defined above.
     param:direction - One of CW or CCW, as defined above. Default is CW
     """
     if not is_init:
-        init()
-    pi.write(DIR, direction)
-    tx_pulses(motor_pin, HERTZ, int(180 * STEPS_PER_DEGREE * STEP_FACTOR))
+        _init()
+    if direction is not None:
+        pi.write(DIR, direction)
+    _tx_pulses(motor_pin, HERTZ, int(180 * STEPS_PER_DEGREE * STEP_FACTOR))
 
 
 def execute(recipe_str):
@@ -125,6 +143,8 @@ def execute(recipe_str):
     Take a recipe, of the form (e.g.) "R L2 F B U' F' D F' U B2 L' U2 B2 U D' B2 U2 L2 D' R2 D2"
     and execute it using the attached stepper motors.
     """
+    if not is_init:
+        _init()
     recipe = recipe_str.split()
     for step_str in recipe:
         base = step_str[0]
@@ -139,10 +159,11 @@ def execute(recipe_str):
         else:
             rot_90(pin)
         sleep(MOVE_DELAY)
+    _stop()
 
 
 if __name__ == "__main__":
-    init()
+    _init()
     print("Stepper test.")
     delay = MOVE_DELAY
 
@@ -169,3 +190,5 @@ if __name__ == "__main__":
             print("2"+s+"'")
             rot_180(mot, CCW)
             sleep(delay)
+
+    _stop()
