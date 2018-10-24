@@ -4,11 +4,11 @@ app:
 
   solverCMD : "./kociemba/solve"
 
-  camera_FR_deviceName : "/dev/v4l/by-path/foo"
-  camera_BL_deviceName : "/dev/v4l/by-path/foo2"
+  camera_FR_deviceName : "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.2:1.0-video-index0"
+  camera_BL_deviceName : "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.4:1.0-video-index0"
 
-  min_scramble_moves : 50
-  max_scramble_moves : 100
+  min_scramble_moves : 30
+  max_scramble_moves : 30
 
 cam:
   colorCenters: [
@@ -59,30 +59,40 @@ cam:
   fps: 15
 
   # I'd rather use a tuple for these, but that requires YAML gymnastics in config.
-  defaultSampleCoords: [
-    [240, 88], [352, 88],
-    [240, 240], [360, 227],
-    [240, 400], [352, 400]
-  ]
+  colorSampleCoords: {
+    "front": [
+      [280, 30], [420, 30],
+      [270, 190], [430, 190],
+      [270, 410], [410, 410]
+    ],
+    "back": [
+      [250, 10], [410, 10],
+      [245, 190], [420, 190],
+      [250, 400], [405, 400]
+    ]
+  }
 
   flipCamera: N
   flipCode: 1       # 0 = vertical flip, 1 for horizontal, -1 for both.
 
 
 stepper:
-  pins_cubey_v1: {       # This is for the cubey PCB board.
+  
+  pincfg_v1: &pincfg_v1 {      # This is for the cubey v1 PCB board.
+    disable: 25,         # fake news. remove this before comitting. 
     dir: 17,
     up: 18,
-    right: 3,
-    front: 14,
+    right: 3,            # You may have to disable I2C to use this pin.
+    front: 14,           # You may have to disable UART to use this pin
     down: 5,
     left: 4,
-    back: 2
+    back: 2              # You may have to disable I2C to use this pin.
   }
 
-  pins: {           # cubey_v2 edition
-    dir: 15,
-    up: 14,
+  pincfg_v2: &pincfg_v2 {      # cubey_v2 
+    disable: 25,
+    dir: 15,             # You may have to disable UART to use this pin
+    up: 14,              # You may have to disable UART to use this pin
     right: 18,
     front: 21,
     down: 16,
@@ -90,8 +100,9 @@ stepper:
     back: 23
   }
 
+  pins: *pincfg_v1
   rpm: 60
   steps_per_rev: 200
   move_delay: 0.05   # seconds to wait between cube moves.
-  hertz: 5000       # pulses per second. Basically speed. Do not exceed 6000 Hz.
+  hertz: 4000       # pulses per second. Basically speed. Do not exceed 6000 Hz.
   step_factor: 8    # 1/8 microstepping
