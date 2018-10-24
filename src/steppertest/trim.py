@@ -27,7 +27,7 @@ def tx_pulses(pi, GPIO, hertz, num, pulse_len=1):
     if wid >= 0:
         pi.wave_chain([255, 0, wid, 255, 1, num_low, num_high])
         while pi.wave_tx_busy():
-            time.sleep(0.01)
+            pass
         pi.wave_delete(wid)
 
 
@@ -65,7 +65,7 @@ DIR_MAP = {
     "CCW": CCW
 }
 
-if (len(sys.argv)) < 3:
+if (len(sys.argv)) < 4:
     print("Usage: python trim.py [U|D|F|B|L|R] [CW|CCW] <stepcount>")
     sys.exit(0)
 
