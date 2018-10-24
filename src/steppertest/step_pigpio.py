@@ -3,12 +3,15 @@
 import time
 import pigpio
 
-UP = 14
-RIGHT = 18
-FRONT = 21
-DOWN = 16
-LEFT = 20
-BACK = 23
+DIR = 17
+DISABLE = 25
+UP = 18
+RIGHT = 3            # YOU MAY HAVE TO DISABLE I2C TO USE THIS PIN.
+FRONT = 14           # YOU MAY HAVE TO DISABLE UART TO USE THIS PIN?
+DOWN = 5
+LEFT = 4
+BACK = 2              # YOU MAY HAVE TO DISABLE I2C TO USE THIS PIN.
+
 
 STEP_MAP = {
     "U": UP,
@@ -20,7 +23,6 @@ STEP_MAP = {
 }
 
 # STEP = RIGHT
-DIR = 15
 CW = 0
 CCW = 1
 
@@ -36,6 +38,10 @@ def tx_pulses(pi, GPIO, hertz, num, pulse_len=1):
     length_us = int(1000000/hertz)
     assert int(pulse_len) < length_us
     assert num < 65536
+
+    if DISABLE:
+        pi.write(DISABLE, 0)
+        time.sleep(0.001)  # one millisecond
 
     num_low = num % 256
     num_high = num // 256
@@ -54,6 +60,10 @@ def tx_pulses(pi, GPIO, hertz, num, pulse_len=1):
         while pi.wave_tx_busy():
             time.sleep(0.01)
         pi.wave_delete(wid)
+
+    if DISABLE:
+        pi.write(DISABLE, 1)
+        time.sleep(0.001)       # one millisecond
 
 
 if __name__ == "__main__":
