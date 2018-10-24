@@ -12,6 +12,19 @@ import threading
 Camera singleton, that publishes "frame-ready" events to any listeners.
 """
 
+defaultSampleCoords = [
+    [
+        [280, 30], [420, 30],
+        [270, 190], [430, 190],
+        [270, 410], [410, 410]
+    ],
+    [
+        [250, 10], [410, 10],
+        [245, 190], [420, 190],
+        [250, 400], [405, 400]
+    ]
+]
+
 
 class Camera(object):
 
@@ -83,7 +96,17 @@ class Camera(object):
             _, frame_bl = cap_bl.read()
 
             # TODO: Overlay text "Front/Right" and "Back/Left" over relevant feeds.
-            # TODO: Overlay sampling coordinates
+
+            # overlay sampling coordinates.
+            for idx, frame in enumerate([frame_fr, frame_bl]):
+                num = 1
+                for coord in defaultSampleCoords[idx]:
+                    cv2.rectangle(
+                        frame, (coord[0] - 4, coord[1] - 4), (coord[0] + 4, coord[1] + 4), (0, 255, 0), 2)
+                    cv2.putText(
+                        frame, str(num), (coord[0]+5, coord[1]-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+                    num += 1
             vis = np.concatenate((frame_fr, frame_bl), axis=1)
 
             yield cv2.imencode('.jpg', vis)[1].tobytes()
