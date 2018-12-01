@@ -108,3 +108,4 @@ src/kociemba/solve
 doc/eagle/*.b#*
 doc/~$*
 scrap/
+.DS_Store
