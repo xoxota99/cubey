@@ -1,0 +1,64 @@
+# Sample camera calibration file.
+# We want a model that allows the camera to detect what color it's looking at for each face. 
+# Our ability to accurately detect those colors is very susceptible to lighting conditions, 
+# so for each environment you set up the robot, you need to take a solved cube (with a known state), 
+# put it in the robot, and have the robot "look" at it to rediscover what each color looks like, 
+# on each of the facelets that it will be sampling throughout the solve.
+
+# NOTE: we *still* need half-decent lighting. In low-light conditions, blue, red, yellow, all 
+# look pretty much alike, and the solver will misread those colors even with calibration.
+
+# When sampling (or scanning) a coordinate in the captured image, average the color from a square of twice this width / height in pixels.
+sample_size: 10 # 20x20 pixel square
+
+camera: 
+  hue: 0.5
+  saturation: 0.390625
+  brightness: 0.5
+  gain: 0.0
+  contrast: 0.3263157894736842
+  auto_exposure: 0.75
+  exposure: default     # for ELP cameras, you must set auto_exposure to 0.25 in order to use manual exposure. This also makes video capture much slower.
+  
+colors: {
+    # the color "Orange" looks like these RGB values on each of the six Front-right facelets.
+    # colors are actually BGR here.
+    "O": {
+      rgb: [[0.0,165.0,255.0], [0.0,165.0,255.0],
+      [0.0,165.0,255.0], [0.0,165.0,255.0],
+      [0.0,165.0,255.0], [0.0,165.0,255.0]],
+      # plus-or-minus a margin of...
+      radius: 20.0 # Expressed as euclidean distance (in the RGB color space) from the sampled color to the "ideal" color.
+    },
+    "R": {
+      rgb: [[0.0,0.0,255.0], [0.0,0.0,255.0],
+      [0.0,0.0,255.0], [0.0,0.0,255.0],
+      [0.0,0.0,255.0], [0.0,0.0,255.0]],
+      radius: 20.0
+    },
+    "G": {
+      rgb: [[0.0,200.0,0.0], [0.0,200.0,0.0],
+      [0.0,200.0,0.0], [0.0,200.0,0.0],
+      [0.0,200.0,0.0], [0.0,200.0,0.0]],
+      radius: 20.0
+    },
+    "B": {
+      rgb: [[180.0,0.0,0.0], [180.0,0.0,0.0],
+      [180.0,0.0,0.0], [180.0,0.0,0.0],
+      [180.0,0.0,0.0], [180.0,0.0,0.0]],
+      radius: 20.0
+    },
+    "Y": {
+      rgb: [[0.0,200.0,200.0], [0.0,200.0,200.0],
+      [0.0,200.0,200.0], [0.0,200.0,200.0],
+      [0.0,200.0,200.0], [0.0,200.0,200.0]],
+      radius: 20.0
+    },
+    "W": {
+      rgb: [[200.0,200.0,200.0], [200.0,200.0,200.0],
+      [200.0,200.0,200.0], [200.0,200.0,200.0],
+      [200.0,200.0,200.0], [200.0,200.0,200.0]],
+      radius: 20.0
+    }
+}
+

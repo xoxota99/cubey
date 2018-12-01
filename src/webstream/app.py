@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from flask import Flask, render_template, Response
 import argparse
 from camera import Camera
@@ -35,7 +34,7 @@ def gen(camera):
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(Camera(0, 1)),
+    return Response(gen(Camera(0)),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # TODO: Also provide a graphic of the cube's state estimation.

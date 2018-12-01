@@ -21,8 +21,8 @@ if 'disable' in pins:
     DISABLE = pins['disable']
 
 MOTOR_PIN = [UP, RIGHT, FRONT, DOWN, LEFT, BACK]  # Step GPIO Pins
-STEP_NAME = ["U", "R", "F", "D", "L", "B"]
-STEP_MAP = {
+FACE_NAME = ["U", "R", "F", "D", "L", "B"]
+FACE_MOTOR_MAP = {
     "U": UP,
     "R": RIGHT,
     "F": FRONT,
@@ -41,8 +41,8 @@ STEP_FACTOR = cfg['stepper']['step_factor']
 
 MOVE_DELAY = cfg['stepper']['move_delay']
 
-CW = 1
-CCW = 0
+CW = 0
+CCW = 1
 
 HERTZ = cfg['stepper']['hertz']
 
@@ -149,7 +149,7 @@ def execute(recipe_str):
     for step_str in recipe:
         base = step_str[0]
         # TODO: We can execut opposite side simultaneously, if the NEXT item in the list is OPPOSITE this item AND has the SAME orientation (CW or CCW) as this item.
-        pin = STEP_MAP[base]
+        pin = FACE_MOTOR_MAP[base]
         if (len(step_str) >= 2):
             xtra = step_str[-1:]
             if (xtra == "'"):
@@ -168,9 +168,9 @@ if __name__ == "__main__":
     delay = MOVE_DELAY
 
     # rotate each side 90 degrees, four times, with a pause between each rotation.
-    for s, mot in zip(STEP_NAME, MOTOR_PIN):
+    for s, mot in zip(FACE_NAME, MOTOR_PIN):
         # s = "U"
-        mot = STEP_MAP[s]
+        mot = FACE_MOTOR_MAP[s]
         for _ in range(4):
             print(s)
             rot_90(mot, CW)
@@ -181,7 +181,7 @@ if __name__ == "__main__":
             sleep(delay)
 
     # rotate each side twice, 180 degrees, with a pause between each rotation.
-    for s, mot in zip(STEP_NAME, MOTOR_PIN):
+    for s, mot in zip(FACE_NAME, MOTOR_PIN):
         for _ in range(2):
             print("2" + s)
             rot_180(mot, CW)
@@ -190,5 +190,7 @@ if __name__ == "__main__":
             print("2"+s+"'")
             rot_180(mot, CCW)
             sleep(delay)
+
+    # TODO: Allow for scrambling to a specified target state (using Kociemba? Something else?)
 
     _stop()

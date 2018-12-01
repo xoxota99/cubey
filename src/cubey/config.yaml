@@ -1,0 +1,58 @@
+app:
+  logLevel : "INFO"
+  logFormat : "%(asctime)s - %(levelname)s - %(message)s"
+
+  solverCMD : "../kociemba/solve"
+
+  min_scramble_moves : 20
+  max_scramble_moves : 50
+
+cam:
+  warmup_delay_ms : 1000
+  camera_deviceID : 0
+
+  calibration : "default_calib.yaml"
+
+  colorFaceMap: 
+    O: "F"            # Orange facing front.
+    W: "B"            # White facing bottom.
+    Y: "T"            # Yellow facing top.
+    B: "L"            # Blue facing left.
+    G: "R"            # Green facing right.
+    R: "B"            # Red facing back.
+    X: "X"            # UNKNOWN.
+
+  frameWidth: 640
+  frameHeight: 480
+  fps: 60
+
+  # I'd rather use a tuple for these, but that requires YAML gymnastics in config.
+  colorSampleCoords: [
+      [300, 30], [440, 40],
+      [270, 220], [440, 220],
+      [270, 430], [420, 440]
+    ]
+
+  flipCamera: False
+  flipCode: 1       # 0 = vertical flip, 1 for horizontal, -1 for both.
+
+
+stepper:
+  
+  pincfg_v2: &pincfg_v2       # cubey_v2
+    disable: 25
+    dir: 15             # You may have to disable UART to use this pin
+    up: 14              # You may have to disable UART to use this pin
+    right: 18
+    front: 21
+    down: 16
+    left: 20
+    back: 23
+  
+
+  pins: *pincfg_v2
+  rpm: 60
+  steps_per_rev: 200
+  move_delay: 0.05   # seconds to wait between cube moves.
+  hertz: 4000       # pulses per second. Basically speed. Do not exceed 4000 Hz.
+  step_factor: 8    # 1/8 microstepping
