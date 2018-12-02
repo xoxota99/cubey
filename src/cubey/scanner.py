@@ -3,14 +3,15 @@
     to control the camera and stepper motors, respectively.
 """
 
-import stepper
 import logging
 import numpy as np
-import camera
 import math
 import yaml
-from config import cfg
 from PIL import Image, ImageDraw
+
+import stepper
+import camera
+from config import cfg
 
 logging.basicConfig(
     level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
@@ -103,145 +104,145 @@ def scan_state():
     return state
 
 
-def calibrate():
-    """
-    Scan a (currently solved) cube, and use the mean of the resulting color values as calibrated color centers for each edge / corner facelet.
-    Generate radius based on the known values encountered.
+# def calibrate():
+#     """
+#     Scan a (currently solved) cube, and use the mean of the resulting color values as calibrated color centers for each edge / corner facelet.
+#     Generate radius based on the known values encountered.
 
-    WE ASSUME: That the cube is fully solved, and present in a known orientation (Orange face front, Yellow face up).
-    """
+#     WE ASSUME: That the cube is fully solved, and present in a known orientation (Orange face front, Yellow face up).
+#     """
 
-    # TODO: Allow for other orientations of the cube, passed as a parameter.
+#     # TODO: Allow for other orientations of the cube, passed as a parameter.
 
-    # colors, in BGR format.
+#     # colors, in BGR format.
 
-    colors = {
-        'O': np.zeros((6, 3)).tolist(),
-        'R': np.zeros((6, 3)).tolist(),
-        'G': np.zeros((6, 3)).tolist(),
-        'B': np.zeros((6, 3)).tolist(),
-        'Y': np.zeros((6, 3)).tolist(),
-        'W': np.zeros((6, 3)).tolist()
-    }
+#     colors = {
+#         'O': np.zeros((6, 3)).tolist(),
+#         'R': np.zeros((6, 3)).tolist(),
+#         'G': np.zeros((6, 3)).tolist(),
+#         'B': np.zeros((6, 3)).tolist(),
+#         'Y': np.zeros((6, 3)).tolist(),
+#         'W': np.zeros((6, 3)).tolist()
+#     }
 
-    # scan front
+#     # scan front
 
-    colors['O'][0], colors['B'][1], colors['O'][2], colors['B'][
-        3], colors['O'][4], colors['B'][5] = camera.get_raw_colors("1_OBOBOB")
+#     colors['O'][0], colors['B'][1], colors['O'][2], colors['B'][
+#         3], colors['O'][4], colors['B'][5] = camera.get_raw_colors("1_OBOBOB")
 
-    debug("scanning {0}: {1}".format("FR", "OBOBOB"))
+#     debug("scanning {0}: {1}".format("FR", "OBOBOB"))
 
-    stepper.execute("F2")
-    _, colors['G'][1], _, colors['G'][3], _, colors['G'][5] = camera.get_raw_colors(
-        "2__G_G_G")
-    debug("scanning {0}: {1}".format("FR", "_G_G_G"))
+#     stepper.execute("F2")
+#     _, colors['G'][1], _, colors['G'][3], _, colors['G'][5] = camera.get_raw_colors(
+#         "2__G_G_G")
+#     debug("scanning {0}: {1}".format("FR", "_G_G_G"))
 
-    stepper.execute("F")
-    _, colors['W'][1], _, colors['W'][3], _, colors['W'][5] = camera.get_raw_colors(
-        "3__W_W_W")
-    debug("scanning {0}: {1}".format("FR", "_W_W_W"))
+#     stepper.execute("F")
+#     _, colors['W'][1], _, colors['W'][3], _, colors['W'][5] = camera.get_raw_colors(
+#         "3__W_W_W")
+#     debug("scanning {0}: {1}".format("FR", "_W_W_W"))
 
-    stepper.execute("F R")  # origin, then R.
-    colors['W'][0], _, colors['W'][2], _, colors['W'][4], _ = camera.get_raw_colors(
-        "4_W_W_W_")
-    debug("scanning {0}: {1}".format("FR", "W_W_W_"))
+#     stepper.execute("F R")  # origin, then R.
+#     colors['W'][0], _, colors['W'][2], _, colors['W'][4], _ = camera.get_raw_colors(
+#         "4_W_W_W_")
+#     debug("scanning {0}: {1}".format("FR", "W_W_W_"))
 
-    stepper.execute("R' U R'")  # origin, then U R'
-    colors['Y'][0], colors['R'][1], colors['Y'][2], colors['R'][
-        3], colors['Y'][4], colors['R'][5] = camera.get_raw_colors("5__YRYRYR")
-    debug("scanning {0}: {1}".format("FR", "YRYRYR"))
+#     stepper.execute("R' U R'")  # origin, then U R'
+#     colors['Y'][0], colors['R'][1], colors['Y'][2], colors['R'][
+#         3], colors['Y'][4], colors['R'][5] = camera.get_raw_colors("5__YRYRYR")
+#     debug("scanning {0}: {1}".format("FR", "YRYRYR"))
 
-    stepper.execute("R U' R U F")  # origin, then R U F
-    colors['B'][0], colors['O'][1], colors['B'][2], colors['O'][
-        3], colors['B'][4], colors['O'][5] = camera.get_raw_colors("6_BOBOBO")
-    debug("scanning {0}: {1}".format("FR", "BOBOBO"))
+#     stepper.execute("R U' R U F")  # origin, then R U F
+#     colors['B'][0], colors['O'][1], colors['B'][2], colors['O'][
+#         3], colors['B'][4], colors['O'][5] = camera.get_raw_colors("6_BOBOBO")
+#     debug("scanning {0}: {1}".format("FR", "BOBOBO"))
 
-    stepper.execute("F' U' R' U' F")  # origin, then U' F
-    colors['G'][0], _, colors['G'][2], _, colors['G'][4], _ = camera.get_raw_colors(
-        "7_G_G_G_")
-    debug("scanning {0}: {1}".format("FR", "G_G_G_"))
+#     stepper.execute("F' U' R' U' F")  # origin, then U' F
+#     colors['G'][0], _, colors['G'][2], _, colors['G'][4], _ = camera.get_raw_colors(
+#         "7_G_G_G_")
+#     debug("scanning {0}: {1}".format("FR", "G_G_G_"))
 
-    stepper.execute("F' U' F")
-    colors['R'][0], colors['Y'][1], colors['R'][2], colors['Y'][
-        3], colors['R'][4], colors['Y'][5] = camera.get_raw_colors("8_RYRYRY")
-    debug("scanning {0}: {1}".format("FR", "RYRYRY"))
+#     stepper.execute("F' U' F")
+#     colors['R'][0], colors['Y'][1], colors['R'][2], colors['Y'][
+#         3], colors['R'][4], colors['Y'][5] = camera.get_raw_colors("8_RYRYRY")
+#     debug("scanning {0}: {1}".format("FR", "RYRYRY"))
 
-    stepper.execute("F' U2")  # back to origin
+#     stepper.execute("F' U2")  # back to origin
 
-    # at this point, we've scanned all the colors on each facelet.
-    # Now lets build the calibration data based on the gathered data.
-    cal = {}
-    for key in colors:
-        cal_entry = {}
-        face = colors[key]
-        arr = np.sum(np.array(face), axis=0)
-        arr = [x / len(face) for x in arr]
-        radius = 2.0       # start with a reasonable default value.
-        for facelet in face:
-            diff = [abs(a_i - b_i) for a_i, b_i in zip(arr, facelet)]
-            dist = math.sqrt((diff[0]-arr[0])**2 +
-                             (diff[1] - arr[1]) ** 2 + (diff[2] - arr[2]) ** 2)
-            if dist > radius or radius == 0.0:
-                radius = dist  # euclidean distance from the average to the outlyingest color sample
+#     # at this point, we've scanned all the colors on each facelet.
+#     # Now lets build the calibration data based on the gathered data.
+#     cal = {}
+#     for key in colors:
+#         cal_entry = {}
+#         face = colors[key]
+#         arr = np.sum(np.array(face), axis=0)
+#         arr = [x / len(face) for x in arr]
+#         radius = 2.0       # start with a reasonable default value.
+#         for facelet in face:
+#             diff = [abs(a_i - b_i) for a_i, b_i in zip(arr, facelet)]
+#             dist = math.sqrt((diff[0]-arr[0])**2 +
+#                              (diff[1] - arr[1]) ** 2 + (diff[2] - arr[2]) ** 2)
+#             if dist > radius or radius == 0.0:
+#                 radius = dist  # euclidean distance from the average to the outlyingest color sample
 
-        cal_entry["rgb"] = colors[key]
-        cal_entry["radius"] = 20.0  # radius
-        cal[key] = cal_entry
+#         cal_entry["rgb"] = colors[key]
+#         cal_entry["radius"] = 20.0  # radius
+#         cal[key] = cal_entry
 
-    # collision-detection, to assert that no two non-equivalent color pseudo-spheres collide (e.g.:
-    # Is there a risk that a blue facelet could be mistaken for a yellow facelet,
-    # using any of the "blue" colors-plus-radius, and any of the "yellow"
-    # colors-plus-radius). Rough upper-bound is every facelet compared to every other facelet of a
-    # different color, for each camera: 2 * 36 * (1+2+3+4+5) = 1080 comparisons.
+#     # collision-detection, to assert that no two non-equivalent color pseudo-spheres collide (e.g.:
+#     # Is there a risk that a blue facelet could be mistaken for a yellow facelet,
+#     # using any of the "blue" colors-plus-radius, and any of the "yellow"
+#     # colors-plus-radius). Rough upper-bound is every facelet compared to every other facelet of a
+#     # different color, for each camera: 2 * 36 * (1+2+3+4+5) = 1080 comparisons.
 
-    ccount = 1
+#     ccount = 1
 
-    compared = {"R": [], "O": [], "Y": [], "G": [], "B": [], "W": []}
-    errors = []
-    for key1 in cal:  # 6
-        colors1 = cal[key1]["rgb"]
-        for key2 in cal:  # 5, 4, 3, 2, 1
-            compared[key1].append(key2)
-            if key2 != key1 and key1 not in compared[key2]:
-                colors2 = cal[key2]["rgb"]
-                # only test against colors in the same position.
-                for i in range(6):
-                    clr1 = colors1[i]
-                    clr2 = colors2[i]
-                    logging.info("#{4}: Testing {0}:{1} against {2}:{3}".format(
-                        key1, clr1, key2, clr2, ccount))
-                    ccount += 1
-                    dist = math.sqrt(
-                        (clr1[0] - clr2[0]) ** 2 + (clr1[1] - clr2[1]) ** 2 + (clr1[2] - clr2[2]) ** 2)
-                    if dist < cal[key1]["radius"] or dist < cal[key2]["radius"]:
-                        cal[key1]["radius"] = min(
-                            cal[key1]["radius"], round(dist, 2))
-                        cal[key2]["radius"] = min(
-                            cal[key2]["radius"], round(dist, 2))
+#     compared = {"R": [], "O": [], "Y": [], "G": [], "B": [], "W": []}
+#     errors = []
+#     for key1 in cal:  # 6
+#         colors1 = cal[key1]["rgb"]
+#         for key2 in cal:  # 5, 4, 3, 2, 1
+#             compared[key1].append(key2)
+#             if key2 != key1 and key1 not in compared[key2]:
+#                 colors2 = cal[key2]["rgb"]
+#                 # only test against colors in the same position.
+#                 for i in range(6):
+#                     clr1 = colors1[i]
+#                     clr2 = colors2[i]
+#                     logging.info("#{4}: Testing {0}:{1} against {2}:{3}".format(
+#                         key1, clr1, key2, clr2, ccount))
+#                     ccount += 1
+#                     dist = math.sqrt(
+#                         (clr1[0] - clr2[0]) ** 2 + (clr1[1] - clr2[1]) ** 2 + (clr1[2] - clr2[2]) ** 2)
+#                     if dist < cal[key1]["radius"] or dist < cal[key2]["radius"]:
+#                         cal[key1]["radius"] = min(
+#                             cal[key1]["radius"], round(dist, 2))
+#                         cal[key2]["radius"] = min(
+#                             cal[key2]["radius"], round(dist, 2))
 
-                        errors.append(
-                            {
-                                "color1": key1,
-                                "radius1": cal[key1]["radius"],
-                                "rgb1": clr1,
-                                "color2": key2,
-                                "radius2": cal[key2]["radius"],
-                                "rgb2": clr2,
-                                "dist": dist,
-                            }
-                        )
-        logging.info("compared: {0}".format(compared))
+#                         errors.append(
+#                             {
+#                                 "color1": key1,
+#                                 "radius1": cal[key1]["radius"],
+#                                 "rgb1": clr1,
+#                                 "color2": key2,
+#                                 "radius2": cal[key2]["radius"],
+#                                 "rgb2": clr2,
+#                                 "dist": dist,
+#                             }
+#                         )
+#         logging.info("compared: {0}".format(compared))
 
-    if len(errors) > 0:
-        logging.warn("-----------------------------------------------")
-        logging.warn(
-            "There were collisions in the color calibration, and radii were automatically adjusted:")
-        for err in errors:
-            logging.warn("\t{0}".format(err))
-        logging.warn("-----------------------------------------------")
+#     if len(errors) > 0:
+#         logging.warn("-----------------------------------------------")
+#         logging.warn(
+#             "There were collisions in the color calibration, and radii were automatically adjusted:")
+#         for err in errors:
+#             logging.warn("\t{0}".format(err))
+#         logging.warn("-----------------------------------------------")
 
-    retval = {"colors": cal, "sample_size": camera.calib_data["sample_size"]}
-    return retval
+#     retval = {"colors": cal, "sample_size": camera.calib_data["sample_size"]}
+#     return retval
 
 
 def get_state_string(state=None):
@@ -380,13 +381,3 @@ def get_state_img(state=None):
             i += 1
 
     return img
-
-
-if __name__ == "__main__":
-    # img = get_state_img()
-    # img.save("cube.png")
-
-    c = camera.get_settings()
-    s = calibrate()
-    obj = {"camera": c, "calib": s}
-    logging.info(yaml.dump(obj, default_flow_style=True))
