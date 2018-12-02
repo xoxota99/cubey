@@ -1,18 +1,19 @@
 from cubey.config import cfg
 from cubey import stepper
-import pigpio
-import time
-import sys
-import os
+# import pigpio
+# import time
+# import sys
+# import os
 import logging
 
+# cfg = config.cfg
 
 logging.basicConfig(
     level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
 
 
 """
-Utility for interactively commanding the Stepper motors of the robot, using typical Rubik's Cube commands:
+Utility for interactively commanding the Stepper motors of the robot, using typical Rubik's Cube notation:
 R - Turn RIGHT face clockwise 90 degrees
 R2 - Turn RIGHT face 180 degrees (in an undefined direction)
 R' - Turn RIGHT face counter-clockwise 90 degrees.
@@ -41,17 +42,17 @@ if __name__ == "__main__":
             recipe = inp.upper().split()
             for step_str in recipe:
                 base = step_str[0]
-                if stepper.FACE_NAME[base]:
+                if base in stepper.FACE_NAME:
+                    motor_pin = stepper.FACE_MOTOR_MAP.get(base)
                     if (len(step_str) >= 2):
                         xtra = step_str[-1:]
                         print(base+xtra)
                         if (xtra == "'"):
-                            stepper.rot_90(
-                                stepper.FACE_MOTOR_MAP[base], stepper.CCW)
+                            stepper.rot_90(motor_pin, stepper.CCW)
                         elif (xtra == "2"):
-                            stepper.rot_180(stepper.FACE_MOTOR_MAP[base])
+                            stepper.rot_180(motor_pin)
                     else:
-                        stepper.rot_90(stepper.FACE_MOTOR_MAP[base])
+                        stepper.rot_90(motor_pin)
                         print(base)
                 else:
                     print("*** Unknown cube face '" + base +
@@ -62,7 +63,8 @@ if __name__ == "__main__":
             return True
 
     p = MyPrompt()
+
     p.prompt = "Cubey > "
     p.cmdloop()
 
-    pi.stop()
+    # pi.stop()   #it may be that horrible things will happen if we don't call stop.
