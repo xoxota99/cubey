@@ -1,11 +1,12 @@
+
 import sys
 import logging
 import time
 
-import stepper
-import scanner
-import solver
-from config import cfg
+from cubey import stepper
+from cubey import scanner
+from cubey import solver
+from cubey.config import cfg
 
 logging.basicConfig(
     level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])

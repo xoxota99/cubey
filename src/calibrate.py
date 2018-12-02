@@ -1,6 +1,9 @@
 import numpy as np
 import logging
 import yaml
+import math
+import sys
+
 from cubey import camera
 from cubey import stepper
 from cubey import config
@@ -166,8 +169,11 @@ def process_args(argv):
         for i, arg in enumerate(argv):
             if i % 2 == 0:
                 # param name
+                pass
             else:
                 # param value
+                pass
+    return {}
 
 
 if __name__ == "__main__":
