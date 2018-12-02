@@ -1,72 +1,14 @@
-# import os
 import sys
 import logging
-# import subprocess
-import stepper
 import time
-# import random
+
+import stepper
 import scanner
 import solver
 from config import cfg
 
 logging.basicConfig(
     level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
-
-# MIN_SCRAMBLE_MOVES = cfg['app']['min_scramble_moves']
-# MAX_SCRAMBLE_MOVES = cfg['app']['max_scramble_moves']
-
-
-# def scramble():
-#     """
-#     Generate a move list to scramble the cube. Then scramble the cube and return the move list.
-
-#     The number of moves in the scramble is determined by the config settings app.min_scramble_moves and app.max_scramble_moves
-
-#     Example output: "U R' B2 D F' U' D' R F' U2 F' L2 F2 B2 D2 F2 D' F2 B2 U' B2"
-#     """
-#     recipe = ""
-#     move_count = random.randint(MIN_SCRAMBLE_MOVES, MAX_SCRAMBLE_MOVES+1)
-#     base = "X"
-#     last_base = "X"
-#     for _ in range(move_count):
-#         while base == last_base:
-#             base = random.choice(stepper.FACE_NAME)
-
-#         last_base = base
-#         add = random.randint(0, 3)
-#         xtra = ""
-
-#         if add == 1:
-#             xtra = "'"
-#         elif add == 2:
-#             xtra = "2"
-
-#         recipe = recipe + base + xtra + " "
-
-#     logging.info("Random Scramble: " + recipe)
-#     stepper.execute(recipe)
-#     return recipe
-
-
-# def descramble(recipe_str):
-#     """
-#     Fun but useless function to take a known scramble recipe, and play it backwards.
-#     So we can scramble the cube, then descramble it. Could be useful for running
-#     mechanical stress testing ending in a known cube state?
-#     """
-#     recipe_arr = recipe_str.split()
-#     rec2 = ""
-#     for step in reversed(recipe_arr):
-#         if("'" in step):
-#             rec2 += step.replace("'", "") + " "
-#         elif ("2" not in step):
-#             rec2 += step + "' "
-#         else:
-#             rec2 += step + " "
-
-#     logging.info("Descramble: " + rec2)
-#     stepper.execute(rec2)
-#     return rec2
 
 
 def main():
