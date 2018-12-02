@@ -40,14 +40,14 @@ cam:
 stepper:
   
   pincfg_v2: &pincfg_v2       # cubey_v2
-    disable: 25
-    dir: 15             # You may have to disable UART to use this pin
-    up: 14              # You may have to disable UART to use this pin
-    right: 18
-    front: 21
-    down: 16
-    left: 20
-    back: 23
+    back: 2
+    front: 3
+    left: 22
+    right: 10
+    disable: 6
+    down: 13
+    up: 19
+    dir: 26
   
 
   pins: *pincfg_v2
