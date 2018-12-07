@@ -1,16 +1,5 @@
-from cubey.config import cfg
-from cubey import stepper
-# import pigpio
-# import time
-# import sys
-# import os
 import logging
-
-# cfg = config.cfg
-
-logging.basicConfig(
-    level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
-
+from cubey import stepper
 
 """
 Utility for interactively commanding the Stepper motors of the robot, using typical Rubik's Cube notation:

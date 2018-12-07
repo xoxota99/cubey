@@ -1,12 +1,16 @@
-from __future__ import division
 from time import sleep
 import math
 import pigpio
-from config import cfg
+import yaml
 
 # We are only spinning one motor at a time, so only need one DIR pin.
 # (All motors are on the same DIR bus).
-pins = cfg['stepper']['pins']
+config_file = "config.yaml"
+config = {}
+with open(config_file, 'r') as ymlfile:
+    config = yaml.load(ymlfile)
+
+pins = config['stepper']['pins']
 DIR = pins['dir']                # Direction GPIO Pin
 
 UP = pins['up']                  # UP face stepper
@@ -30,21 +34,21 @@ FACE_MOTOR_MAP = {
     "L": LEFT,
     "B": BACK
 }
-RPM = cfg['stepper']['rpm']  # complete revolutions (360 deg.) per minute
+RPM = config['stepper']['rpm']  # complete revolutions (360 deg.) per minute
 # steps per revolution (varies by motor)
-STEPS_PER_REVOLUTION = cfg['stepper']['steps_per_rev']
+STEPS_PER_REVOLUTION = config['stepper']['steps_per_rev']
 STEPS_PER_DEGREE = STEPS_PER_REVOLUTION / 360.0
-STEP_FACTOR = cfg['stepper']['step_factor']
+STEP_FACTOR = config['stepper']['step_factor']
 # PULSE_LENGTH_US = 1000000 // (STEPS_PER_REVOLUTION * RPM // 60)
 # e.g. 4 revolutions per second = 800 steps per second.
 # 800 steps per second = one step every 1250 uS.
 
-MOVE_DELAY = cfg['stepper']['move_delay']
+MOVE_DELAY = config['stepper']['move_delay']
 
 CW = 0
 CCW = 1
 
-HERTZ = cfg['stepper']['hertz']
+HERTZ = config['stepper']['hertz']
 
 pi = None       # pigpio reference
 is_init = False
@@ -159,38 +163,4 @@ def execute(recipe_str):
         else:
             rot_90(pin)
         sleep(MOVE_DELAY)
-    _stop()
-
-
-if __name__ == "__main__":
-    _init()
-    print("Stepper test.")
-    delay = MOVE_DELAY
-
-    # rotate each side 90 degrees, four times, with a pause between each rotation.
-    for s, mot in zip(FACE_NAME, MOTOR_PIN):
-        # s = "U"
-        mot = FACE_MOTOR_MAP[s]
-        for _ in range(4):
-            print(s)
-            rot_90(mot, CW)
-            sleep(delay)
-        for _ in range(4):
-            print(s+"'")
-            rot_90(mot, CCW)
-            sleep(delay)
-
-    # rotate each side twice, 180 degrees, with a pause between each rotation.
-    for s, mot in zip(FACE_NAME, MOTOR_PIN):
-        for _ in range(2):
-            print("2" + s)
-            rot_180(mot, CW)
-            sleep(delay)
-        for _ in range(2):
-            print("2"+s+"'")
-            rot_180(mot, CCW)
-            sleep(delay)
-
-    # TODO: Allow for scrambling to a specified target state (using Kociemba? Something else?)
-
     _stop()

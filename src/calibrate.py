@@ -6,21 +6,23 @@ import sys
 
 from cubey import camera
 from cubey import stepper
-from cubey import config
+from cubey import camera
 
-cfg = config.cfg
+config_file = "config.yaml"
+config = {}
+with open(config_file, 'r') as ymlfile:
+    config = yaml.load(ymlfile)
+
 logging.basicConfig(
-    level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
+    level=logging.getLevelName(config['app']['logLevel']), format=config['app']['logFormat'])
 
-
-colorSampleCoords = cfg['cam']['colorSampleCoords']
-calib_file = cfg['cam']['calibration']
+colorSampleCoords = config['cam']['colorSampleCoords']
+calib_file = config['cam']['calibration']
 calib = {}
 with open(calib_file, 'r') as ymlfile:
     calib = yaml.load(ymlfile)
 
-camera = camera.Camera(cfg['cam']['camera_deviceID'],
-                       colorSampleCoords, calib)
+camera = camera.Camera(config, calib)
 
 
 def calibrate():

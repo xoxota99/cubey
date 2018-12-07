@@ -1,19 +1,28 @@
+#!/usr/bin/python3
 
 import sys
 import logging
 import time
+import yaml
 
 from cubey import stepper
-from cubey import scanner
-from cubey import solver
-from cubey.config import cfg
-
-logging.basicConfig(
-    level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
+from cubey.scanner import Scanner
+from cubey.solver import Solver
+# from cubey.config import cfg
 
 
 def main():
     """scan the cube, get a solution from kociemba, then execute it on the robot."""
+    config_file = "config.yaml"
+    config = {}
+    with open(config_file, 'r') as ymlfile:
+        config = yaml.load(ymlfile)
+
+    logging.basicConfig(
+        level=logging.getLevelName(config['app']['logLevel']), format=config['app']['logFormat'])
+    scanner = Scanner(config)
+    solver = Solver(config)
+
     logging.info("Scanning...")
     t0 = round(time.time() * 1000)
     state_str = scanner.get_state_string(scanner.scan_state())

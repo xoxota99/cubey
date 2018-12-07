@@ -1,12 +1,12 @@
 """
-    Camera control module, including functions for scanning and 
+    Camera control module, including functions for scanning and
     returning best-guess color state of the camera-facing cube "edge".
 """
 import cv2
 import numpy as np
 import os.path
 import time
-from config import cfg
+# from config import cfg
 
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
@@ -14,8 +14,8 @@ from colormath.color_diff import delta_e_cie2000
 import yaml
 import logging
 
-logging.basicConfig(
-    level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
+# logging.basicConfig(
+#     level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
 
 
 # Map Color codes (OWYBGR) to Face codes (FBTLRB).
@@ -23,15 +23,15 @@ logging.basicConfig(
 # the "known" position of cube faces at startup. Because we can't scan the center facelet
 # of each side (it is obscured by the gripper), we have to assume that it's a certain color for each side.
 # this is basically a config value that describes the positioning of the cube in the robot.
-COLOR_TO_FACE = cfg['cam']['colorFaceMap']
+# COLOR_TO_FACE = cfg['cam']['colorFaceMap']
 
-FRAME_WIDTH = cfg['cam']['frameWidth']
-FRAME_HEIGHT = cfg['cam']['frameHeight']
-FPS = cfg['cam']['fps']
+# FRAME_WIDTH = cfg['cam']['frameWidth']
+# FRAME_HEIGHT = cfg['cam']['frameHeight']
+# FPS = cfg['cam']['fps']
 
-# Should we flip the camera image? (Some webcams mirror by default. Super annoying.)
-FLIP_CAMERA = cfg['cam']['flipCamera']
-FLIP_CODE = cfg['cam']['flipCode']
+# # Should we flip the camera image? (Some webcams mirror by default. Super annoying.)
+# FLIP_CAMERA = cfg['cam']['flipCamera']
+# FLIP_CODE = cfg['cam']['flipCode']
 
 
 def guessColor_normalized_euclidean(v, idx, calib_data):
@@ -184,17 +184,18 @@ class Camera:
         for _ in range(frames):
             self.vidcap.grab()
 
-    def __init__(self, dev_id, sampleCoords, calib_data):
+    def __init__(self, config, calib_data):
         # logging.info("resolving device for path '{0}'".format(deviceName))
         # dev_id = devIdFromPath(deviceName)
         # logging.info("path '{0}' resolved to device ID {1}".format(
         #     deviceName, dev_id))
+        self.config = config
+        self.vidcap = cv2.VideoCapture(config['cam']['camera_deviceID'])
 
-        self.vidcap = cv2.VideoCapture(dev_id)
-
-        self.vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
-        self.vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
-        self.vidcap.set(cv2.CAP_PROP_FPS, FPS)
+        self.vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, config['cam']['frameWidth'])
+        self.vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT,
+                        config['cam']['frameHeight'])
+        self.vidcap.set(cv2.CAP_PROP_FPS, config['cam']['fps'])
 
         if calib_data["camera"]["brightness"] != "default":
             self.vidcap.set(cv2.CAP_PROP_BRIGHTNESS,
@@ -217,7 +218,7 @@ class Camera:
                             calib_data["camera"]["exposure"])
 
         self.calib_data = calib_data
-        self.sampleCoords = sampleCoords
+        self.sampleCoords = config['cam']['colorSampleCoords']
 
         # self.warmup_time(cfg['cam']['warmup_delay_ms'])
         self.warmup_frames(30)
@@ -230,9 +231,10 @@ class Camera:
         _, frame = self.vidcap.read()
         if frame is not None:
 
-            if FLIP_CAMERA:
+            if self.config['cam']['flipCamera']:
                 logging.info("FLIP")
-                frame = cv2.flip(frame, flipCode=FLIP_CODE)
+                frame = cv2.flip(
+                    frame, flipCode=self.config['cam']['flipCode'])
 
             # frame = (frame/256).astype('uint8')         # convert to 8-bit.
             is_black = True
@@ -269,15 +271,15 @@ class Camera:
             return np.full(6, [0.0, 0.0, 0.0]).tolist()
 
     def get_colors(self):
-        """ 
-            Given a camera reference, take a vertical edge-on picture of the cube, and return a tuple of FURBDL 
+        """
+            Given a camera reference, take a vertical edge-on picture of the cube, and return a tuple of FURBDL
             values that refer to the facelets in the (zero-based) F2, R0, F5, R3, F8, R6 positions.
         """
         arr = self.get_raw_colors()
         retval = []
         for idx, clr in enumerate(arr):
             code = guessColor(clr, idx, self.calib_data["colors"])
-            code = COLOR_TO_FACE[code]
+            code = self.config['cam']['colorFaceMap'][code]
 
             retval.append(code)
 
@@ -288,13 +290,19 @@ class Camera:
 
 
 if __name__ == "__main__":
-    colorSampleCoords = cfg['cam']['colorSampleCoords']
-    calib_file = cfg['cam']['calibration']
+    config_file = "config.yaml"
+    config = {}
+    with open(config_file, 'r') as ymlfile:
+        config = yaml.load(ymlfile)
+
+    calib_file = config['cam']['calibration']
     calib = {}
     with open(calib_file, 'r') as ymlfile:
         calib = yaml.load(ymlfile)
 
-    camera = Camera(cfg['cam']['camera_deviceName'],
-                    colorSampleCoords["front"], calib["calib"]["colors"])
+    camera = Camera(config, calib)
+
+    # camera = Camera(cfg['cam']['camera_deviceName'],
+    #                 colorSampleCoords["front"], calib["calib"]["colors"])
 
     logging.info(camera.get_colors())

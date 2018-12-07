@@ -1,4 +1,3 @@
-from __future__ import division
 # from imutils.video import VideoStream
 import numpy as np
 # import imutils
