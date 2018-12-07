@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-# Installation instructions:
-# Copy this file into /usr/local/bin, and set it as executable (chmod +x)
-#
+
+# Used to safely shutdown the pi by pushing a momentary switch. Also indicates "power" with an LED
+
 from RPi import GPIO
 import time
 from subprocess import call
