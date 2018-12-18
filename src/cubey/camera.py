@@ -6,32 +6,12 @@ import cv2
 import numpy as np
 import os.path
 import time
-# from config import cfg
 
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 import yaml
 import logging
-
-# logging.basicConfig(
-#     level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
-
-
-# Map Color codes (OWYBGR) to Face codes (FBTLRB).
-# we take this extra step here, instead of inline in COLOR_CENTERS, to allow for configuring
-# the "known" position of cube faces at startup. Because we can't scan the center facelet
-# of each side (it is obscured by the gripper), we have to assume that it's a certain color for each side.
-# this is basically a config value that describes the positioning of the cube in the robot.
-# COLOR_TO_FACE = cfg['cam']['colorFaceMap']
-
-# FRAME_WIDTH = cfg['cam']['frameWidth']
-# FRAME_HEIGHT = cfg['cam']['frameHeight']
-# FPS = cfg['cam']['fps']
-
-# # Should we flip the camera image? (Some webcams mirror by default. Super annoying.)
-# FLIP_CAMERA = cfg['cam']['flipCamera']
-# FLIP_CODE = cfg['cam']['flipCode']
 
 
 def guessColor_normalized_euclidean(v, idx, calib_data):
@@ -290,7 +270,7 @@ class Camera:
 
 
 if __name__ == "__main__":
-    config_file = "config.yaml"
+    config_file = "../config.yaml"
     config = {}
     with open(config_file, 'r') as ymlfile:
         config = yaml.load(ymlfile)
