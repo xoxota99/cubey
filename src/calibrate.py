@@ -168,14 +168,15 @@ def calibrate():
 
 def process_args(argv):
     if len(argv) > 1:
+        retval = {}
+        pName = ""
         for i, arg in enumerate(argv):
             if i % 2 == 0:
-                # param name
-                pass
+                pName = arg
             else:
-                # param value
-                pass
-    return {}
+                retval[pName] = arg
+                pName=""
+    return retval
 
 
 if __name__ == "__main__":
