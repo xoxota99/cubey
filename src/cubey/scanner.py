@@ -9,7 +9,6 @@ import math
 import yaml
 from PIL import Image, ImageDraw
 
-import stepper
 from camera import Camera
 
 # logging.basicConfig(
@@ -37,14 +36,14 @@ class Scanner:
     def __init__(self, config):
         self.config = config
 
-        calib_file = config['cam']['calibration']
+        calib_file = "../"+config['cam']['calibration']
         calib = {}
         with open(calib_file, 'r') as ymlfile:
             calib = yaml.load(ymlfile)
 
         self.camera = Camera(config, calib)
 
-    def scan_state(self):
+    def scan_state(self, motors):
         """
         Scan the current state of the cube, and return a map of <facename:array<facename>> to represent the cube state.
         Cube state is represented like:
@@ -74,34 +73,34 @@ class Scanner:
 
         state['F'][2], state['R'][0], state['F'][5], state['R'][3], state['F'][8], state['R'][6] = self.camera.get_colors()
 
-        stepper.execute('F')
+        motors.execute('F')
         state['F'][0], state['U'][6], state['F'][1], state['U'][7], _, state['U'][8] = self.camera.get_colors()
 
-        stepper.execute('F')
+        motors.execute('F')
         state['F'][6], state['L'][8], state['F'][3], state['L'][5], _, state['L'][2] = self.camera.get_colors()
 
-        stepper.execute('F')
+        motors.execute('F')
         _, state['D'][2], state['F'][7], state['D'][1], _, state['D'][0] = self.camera.get_colors()
 
-        stepper.execute('F R')  # origin, then R
+        motors.execute('F R')  # origin, then R
         _, _, state['D'][5], state['R'][7], state['D'][8], state['R'][8] = self.camera.get_colors()
 
-        stepper.execute('R')
+        motors.execute('R')
         state['B'][6], _, state['B'][3], state['R'][5], state['B'][0], state['R'][2] = self.camera.get_colors()
 
-        stepper.execute('R')
+        motors.execute('R')
         state['U'][2], _, state['U'][5], state['R'][1], _, _ = self.camera.get_colors()
 
-        stepper.execute("R B' U R'")  # origin, then B' U R'
+        motors.execute("R B' U R'")  # origin, then B' U R'
         state['L'][6], state['B'][8], state['L'][3], state['B'][5], state['L'][0], state['B'][2] = self.camera.get_colors()
 
-        stepper.execute("R U' B L' F2")  # origin, then L' F2
+        motors.execute("R U' B L' F2")  # origin, then L' F2
         state['D'][7], _, state['D'][4], _, _, _ = self.camera.get_colors()
 
-        stepper.execute("F2 L")
+        motors.execute("F2 L")
         return state
 
-    def get_state_string(self, state=None):
+    def get_state_string(self, motors, state=None):
         """
         Given a map of <faces,array<facelet>>, representing the cube state, return a
         string representation, according to the order U1, U2, U3, U4, U5, U6, U7, U8, U9, R1, R2,
@@ -112,7 +111,7 @@ class Scanner:
         Example state: "DLRUULBDFLFFDRBBRRDLUFFFBRDUDLRDFRDULBRLLUBULDBFRBUFBU"
         """
         if state is None:
-            state = self.scan_state()
+            state = self.scan_state(motors)
 
         retval = "".join(state['U']) \
             + "".join(state['R']) \

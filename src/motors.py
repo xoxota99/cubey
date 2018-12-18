@@ -1,5 +1,7 @@
 import logging
 from cubey import stepper
+from cmd import Cmd
+import yaml
 
 """
 Utility for interactively commanding the Stepper motors of the robot, using typical Rubik's Cube notation:
@@ -18,38 +20,47 @@ You can chain together commands in a single line, such as: D2 R2 U L' B' D R L' 
 
 """
 
-if __name__ == "__main__":
+config = {}
+motors = None
 
-    from cmd import Cmd
 
-    class MyPrompt(Cmd):
+class MyPrompt(Cmd):
 
-        def default(self, inp):
-            if inp == "Q" or inp == "EOF":
-                return self.do_q(inp)
+    def default(self, inp):
 
-            recipe = inp.upper().split()
-            for step_str in recipe:
-                base = step_str[0]
-                if base in stepper.FACE_NAME:
-                    motor_pin = stepper.FACE_MOTOR_MAP.get(base)
-                    if (len(step_str) >= 2):
-                        xtra = step_str[-1:]
-                        print(base+xtra)
-                        if (xtra == "'"):
-                            stepper.rot_90(motor_pin, stepper.CCW)
-                        elif (xtra == "2"):
-                            stepper.rot_180(motor_pin)
-                    else:
-                        stepper.rot_90(motor_pin)
-                        print(base)
+        if inp == "Q" or inp == "EOF":
+            return self.do_q(inp)
+
+        recipe = inp.upper().split()
+        for step_str in recipe:
+            base = step_str[0]
+            if base in stepper.FACE_NAME:
+                motor_pin = stepper.FACE_MOTOR_MAP.get(base)
+                if (len(step_str) >= 2):
+                    xtra = step_str[-1:]
+                    print(base+xtra)
+                    if (xtra == "'"):
+                        motors.rot_90(motor_pin, stepper.CCW)
+                    elif (xtra == "2"):
+                        motors.rot_180(motor_pin)
                 else:
-                    print("*** Unknown cube face '" + base +
-                          "' in move '" + step_str + "'")
+                    motors.rot_90(motor_pin)
+                    print(base)
+            else:
+                print("*** Unknown cube face '" + base +
+                      "' in move '" + step_str + "'")
 
-        def do_q(self, inp):
-            print("Bye")
-            return True
+    def do_q(self, inp):
+        print("Bye")
+        return True
+
+
+if __name__ == "__main__":
+    config_file = "config.yaml"
+    with open(config_file, 'r') as ymlfile:
+        config = yaml.load(ymlfile)
+
+    motors = stepper.MotorController(config)
 
     p = MyPrompt()
 

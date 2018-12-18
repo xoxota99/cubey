@@ -14,7 +14,7 @@ def solve(scanner, solver, motors):
     """scan the cube, get a solution from kociemba, then execute it on the robot."""
     logging.info("Scanning...")
     t0 = round(time.time() * 1000)
-    state_str = scanner.get_state_string(scanner.scan_state())
+    state_str = scanner.get_state_string(motors)
     t1 = round(time.time() * 1000)
     logging.info("Scanned state: " + state_str)
 
@@ -42,7 +42,7 @@ def solve_interactive(scanner, solver, motors):
     """scan the cube, get a solution from kociemba, then execute it on the robot."""
     input("Press any key to begin scanning the cube.")
     t0 = round(time.time() * 1000)
-    state_str = scanner.get_state_string(scanner.scan_state())
+    state_str = scanner.get_state_string(motors)
     t1 = round(time.time() * 1000)
     print("Scan complete! Cube state: {0}\n".format(state_str))
 

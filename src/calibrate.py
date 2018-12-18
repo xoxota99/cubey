@@ -5,8 +5,7 @@ import math
 import sys
 
 from cubey import camera
-from cubey import stepper
-from cubey import camera
+from cubey.stepper import MotorController
 
 config_file = "config.yaml"
 config = {}
@@ -25,15 +24,13 @@ with open(calib_file, 'r') as ymlfile:
 camera = camera.Camera(config, calib)
 
 
-def calibrate():
+def calibrate(motors):
     """
     Scan a (currently solved) cube, and use the mean of the resulting color values as calibrated color centers for each edge / corner facelet.
     Generate radius based on the known values encountered.
 
     WE ASSUME: That the cube is fully solved, and present in a known orientation (Orange face front, Yellow face up).
     """
-
-    # TODO: Allow for other orientations of the cube, passed as a parameter.
 
     # colors, in BGR format.
 
@@ -53,42 +50,42 @@ def calibrate():
 
     logging.debug("scanning {0}: {1}".format("FR", "OBOBOB"))
 
-    stepper.execute("F2")
+    motors.execute("F2")
     _, colors['G'][1], _, colors['G'][3], _, colors['G'][5] = camera.get_raw_colors(
         "2__G_G_G")
     logging.debug("scanning {0}: {1}".format("FR", "_G_G_G"))
 
-    stepper.execute("F")
+    motors.execute("F")
     _, colors['W'][1], _, colors['W'][3], _, colors['W'][5] = camera.get_raw_colors(
         "3__W_W_W")
     logging.debug("scanning {0}: {1}".format("FR", "_W_W_W"))
 
-    stepper.execute("F R")  # origin, then R.
+    motors.execute("F R")  # origin, then R.
     colors['W'][0], _, colors['W'][2], _, colors['W'][4], _ = camera.get_raw_colors(
         "4_W_W_W_")
     logging.debug("scanning {0}: {1}".format("FR", "W_W_W_"))
 
-    stepper.execute("R' U R'")  # origin, then U R'
+    motors.execute("R' U R'")  # origin, then U R'
     colors['Y'][0], colors['R'][1], colors['Y'][2], colors['R'][
         3], colors['Y'][4], colors['R'][5] = camera.get_raw_colors("5__YRYRYR")
     logging.debug("scanning {0}: {1}".format("FR", "YRYRYR"))
 
-    stepper.execute("R U' R U F")  # origin, then R U F
+    motors.execute("R U' R U F")  # origin, then R U F
     colors['B'][0], colors['O'][1], colors['B'][2], colors['O'][
         3], colors['B'][4], colors['O'][5] = camera.get_raw_colors("6_BOBOBO")
     logging.debug("scanning {0}: {1}".format("FR", "BOBOBO"))
 
-    stepper.execute("F' U' R' U' F")  # origin, then U' F
+    motors.execute("F' U' R' U' F")  # origin, then U' F
     colors['G'][0], _, colors['G'][2], _, colors['G'][4], _ = camera.get_raw_colors(
         "7_G_G_G_")
     logging.debug("scanning {0}: {1}".format("FR", "G_G_G_"))
 
-    stepper.execute("F' U' F")
+    motors.execute("F' U' F")
     colors['R'][0], colors['Y'][1], colors['R'][2], colors['Y'][
         3], colors['R'][4], colors['Y'][5] = camera.get_raw_colors("8_RYRYRY")
     logging.debug("scanning {0}: {1}".format("FR", "RYRYRY"))
 
-    stepper.execute("F' U2")  # back to origin
+    motors.execute("F' U2")  # back to origin
 
     # at this point, we've scanned all the colors on each facelet.
     # Now lets build the calibration data based on the gathered data.
@@ -175,15 +172,25 @@ def process_args(argv):
                 pName = arg
             else:
                 retval[pName] = arg
-                pName=""
+                pName = ""
     return retval
 
 
 if __name__ == "__main__":
     args = process_args(sys.argv)
 
+    config_file = "config.yaml"
+    config = {}
+    with open(config_file, 'r') as ymlfile:
+        config = yaml.load(ymlfile)
+
+    logging.basicConfig(
+        level=logging.getLevelName(config['app']['logLevel']), format=config['app']['logFormat'])
+
+    motors = MotorController(config)
+
     c = camera.get_settings()
-    s = calibrate()
+    s = calibrate(motors)
     obj = {"camera": c, "calib": s}
     yaml_text = yaml.dump(obj, default_flow_style=True)
 
