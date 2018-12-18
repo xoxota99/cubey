@@ -275,7 +275,7 @@ if __name__ == "__main__":
     with open(config_file, 'r') as ymlfile:
         config = yaml.load(ymlfile)
 
-    calib_file = config['cam']['calibration']
+    calib_file = "../"+config['cam']['calibration']
     calib = {}
     with open(calib_file, 'r') as ymlfile:
         calib = yaml.load(ymlfile)

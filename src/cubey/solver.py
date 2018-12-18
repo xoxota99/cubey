@@ -1,12 +1,7 @@
 import os
 import subprocess
 import random
-
-import scanner
 import stepper
-# from config import cfg
-
-# CMD = cfg['app']['solverCMD']
 
 
 class Solver:
@@ -43,6 +38,7 @@ class Solver:
         move_count = random.randint(min_scramble_moves, max_scramble_moves+1)
         base = "X"
         last_base = "X"
+
         for _ in range(move_count):
             while base == last_base:
                 base = random.choice(stepper.FACE_NAME)

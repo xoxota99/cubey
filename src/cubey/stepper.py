@@ -1,5 +1,4 @@
 from time import sleep
-# import math
 import pigpio
 
 FACE_NAME = ["U", "R", "F", "D", "L", "B"]
