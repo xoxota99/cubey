@@ -194,8 +194,8 @@ if __name__ == "__main__":
     obj = {"camera": c, "calib": s}
     yaml_text = yaml.dump(obj, default_flow_style=True)
 
-    if args["output_file"]:
-        with open(args["output_file"], 'w') as outfile:
+    if args["o"]:
+        with open(args["o"], 'w') as outfile:
             yaml.dump(obj, outfile, default_flow_style=True)
     else:
         logging.info(yaml_text)

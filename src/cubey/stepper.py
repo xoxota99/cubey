@@ -65,16 +65,17 @@ class MotorController:
 
             # Set up pins as an output
             pi.set_mode(DIR_PIN, pigpio.OUTPUT)
-            for _, val in config['stepper']['pins']:
+            for _, val in config['stepper']['pins'].items():
                 pi.set_mode(val, pigpio.OUTPUT)
 
             is_init = True
 
     def _stop(self):
         global is_init
-        pi.stop()
-        sleep(0.001)
-        is_init = False
+        if is_init:
+            pi.stop()
+            sleep(0.001)
+            is_init = False
 
     def _tx_pulses(self, pin, hertz, num, pulse_len=1):
         assert hertz < 500000
@@ -140,6 +141,7 @@ class MotorController:
         Take a recipe, of the form (e.g.) "R L2 F B U' F' D F' U B2 L' U2 B2 U D' B2 U2 L2 D' R2 D2"
         and execute it using the attached stepper motors.
         """
+        # print("EXECUTING....")
         if not is_init:
             self._initialize()
         recipe = recipe_str.split()

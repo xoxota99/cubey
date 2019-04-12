@@ -7,7 +7,7 @@ from cubey.stepper import MotorController
 from cubey.solver import Solver
 
 
-def descramble(recipe_str, motors):
+def descramble(recipe_str):
     """
     Fun but useless function to take a known scramble recipe, and play it backwards. 
     So we can scramble the cube, then descramble it. Could be useful for running 
@@ -23,8 +23,6 @@ def descramble(recipe_str, motors):
         else:
             rec2 += step + " "
 
-    logging.info("Descramble: " + rec2)
-    motors.execute(rec2)
     return rec2
 
 
@@ -48,21 +46,31 @@ if __name__ == "__main__":
         mode = sys.argv[1].upper()
 
     if mode == "S":  # scramble
-        print(slv.scramble(20, 30))
+        recipe = slv.scramble(20, 30)
+        print(recipe)
+        motors.execute(recipe)
     elif mode == "D":  # descramble. Optionally provide a recipe.
         if(len(sys.argv) > 2):
             s = sys.argv[2].upper()
         else:
             s = slv.scramble(20, 30)
             print("Scramble: {:s}", s)
+            motors.execute(s)
+            sleep(1)
 
-        d = descramble(s, motors)
+        d = descramble(s)
         print("Descramble: {:s}", d)
+        motors.execute(d)
+
     elif mode == "DD":  # INFINITE scramble / descramble.
         while True:
             print()
             s = slv.scramble(20, 30)
             print("Scramble: {:s}", s)
-            d = descramble(s, motors)
+            motors.execute(s)
+            sleep(1)
+
+            d = descramble(s)
             print("Descramble: {:s}", d)
-            sleep(2)
+            motors.execute(d)
+            sleep(1)

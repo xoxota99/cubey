@@ -53,6 +53,6 @@ stepper:
   pins: *pincfg_v2
   rpm: 60
   steps_per_rev: 200
-  move_delay: 0.05   # seconds to wait between cube moves.
-  hertz: 4000       # pulses per second. Basically speed. Do not exceed 4000 Hz.
+  move_delay: 0.01   # seconds to wait between cube moves.
+  hertz: 2000       # pulses per second. Basically speed. Do not exceed 4000 Hz.
   step_factor: 8    # 1/8 microstepping

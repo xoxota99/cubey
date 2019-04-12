@@ -1,7 +1,7 @@
 import os
 import subprocess
 import random
-import stepper
+from cubey import stepper
 
 
 class Solver:

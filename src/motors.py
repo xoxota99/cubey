@@ -20,35 +20,22 @@ You can chain together commands in a single line, such as: D2 R2 U L' B' D R L' 
 
 """
 
-config = {}
-motors = None
-
 
 class MyPrompt(Cmd):
+
+    def __init__(self, motors):
+        self.motors = motors
+        super(MyPrompt, self).__init__()
 
     def default(self, inp):
 
         if inp == "Q" or inp == "EOF":
             return self.do_q(inp)
 
-        recipe = inp.upper().split()
-        for step_str in recipe:
-            base = step_str[0]
-            if base in stepper.FACE_NAME:
-                motor_pin = stepper.FACE_MOTOR_MAP.get(base)
-                if (len(step_str) >= 2):
-                    xtra = step_str[-1:]
-                    print(base+xtra)
-                    if (xtra == "'"):
-                        motors.rot_90(motor_pin, stepper.CCW)
-                    elif (xtra == "2"):
-                        motors.rot_180(motor_pin)
-                else:
-                    motors.rot_90(motor_pin)
-                    print(base)
-            else:
-                print("*** Unknown cube face '" + base +
-                      "' in move '" + step_str + "'")
+        self.motors.execute(inp.upper())
+
+    def emptyline(self):
+        pass
 
     def do_q(self, inp):
         print("Bye")
@@ -62,9 +49,10 @@ if __name__ == "__main__":
 
     motors = stepper.MotorController(config)
 
-    p = MyPrompt()
+    p = MyPrompt(motors)
 
     p.prompt = "Cubey > "
     p.cmdloop()
 
-    # pi.stop()   #it may be that horrible things will happen if we don't call stop.
+    # it may be that horrible things will happen if we don't call stop.
+    motors._stop()
