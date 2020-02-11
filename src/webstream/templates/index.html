@@ -1,13 +1,14 @@
-<html>
+<!DOCTYPE html>
+<html xml:lang="en">
 
 <head>
   <title>Cubey 1.0 Live Feed</title>
 </head>
 
 <body style="background:white">
-  <img src="/static/cubey.svg" style="width:300px; display: block; margin-left: auto; margin-right: auto;" />
+  <img alt="cubey logo" src="/static/cubey.svg" style="width:300px; display: block; margin-left: auto; margin-right: auto;" />
   <hr />
-  <img style="display: block; margin-left: auto; margin-right: auto;" src="{{ url_for('video_feed') }}" />
+  <img alt="live feed" style="display: block; margin-left: auto; margin-right: auto;" src="{{ url_for('video_feed') }}" />
 </body>
 
 </html>
