@@ -25,6 +25,8 @@ camera = camera.Camera(config, calib)
 
 
 def calibrate(motors):
+    scanstr = "scanning {0}: {1}"
+
     """
     Scan a (currently solved) cube, and use the mean of the resulting color values as calibrated color centers for each edge / corner facelet.
     Generate radius based on the known values encountered.
@@ -48,42 +50,42 @@ def calibrate(motors):
     colors['O'][0], colors['B'][1], colors['O'][2], colors['B'][
         3], colors['O'][4], colors['B'][5] = camera.get_raw_colors("1_OBOBOB")
 
-    logging.debug("scanning {0}: {1}".format("FR", "OBOBOB"))
+    logging.debug(scanstr.format("FR", "OBOBOB"))
 
     motors.execute("F2")
     _, colors['G'][1], _, colors['G'][3], _, colors['G'][5] = camera.get_raw_colors(
         "2__G_G_G")
-    logging.debug("scanning {0}: {1}".format("FR", "_G_G_G"))
+    logging.debug(scanstr.format("FR", "_G_G_G"))
 
     motors.execute("F")
     _, colors['W'][1], _, colors['W'][3], _, colors['W'][5] = camera.get_raw_colors(
         "3__W_W_W")
-    logging.debug("scanning {0}: {1}".format("FR", "_W_W_W"))
+    logging.debug(scanstr.format("FR", "_W_W_W"))
 
     motors.execute("F R")  # origin, then R.
     colors['W'][0], _, colors['W'][2], _, colors['W'][4], _ = camera.get_raw_colors(
         "4_W_W_W_")
-    logging.debug("scanning {0}: {1}".format("FR", "W_W_W_"))
+    logging.debug(scanstr.format("FR", "W_W_W_"))
 
     motors.execute("R' U R'")  # origin, then U R'
     colors['Y'][0], colors['R'][1], colors['Y'][2], colors['R'][
         3], colors['Y'][4], colors['R'][5] = camera.get_raw_colors("5__YRYRYR")
-    logging.debug("scanning {0}: {1}".format("FR", "YRYRYR"))
+    logging.debug(scanstr.format("FR", "YRYRYR"))
 
     motors.execute("R U' R U F")  # origin, then R U F
     colors['B'][0], colors['O'][1], colors['B'][2], colors['O'][
         3], colors['B'][4], colors['O'][5] = camera.get_raw_colors("6_BOBOBO")
-    logging.debug("scanning {0}: {1}".format("FR", "BOBOBO"))
+    logging.debug(scanstr.format("FR", "BOBOBO"))
 
     motors.execute("F' U' R' U' F")  # origin, then U' F
     colors['G'][0], _, colors['G'][2], _, colors['G'][4], _ = camera.get_raw_colors(
         "7_G_G_G_")
-    logging.debug("scanning {0}: {1}".format("FR", "G_G_G_"))
+    logging.debug(scanstr.format("FR", "G_G_G_"))
 
     motors.execute("F' U' F")
     colors['R'][0], colors['Y'][1], colors['R'][2], colors['Y'][
         3], colors['R'][4], colors['Y'][5] = camera.get_raw_colors("8_RYRYRY")
-    logging.debug("scanning {0}: {1}".format("FR", "RYRYRY"))
+    logging.debug(scanstr.format("FR", "RYRYRY"))
 
     motors.execute("F' U2")  # back to origin
 
@@ -166,13 +168,13 @@ def calibrate(motors):
 def process_args(argv):
     if len(argv) > 1:
         retval = {}
-        pName = ""
+        param_name = ""
         for i, arg in enumerate(argv):
             if i % 2 == 0:
-                pName = arg
+                param_name = arg
             else:
-                retval[pName] = arg
-                pName = ""
+                retval[param_name] = arg
+                param_name = ""
     return retval
 
 

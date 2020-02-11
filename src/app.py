@@ -80,8 +80,7 @@ if __name__ == "__main__":
 
     func = solve
 
-    if len(sys.argv) > 1:
-        if sys.argv[1].upper() == "-I":
+    if len(sys.argv) > 1 and sys.argv[1].upper() == "-I":
             func = solve_interactive
 
     sys.exit(func(scanner, solver, motors))

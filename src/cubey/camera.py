@@ -13,13 +13,16 @@ from colormath.color_diff import delta_e_cie2000
 import yaml
 import logging
 
+test_color_in_position_str = "Testing color {0} in position {1}:"
+against_color_str = "     against '{0}', ({1}), distance is {2}."
+i_guess_color_str = "I guess color {0} is {1} , with distance {2}"
 
-def guessColor_normalized_euclidean(v, idx, calib_data):
+def guess_color_normalized_euclidean(v, idx, calib_data):
     """Guess color using Euclidean distance"""
     norm_v = [float(i) / max(v) for i in v]
     best_dist = 0
     best_color = None
-    logging.info("Testing color {0} in position {1}:".format(v, idx))
+    logging.info(test_color_in_position_str.format(v, idx))
     for _, (k, v2) in enumerate(calib_data["colors"]):
         rgb = v2['rgb'][idx]
         norm_rgb = [float(i) / max(rgb) for i in rgb]
@@ -35,46 +38,46 @@ def guessColor_normalized_euclidean(v, idx, calib_data):
             best_color = k
 
     if best_color >= 0:  # and best_dist < colorCenters[best_color]['radius']:
-        logging.info("I guess color {0} is '{1}' , with distance {2}".format(
+        logging.info(i_guess_color_str.format(
             v, best_color, best_dist))
         return best_color
     else:
         return 'X'
 
 
-def guessColor_euclidean(v, idx, calib_data):
+def guess_color_euclidean(v, idx, calib_data):
     """Guess color using Euclidean distance"""
     best_dist = 0
     best_color = None
-    logging.info("Testing color {0} in position {1}:".format(v, idx))
+    logging.info(test_color_in_position_str.format(v, idx))
     for _, (k, v2) in enumerate(calib_data["colors"]):
         rgb = v2['rgb'][idx]
         dist2 = (rgb[0] - v[0]) ** 2 + \
             (rgb[1] - v[1]) ** 2 + \
             (rgb[2] - v[2]) ** 2
 
-        logging.info("     against '{0}', ({1}), distance is {2}.".format(
+        logging.info(against_color_str.format(
             k, rgb, dist2))
         if dist2 < best_dist or best_color is None:
             best_dist = dist2
             best_color = k
 
     if best_color >= 0:  # and best_dist < colorCenters[best_color]['radius']:
-        logging.info("I guess color {0} is {1} , with distance {2}".format(
+        logging.info(i_guess_color_str.format(
             v, best_color, best_dist))
         return best_color
     else:
         return 'X'
 
 
-def guessColor_cie2000(v, idx, calib_data):
+def guess_color_cie2000(v, idx, calib_data):
     """
     Guess the color using the CIE2000 color space transformation, per http://hanzratech.in/2015/01/16/color-difference-between-2-colors-using-python.html
     """
     color1_rgb = sRGBColor(v[2], v[1], v[0])
     best_dist = 0
     best_color = None
-    logging.info("Testing color {0} in position {1}:".format(v, idx))
+    logging.info(test_color_in_position_str.format(v, idx))
     for _, (k, v2) in enumerate(calib_data["colors"]):
         rgb = v2['rgb'][idx]
         color2_rgb = sRGBColor(rgb[2], rgb[1], rgb[0])
@@ -82,40 +85,40 @@ def guessColor_cie2000(v, idx, calib_data):
         color2_lab = convert_color(color2_rgb, LabColor)
         # Find the color difference using CIE2000
         dist = delta_e_cie2000(color1_lab, color2_lab)
-        logging.info("     against '{0}', ({1}), distance is {2}.".format(
+        logging.info(against_color_str.format(
             k, rgb, dist))
         if dist < best_dist or best_color is None:
             best_dist = dist
             best_color = k
 
     if best_color >= 0:  # and best_dist < colorCenters[best_color]['radius']:
-        logging.info("I guess color {0} is {1} , with distance {2}".format(
+        logging.info(i_guess_color_str.format(
             v, best_color, best_dist))
         return best_color
     else:
         return 'X'
 
 
-def guessColor_linalg(v, idx, calib_data):
+def guess_color_linalg(v, idx, calib_data):
     """
     Guess the color using numpy's crappy linalg normalization.
     """
 
     best_dist = 0
     best_color = None
-    logging.info("Testing color {0} in position {1}:".format(v, idx))
+    logging.info(test_color_in_position_str.format(v, idx))
     for _, (k, v2) in enumerate(calib_data["colors"]):
         rgb = v2['rgb'][idx]
         dist = np.linalg.norm(v - rgb)
 
-        logging.info("     against '{0}', ({1}), distance is {2}.".format(
+        logging.info(against_color_str.format(
             k, rgb, dist))
         if dist < best_dist or best_color == -1:
             best_dist = dist
             best_color = k
 
     if best_color >= 0:  # and best_dist < colorCenters[best_color]['radius']:
-        logging.info("I guess color {0} is {1} , with distance {2}".format(
+        logging.info(i_guess_color_str.format(
             v, best_color, best_dist))
         return best_color
     else:
@@ -123,7 +126,7 @@ def guessColor_linalg(v, idx, calib_data):
 
 
 # function pointer to whatever color guessing algorithm we would like to use.
-guessColor = guessColor_linalg
+guess_color = guess_color_linalg
 
 
 # def devIdFromPath(path):
@@ -258,7 +261,7 @@ class Camera:
         arr = self.get_raw_colors()
         retval = []
         for idx, clr in enumerate(arr):
-            code = guessColor(clr, idx, self.calib_data["colors"])
+            code = guess_color(clr, idx, self.calib_data["colors"])
             code = self.config['cam']['colorFaceMap'][code]
 
             retval.append(code)
