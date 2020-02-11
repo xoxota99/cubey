@@ -1,3 +1,16 @@
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=bugs)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=code_smells)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=coverage)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=ncloc)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=alert_status)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=security_rating)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=sqale_index)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+
+
 # cubey
 A Raspberry pi-based Rubik's Cube solving robot.
 
