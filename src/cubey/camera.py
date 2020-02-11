@@ -140,7 +140,7 @@ guess_color = guess_color_linalg
 class Camera:
     vidcap = None
 
-    sampleCoords = []
+    sample_coords = []
 
     def get_settings(self):
         return {
@@ -201,7 +201,7 @@ class Camera:
                             calib_data["camera"]["exposure"])
 
         self.calib_data = calib_data
-        self.sampleCoords = config['cam']['colorSampleCoords']
+        self.sample_coords = config['cam']['colorSampleCoords']
 
         # self.warmup_time(cfg['cam']['warmup_delay_ms'])
         self.warmup_frames(30)
@@ -222,7 +222,7 @@ class Camera:
             # frame = (frame/256).astype('uint8')         # convert to 8-bit.
             is_black = True
             r = self.calib_data["sample_size"]
-            for coord in self.sampleCoords:
+            for coord in self.sample_coords:
                 x, y = coord[0], coord[1]
 
                 # define a small square (x1,y1,x2,y2) in the frame to sample for color.

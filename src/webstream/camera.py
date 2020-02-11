@@ -21,7 +21,7 @@ with open(calib_file, 'r') as ymlfile:
 Camera singleton, that publishes "frame-ready" events to any listeners.
 """
 
-defaultSampleCoords = cfg["cam"]["colorSampleCoords"]
+default_sample_coords = cfg["cam"]["colorSampleCoords"]
 sample_size = calib["sample_size"]
 
 
@@ -99,7 +99,7 @@ class Camera(object):
 
             # overlay sampling coordinates.
             num = 1
-            for coord in defaultSampleCoords:
+            for coord in default_sample_coords:
                 cv2.rectangle(
                     frame, (coord[0] - sample_size, coord[1] - sample_size), (coord[0] + sample_size, coord[1] + sample_size), (0, 255, 0), 2)
                 cv2.putText(
