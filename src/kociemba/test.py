@@ -328,7 +328,7 @@ if __name__ == '__main__':
                 logging.info(res)
                 if res != r:
                     logging.error(
-                        'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, `r`, `res`))
+                        'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, repr(r), repr(res)))
                     sys.exit(1)
                 cnt += 1
                 t = f.readline()
@@ -342,6 +342,6 @@ if __name__ == '__main__':
             logging.info(res)
             if res != r.strip():
                 logging.error(
-                    'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, `r`, `res`))
+                    'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, repr(r), repr(res)))
                 sys.exit(1)
         logging.info('all %d tests passed' % len(javares))

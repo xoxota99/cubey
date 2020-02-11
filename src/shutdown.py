@@ -22,7 +22,7 @@ butPin = 4
 ledPin = 14     # You may have to disable UART to use this pin.
 
 
-def Shutdown(channel):
+def shut_down(channel):
     print("Shutting Down")
     call("sudo shutdown -P now", shell=True)
 
@@ -34,7 +34,7 @@ def main():
 
     # Add our function to execute when the button pressed event happens
     GPIO.add_event_detect(butPin, GPIO.FALLING,
-                          callback=Shutdown, bouncetime=2000)
+                          callback=shut_down, bouncetime=2000)
     # Now wait!
     while 1:
         time.sleep(1)

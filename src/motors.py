@@ -35,6 +35,7 @@ class MyPrompt(Cmd):
         self.motors.execute(inp.upper())
 
     def emptyline(self):
+        #do nothing.
         pass
 
     def do_q(self, inp):
