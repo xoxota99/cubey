@@ -50,6 +50,23 @@ if __name__ == "__main__":
 
     motors = stepper.MotorController(config)
 
+    print ("""
+    Utility for interactively commanding the Stepper motors of the robot, using typical Rubik's Cube notation:
+    R - Turn RIGHT face clockwise 90 degrees
+    R2 - Turn RIGHT face 180 degrees (in an undefined direction)
+    R' - Turn RIGHT face counter-clockwise 90 degrees.
+
+    For "R" above, you can substitute any of:
+    F - FRONT face
+    U - UP face
+    L - LEFT face
+    B - BACK face
+    D - DOWN face
+
+    You can chain together commands in a single line, such as: D2 R2 U L' B' D R L' B U2 F L2 U2 L2 U' F2 D' B2 U' B2 U2 
+    
+    """)
+
     p = MyPrompt(motors)
 
     p.prompt = "Cubey > "

@@ -16,10 +16,11 @@ for up to ten seconds. Don't actually remove power from the RPI until disk activ
 
 """
 
-# The GPIO pin that the button is connected to. (The other end of the button is connected to ground.)
+# The GPIO pin that the button is connected to. (Active LOW)
 butPin = 4
+
 # The GPIO pin connected to the GROUND leg of the LED. The other end is connected to 5V.
-ledPin = 14     # You may have to disable UART to use this pin.
+ledPin = 14     # You may have to disable UART to use pin 14.
 
 
 def shut_down(channel):

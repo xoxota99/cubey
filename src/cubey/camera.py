@@ -18,7 +18,7 @@ against_color_str = "     against '{0}', ({1}), distance is {2}."
 i_guess_color_str = "I guess color {0} is {1} , with distance {2}"
 
 def guess_color_normalized_euclidean(v, idx, calib_data):
-    """Guess color using Euclidean distance"""
+    """Guess color using Normalized Euclidean distance"""
     norm_v = [float(i) / max(v) for i in v]
     best_dist = 0
     best_color = None

@@ -78,9 +78,16 @@ if __name__ == "__main__":
     solver = Solver(config)
     motors = MotorController(config)
 
-    func = solve
+    solvers = {
+        "DEFAULT" : solve,
+        "-I" : solve_interactive
+    }
+    
+    mode = "DEFAULT"
+    
+    if len(sys.argv) > 1:
+        mode = sys.argv[1].upper()
 
-    if len(sys.argv) > 1 and sys.argv[1].upper() == "-I":
-            func = solve_interactive
+    func = solvers.get(mode,solve)  #non-interactive solver is the default, if not found.
 
     sys.exit(func(scanner, solver, motors))

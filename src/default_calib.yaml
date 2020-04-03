@@ -8,7 +8,8 @@
 # NOTE: we *still* need half-decent lighting. In low-light conditions, blue, red, yellow, all 
 # look pretty much alike, and the solver will misread those colors even with calibration.
 
-# When sampling (or scanning) a coordinate in the captured image, average the color from a square of twice this width / height in pixels.
+# When sampling (or scanning) a coordinate in the captured image, average the color from a square 
+# of twice this width / height in pixels.
 sample_size: 10 # 20x20 pixel square
 
 camera: 
@@ -30,31 +31,31 @@ colors: {
       # plus-or-minus a margin of...
       radius: 20.0 # Expressed as euclidean distance (in the RGB color space) from the sampled color to the "ideal" color.
     },
-    "R": {
+    "R": { # "Red"
       rgb: [[0.0,0.0,255.0], [0.0,0.0,255.0],
       [0.0,0.0,255.0], [0.0,0.0,255.0],
       [0.0,0.0,255.0], [0.0,0.0,255.0]],
       radius: 20.0
     },
-    "G": {
+    "G": { # "Green"
       rgb: [[0.0,200.0,0.0], [0.0,200.0,0.0],
       [0.0,200.0,0.0], [0.0,200.0,0.0],
       [0.0,200.0,0.0], [0.0,200.0,0.0]],
       radius: 20.0
     },
-    "B": {
+    "B": { # "Blue"
       rgb: [[180.0,0.0,0.0], [180.0,0.0,0.0],
       [180.0,0.0,0.0], [180.0,0.0,0.0],
       [180.0,0.0,0.0], [180.0,0.0,0.0]],
       radius: 20.0
     },
-    "Y": {
+    "Y": { # "Yellow"
       rgb: [[0.0,200.0,200.0], [0.0,200.0,200.0],
       [0.0,200.0,200.0], [0.0,200.0,200.0],
       [0.0,200.0,200.0], [0.0,200.0,200.0]],
       radius: 20.0
     },
-    "W": {
+    "W": { # "White"
       rgb: [[200.0,200.0,200.0], [200.0,200.0,200.0],
       [200.0,200.0,200.0], [200.0,200.0,200.0],
       [200.0,200.0,200.0], [200.0,200.0,200.0]],
