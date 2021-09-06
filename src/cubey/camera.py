@@ -273,8 +273,8 @@ class Camera:
 
     def get_faces(self):
         """
-            Given a set of colors, return an array of FURBDL values 
-            So, rather than returning e.g. "W" (for White), return "D" (for Down)
+        Given a set of colors, return an array of FURBDL values 
+        So, rather than returning e.g. "W" (for White), return "D" (for Down)
         """
         arr = self.get_raw_colors()
         retval = []
@@ -285,12 +285,7 @@ class Camera:
 
             retval.append(face)
 
-# TODO: wtf is this.
-            return tuple(retval)
-        else:
-            logging.warn("no frames!")
-            return tuple(np.full(6, "X"))
-# /TODO
+        return tuple(retval)
 
 
 if __name__ == "__main__":
