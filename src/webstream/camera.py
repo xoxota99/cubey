@@ -1,10 +1,7 @@
-# from imutils.video import VideoStream
 import numpy as np
-# import imutils
 import time
 import cv2
 from frameEvent import FrameEvent
-from datetime import datetime
 import threading
 import yaml
 
@@ -28,9 +25,6 @@ sample_size = calib["sample_size"]
 class Camera(object):
 
     thread = None  # background thread that reads frames from camera.
-    # frame = None  # current frame is stored here by background thread
-    # last_access = 0  # time of last client access to the camera
-    # event = FrameEvent()
 
     def __init__(self, source):
         """Start the background camera thread if it isn't running yet."""

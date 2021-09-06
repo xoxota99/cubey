@@ -4,7 +4,6 @@ import subprocess
 import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-# import kociemba.search
 
 # these results were produced by original Kociemba's Java implementation
 javares = [

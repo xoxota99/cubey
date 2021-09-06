@@ -3,19 +3,12 @@
     to control the camera and stepper motors, respectively.
 """
 
-# import sys
 import logging
 import numpy as np
-# import math
 import yaml
 from PIL import Image, ImageDraw
 
 from camera import Camera
-
-# logging.basicConfig(
-#     level=logging.getLevelName(cfg['app']['logLevel']), format=cfg['app']['logFormat'])
-
-# warmup_delay_ms = config['cam']['warmup_delay_ms']
 
 # Default state of the cube, fully solved.
 SOLVED_STATE = {

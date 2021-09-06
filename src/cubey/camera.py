@@ -4,7 +4,6 @@
 """
 from cv2 import cv2     # OpenCV 4.5.3 and later
 import numpy as np
-# import os.path
 import time
 
 import yaml
@@ -137,14 +136,6 @@ def guess_color_linalg(raw_color, idx, calib_data):
 guess_color = guess_color_linalg
 
 
-# def devIdFromPath(path):
-#     realpath = os.path.realpath(path)
-#     if not "/dev/video" in realpath:
-#         raise "Not a video device"
-#     devnum = int(realpath[-1])
-#     return devnum
-
-
 class Camera:
     vidcap = None
 
@@ -176,10 +167,7 @@ class Camera:
             self.vidcap.grab()
 
     def __init__(self, config, calib_data):
-        # logging.info("resolving device for path '{0}'".format(deviceName))
-        # dev_id = devIdFromPath(deviceName)
-        # logging.info("path '{0}' resolved to device ID {1}".format(
-        #     deviceName, dev_id))
+
         self.config = config
         self.vidcap = cv2.VideoCapture(config['cam']['camera_deviceID'])
 
@@ -230,46 +218,43 @@ class Camera:
         self.warmup_frames(4)
         _, frame = self.vidcap.read()   # take a picture.
 
-        if frame is not None:
-
-            if self.config['cam']['flipCamera']:
-                logging.info("FLIP")
-                frame = cv2.flip(
-                    frame, flipCode=self.config['cam']['flipCode'])
-
-            # frame = (frame/256).astype('uint8')         # convert to 8-bit.
-            is_black = True
-            r = self.calib_data["sample_size"]
-            for coord in self.sample_coords:    # for each of the edge facelet coords
-                x, y = coord[0], coord[1]
-
-                # define a small square (x1,y1,x2,y2) in the frame to sample for color.
-                x1, y1 = x - r, y - r
-                x2, y2 = x + r, y + r
-
-                block = frame[y1:y2, x1:x2]
-                block_r = block[:, :, 0]    # red
-                block_g = block[:, :, 1]    # green
-                block_b = block[:, :, 2]    # blue
-
-                # get the average color within the block, for each R/G/B component.
-                clr = np.array(
-                    (np.median(block_r), np.median(block_g), np.median(block_b))).tolist()
-                # clr /= np.linalg.norm( clr ) / 255.0
-                if is_black and (clr[0] != 0 or clr[1] != 0 or clr[2] != 0):
-                    is_black = False
-
-                arr.append(clr)
-                if filename is not None:
-                    cv2.imwrite(filename + ".png", frame)
-
-            if is_black:
-                logging.warn("All colors are BLACK. Is the lense cap on?")
-
-            return arr
-        else:
+        if frame is None:
             logging.warn("no frames!")
             return np.full(6, [0.0, 0.0, 0.0]).tolist()
+
+        if self.config['cam']['flipCamera']:
+            logging.info("FLIP")
+            frame = cv2.flip(
+                frame, flipCode=self.config['cam']['flipCode'])
+
+        is_black = True
+        r = self.calib_data["sample_size"]
+        for coord in self.sample_coords:    # for each of the edge facelet coords
+            x, y = coord[0], coord[1]
+
+            # define a small square (x1,y1,x2,y2) in the frame to sample for color.
+            x1, y1 = x - r, y - r
+            x2, y2 = x + r, y + r
+
+            block = frame[y1:y2, x1:x2]
+            block_r = block[:, :, 0]    # red
+            block_g = block[:, :, 1]    # green
+            block_b = block[:, :, 2]    # blue
+
+            # get the average color within the block, for each R/G/B component.
+            clr = np.array(
+                (np.median(block_r), np.median(block_g), np.median(block_b))).tolist()
+
+            is_black = is_black and clr[0] == 0 and clr[1] == 0 and clr[2] == 0
+
+            arr.append(clr)
+            if filename is not None:
+                cv2.imwrite(filename + ".png", frame)
+
+        if is_black:
+            logging.warn("All colors are BLACK. Is the lense cap on?")
+
+        return arr
 
     def get_faces(self):
         """
@@ -300,8 +285,5 @@ if __name__ == "__main__":
         calib = yaml.load(ymlfile)
 
     camera = Camera(config, calib)
-
-    # camera = Camera(cfg['cam']['camera_deviceName'],
-    #                 colorSampleCoords["front"], calib["calib"]["colors"])
 
     logging.info(camera.get_faces())
