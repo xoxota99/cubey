@@ -15,8 +15,8 @@ cam:
 
   colorFaceMap: 
     O: "F"            # Orange facing front.
-    W: "B"            # White facing bottom.
-    Y: "T"            # Yellow facing top.
+    W: "D"            # White facing down.
+    Y: "U"            # Yellow facing up.
     B: "L"            # Blue facing left.
     G: "R"            # Green facing right.
     R: "B"            # Red facing back.
