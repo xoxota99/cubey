@@ -3,10 +3,10 @@
     to control the camera and stepper motors, respectively.
 """
 
-import sys
+# import sys
 import logging
 import numpy as np
-import math
+# import math
 import yaml
 from PIL import Image, ImageDraw
 

@@ -1,8 +1,6 @@
-#!/usr/bin/python3
-
 # Used to safely shutdown the pi by pushing a momentary switch. Also indicates "power" with an LED
 
-from RPi import GPIO
+import pigpio
 import time
 from subprocess import call
 
@@ -29,13 +27,17 @@ def shut_down(channel):
 
 
 def main():
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(butPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(ledPin, GPIO.OUT, initial=GPIO.LOW)  # turn on the LED.
+    pi = pigpio.pi()
+    pi.set_mode(butPin, pigpio.INPUT)   # set as input
+    pi.set_pull_up_down(butPin, pigpio.PUD_UP)  # set internal pullup
+    pi.set_glitch_filter(butPin, 300000)    # debounce 0.3 seconds
 
     # Add our function to execute when the button pressed event happens
-    GPIO.add_event_detect(butPin, GPIO.FALLING,
-                          callback=shut_down, bouncetime=2000)
+    pi.callback(butPin, pigpio.FALLING_EDGE, shut_down)
+
+    pi.set_mode(ledPin, pigpio.OUTPUT)
+    pi.write(ledPin, 0)
+
     # Now wait!
     while 1:
         time.sleep(1)
