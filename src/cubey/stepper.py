@@ -1,12 +1,10 @@
 from time import sleep
 import pigpio
 
-FACE_NAME = ["U", "R", "F", "D", "L", "B"]
-
 config = {}
-DIR_PIN = 0
-DISABLE_PIN = 0
-FACE_MOTOR_MAP = {}
+DIR_PIN = 0          # GPIO pin to set direction (cw / ccw)
+DISABLE_PIN = 0      # GPIO pin to disable the stepper
+FACE_MOTOR_MAP = {}  # map of faces to motor pins.
 
 STEPS_PER_DEGREE = 200  # steps per degree (varies by motor)
 STEP_FACTOR = 8  # number of pulses per step. (for microstepping)
@@ -28,11 +26,15 @@ class MotorController:
         config = _config
 
         pins = _config['stepper']['pins']
-        DIR_PIN = pins['dir']                # Direction GPIO Pin
 
+        # Direction GPIO Pin
+        DIR_PIN = pins['dir']
+
+        # Disable GPIO pin
         if 'disable' in pins:
             DISABLE_PIN = pins['disable']
 
+        # map of faces to GPIO pins
         FACE_MOTOR_MAP = {
             "U": pins['up'],
             "R": pins['right'],
@@ -42,8 +44,13 @@ class MotorController:
             "B": pins['back']
         }
 
+        # Number of stepper motor "steps" per degree of angle.
         STEPS_PER_DEGREE = config['stepper']['steps_per_rev'] / 360.0
+
+        # micro-stepping factor.
         STEP_FACTOR = config['stepper']['step_factor']
+
+        # seconds to wait between cube moves.
         MOVE_DELAY = config['stepper']['move_delay']
 
         HERTZ = config['stepper']['hertz']

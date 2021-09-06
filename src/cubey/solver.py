@@ -41,7 +41,8 @@ class Solver:
 
         for _ in range(move_count):
             while base == last_base:
-                base = random.choice(stepper.FACE_NAME)
+                # pick a random face
+                base = random.choice(["U", "R", "F", "D", "L", "B"])
 
             last_base = base
             add = random.randint(0, 3)

@@ -2,7 +2,7 @@
     Camera control module, including functions for scanning and
     returning best-guess color state of the camera-facing cube "edge".
 """
-from cv2 import cv2     # OpenCV 4.x and later
+from cv2 import cv2     # OpenCV 4.5.3 and later
 import numpy as np
 # import os.path
 import time
@@ -13,6 +13,7 @@ import logging
 test_color_in_position_str = "Testing color {0} in position {1}:"
 against_color_str = "     against '{0}', ({1}), distance is {2}."
 i_guess_color_str = "I guess color {0} is {1} , with distance {2}"
+
 
 def guess_color_normalized_euclidean(raw_color, idx, calib_data):
     """Guess color using Normalized Euclidean distance"""
@@ -39,7 +40,7 @@ def guess_color_normalized_euclidean(raw_color, idx, calib_data):
             raw_color, best_color, best_dist))
         return best_color
     else:
-        return 'X' # Unknown color.
+        return 'X'  # Unknown color.
 
 
 def guess_color_euclidean(raw_color, idx, calib_data):
@@ -64,7 +65,7 @@ def guess_color_euclidean(raw_color, idx, calib_data):
             raw_color, best_color, best_dist))
         return best_color
     else:
-        return 'X' # Unknown color.
+        return 'X'  # Unknown color.
 
 
 def guess_color_cie2000(raw_color, idx, calib_data):
@@ -73,8 +74,8 @@ def guess_color_cie2000(raw_color, idx, calib_data):
     """
     from colormath.color_objects import sRGBColor, LabColor
     from colormath.color_conversions import convert_color
-    from colormath.color_diff import delta_e_cie2000    
-    
+    from colormath.color_diff import delta_e_cie2000
+
     color1_rgb = sRGBColor(raw_color[2], raw_color[1], raw_color[0])
     best_dist = 0
     best_color = None
@@ -97,7 +98,7 @@ def guess_color_cie2000(raw_color, idx, calib_data):
             raw_color, best_color, best_dist))
         return best_color
     else:
-        return 'X' # Unknown color.
+        return 'X'  # Unknown color.
 
 
 def guess_color_linalg(raw_color, idx, calib_data):
@@ -109,24 +110,27 @@ def guess_color_linalg(raw_color, idx, calib_data):
     """
 
     best_dist = 0
-    best_color = None #  one of "W","O","R","B","G","Y"
+    best_color = None  # one of "W","O","R","B","G","Y"
     logging.info(test_color_in_position_str.format(raw_color, idx))
     for _, (color_name, calib_color_data) in enumerate(calib_data["colors"]):
-        rgb = calib_color_data['rgb'][idx]      # the calibrated RGB data for this color, in this position.
-        dist = np.linalg.norm(raw_color - rgb)  # get the "distance" to this candidate color.
+        # the calibrated RGB data for this color, in this position.
+        rgb = calib_color_data['rgb'][idx]
+        # get the "distance" to this candidate color.
+        dist = np.linalg.norm(raw_color - rgb)
 
         logging.info(against_color_str.format(
             color_name, rgb, dist))
         if dist < best_dist or best_color == -1:
             best_dist = dist    # how "close" are we to the idealized calibrated color?
-            best_color = color_name # best color so far. color_name is one of "W","O","R","B","G","Y"
+            # best color so far. color_name is one of "W","O","R","B","G","Y"
+            best_color = color_name
 
     if best_color >= 0:  # and best_dist < colorCenters[best_color]['radius']:
         logging.info(i_guess_color_str.format(
             raw_color, best_color, best_dist))
         return best_color
     else:
-        return 'X' # Unknown color.
+        return 'X'  # Unknown color.
 
 
 # function pointer to whatever color guessing algorithm we would like to use.
@@ -210,7 +214,6 @@ class Camera:
         # self.warmup_time(cfg['cam']['warmup_delay_ms'])
         self.warmup_frames(30)
 
-
     def get_raw_colors(self, filename=None):
         """
         Given a camera reference, take a vertical edge-on picture of the cube, and 
@@ -220,11 +223,11 @@ class Camera:
         """
         arr = []
 
-        # take a couple of frames. For a USB camera, frames can be buffered on the device, 
-        # so it can take time between the actual scene changing, and an updated frame popping 
+        # take a couple of frames. For a USB camera, frames can be buffered on the device,
+        # so it can take time between the actual scene changing, and an updated frame popping
         # out of the buffer.
 
-        self.warmup_frames(4)   
+        self.warmup_frames(4)
         _, frame = self.vidcap.read()   # take a picture.
 
         if frame is not None:
@@ -237,7 +240,7 @@ class Camera:
             # frame = (frame/256).astype('uint8')         # convert to 8-bit.
             is_black = True
             r = self.calib_data["sample_size"]
-            for coord in self.sample_coords:    # for each of the edge facelets
+            for coord in self.sample_coords:    # for each of the edge facelet coords
                 x, y = coord[0], coord[1]
 
                 # define a small square (x1,y1,x2,y2) in the frame to sample for color.
@@ -276,15 +279,18 @@ class Camera:
         arr = self.get_raw_colors()
         retval = []
         for idx, raw_color in enumerate(arr):
-            adj_color = guess_color(raw_color, idx, self.calib_data["colors"]) # Given the raw color, guess the actual color, based on calibrated lightning conditions.
+            # Given the raw color, guess the actual color, based on calibrated lightning conditions.
+            adj_color = guess_color(raw_color, idx, self.calib_data["colors"])
             face = self.config['cam']['colorFaceMap'][adj_color]
 
             retval.append(face)
 
+# TODO: wtf is this.
             return tuple(retval)
         else:
             logging.warn("no frames!")
             return tuple(np.full(6, "X"))
+# /TODO
 
 
 if __name__ == "__main__":

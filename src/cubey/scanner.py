@@ -17,7 +17,6 @@ from camera import Camera
 
 # warmup_delay_ms = config['cam']['warmup_delay_ms']
 
-
 # Default state of the cube, fully solved.
 SOLVED_STATE = {
     'F': np.full(9, "F").tolist(),
@@ -36,6 +35,11 @@ def debug(str, wait=False):
 
 
 class Scanner:
+    """
+    The Scanner class uses the camera to "scan" the state of the cube. 
+    This scanning process is very sensitive to lighting conditions.
+    """
+
     def __init__(self, config):
         self.config = config
 
@@ -89,7 +93,8 @@ class Scanner:
         motors.execute('F')
         _, state['D'][2], state['F'][7], state['D'][1], _, state['D'][0] = self.camera.get_faces()
 
-        motors.execute('F R')  # Back to origin, then rotate right face clockwise
+        # Back to origin, then rotate right face clockwise
+        motors.execute('F R')
         _, _, state['D'][5], state['R'][7], state['D'][8], state['R'][8] = self.camera.get_faces()
 
         motors.execute('R')
@@ -98,13 +103,15 @@ class Scanner:
         motors.execute('R')
         state['U'][2], _, state['U'][5], state['R'][1], _, _ = self.camera.get_faces()
 
-        motors.execute("R B' U R'")  # origin, then rotate back-counterclockwise, up-clockwise, right-counterclockwise
+        # origin, then rotate back-counterclockwise, up-clockwise, right-counterclockwise
+        motors.execute("R B' U R'")
         state['L'][6], state['B'][8], state['L'][3], state['B'][5], state['L'][0], state['B'][2] = self.camera.get_faces()
 
-        motors.execute("R U' B L' F2")  # origin, then rotate left-counterclockwise, and front-180
+        # origin, then rotate left-counterclockwise, and front-180
+        motors.execute("R U' B L' F2")
         state['D'][7], _, state['D'][4], _, _, _ = self.camera.get_faces()
 
-        motors.execute("F2 L") # rotate front-180, left-clockwise
+        motors.execute("F2 L")  # rotate front-180, left-clockwise
         return state
 
     def get_state_string(self, motors, state=None):
@@ -187,14 +194,15 @@ class Scanner:
             "R": (0, 0, 255, 255),    # Right/Blue
             "B": (255, 0, 0, 255),    # Back/Red
             "L": (0, 255, 0, 255),    # Left/Green
-            "D": (255, 255, 255, 255) # Down/White
+            "D": (255, 255, 255, 255)  # Down/White
         }
 
         if state is None:
             state = SOLVED_STATE  # scan_state()
 
         facelet_pixel_size = 8
-        img = Image.new('RGBA', (12*facelet_pixel_size+1, 9*facelet_pixel_size+1), (0, 0, 0, 0))
+        img = Image.new('RGBA', (12*facelet_pixel_size+1, 9 *
+                        facelet_pixel_size+1), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
 
         # draw the empty cube.
@@ -202,8 +210,8 @@ class Scanner:
         yb = 0 * facelet_pixel_size
         i = 0
 
-        #TODO: This could be more efficient....
-        
+        # TODO: This could be more efficient....
+
         for y in range(3):
             for x in range(3):
                 draw.rectangle([(xb + x * facelet_pixel_size, yb + y * facelet_pixel_size),

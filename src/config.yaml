@@ -39,7 +39,7 @@ cam:
 
 stepper:
   
-  pincfg_v2: &pincfg_v2       # cubey_v2
+  pincfg_v2: &pincfg_v2       # GPIO pin mapping to function.
     back: 2
     front: 3
     left: 22
