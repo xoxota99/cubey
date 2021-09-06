@@ -10,6 +10,7 @@
 
 # When sampling (or scanning) a coordinate in the captured image, average the color from a square 
 # of twice this width / height in pixels.
+
 sample_size: 10 # 20x20 pixel square
 
 camera: 
