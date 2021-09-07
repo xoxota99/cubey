@@ -86,7 +86,8 @@ class Scanner:
         motors.execute('F')
         _, state['D'][2], state['F'][7], state['D'][1], _, state['D'][0] = self.camera.get_faces()
 
-        # Back to origin, then rotate right face clockwise
+        # front map complete.
+
         motors.execute('F R')
         _, _, state['D'][5], state['R'][7], state['D'][8], state['R'][8] = self.camera.get_faces()
 
@@ -96,15 +97,31 @@ class Scanner:
         motors.execute('R')
         state['U'][2], _, state['U'][5], state['R'][1], _, _ = self.camera.get_faces()
 
-        # origin, then rotate back-counterclockwise, up-clockwise, right-counterclockwise
+        # right map complete
+
         motors.execute("R B' U R'")
         state['L'][6], state['B'][8], state['L'][3], state['B'][5], state['L'][0], state['B'][2] = self.camera.get_faces()
 
-        # origin, then rotate left-counterclockwise, and front-180
         motors.execute("R U' B L' F2")
-        state['D'][7], _, state['D'][4], _, _, _ = self.camera.get_faces()
+        state['D'][6], _, state['D'][3], state['L'][7], _, _ = self.camera.get_faces()
 
-        motors.execute("F2 L")  # rotate front-180, left-clockwise
+        motors.execute("F2 L U R'")
+        state['U'][0], _, state['U'][1], state['B'][1], state['U'][2], _ = self.camera.get_faces()
+
+        # up map complete
+
+        motors.execute("R U R'")
+        _, _, _, state['L'][1], _, _ = self.camera.get_faces()
+
+        # left map complete
+
+        motors.execute("B R2")
+        _, _, state['B'][7], state['D'][7], _, _ = self.camera.get_faces()
+
+        # back and down maps complete
+
+        motors.execute("R2 B' R U2")
+
         return state
 
     def get_state_string(self, motors, state=None):
