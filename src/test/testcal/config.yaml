@@ -1,0 +1,27 @@
+colors: {
+    # specify min-max HSV brackets for each color.
+    "O":  {
+      min: [8,190,20],
+      max: [28,255,255]
+    },
+    "R": { # "Red"
+      min: [248,109,64], # TODO: Red wraps from 255 to 0. Use modulo.
+      max: [7,255,255]
+    },
+    "G": { # "Green"
+      min: [60,109,50],
+      max: [100,255,255]
+    },
+    "B": { # "Blue"
+      min: [140,109,20],
+      max: [185,255,255]
+    },
+    "Y": { # "Yellow"
+      min: [25,190,20],
+      max: [46,255,255]
+    },
+    "W": { # "White"
+      min: [0,0,100],
+      max: [255,60,255]
+    }
+}
