@@ -2,6 +2,8 @@ import sys
 import os
 import subprocess
 import logging
+import time
+
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -312,6 +314,10 @@ if __name__ == '__main__':
 
     cmd = './solve'
 
+    maxtime = 0
+    mintime = 0
+    totaltime = 0
+    totalstart = time.time()
     if len(sys.argv) > 1:
         fname = sys.argv[1]
         logging.info('loading tests from %s', fname)
@@ -322,25 +328,44 @@ if __name__ == '__main__':
                 logging.info('running test %d...' % (cnt + 1))
                 t = t.strip()
                 r = f.readline().strip()
+                start = time.time()
                 res = subprocess.check_output(
                     [cmd, t], stderr=open(os.devnull, 'wb')).strip()
+                end = time.time()
+                if(end-start > maxtime or maxtime == 0):
+                    maxtime = end-start
+                if(end-start < mintime or mintime == 0):
+                    mintime = end-start
                 logging.info(res)
-                if res != r:
+                if res.decode("utf-8") != r.strip():
                     logging.error(
                         'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, repr(r), repr(res)))
                     sys.exit(1)
                 cnt += 1
                 t = f.readline()
-            logging.info('all %d tests passed' % cnt)
     else:
         for i, tst in enumerate(javares):
             logging.info('running test %d of %d...' % (i + 1, len(javares)))
             t, r = tst
+
+            start = time.time()
             res = subprocess.check_output(
                 [cmd, t], stderr=open(os.devnull, 'wb')).strip()
+            end = time.time()
+            if(end-start > maxtime or maxtime == 0):
+                maxtime = end-start
+            if(end-start < mintime or mintime == 0):
+                mintime = end-start
+
             logging.info(res)
-            if res != r.strip():
+
+            if res.decode("utf-8") != r.strip():
                 logging.error(
                     'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, repr(r), repr(res)))
                 sys.exit(1)
-        logging.info('all %d tests passed' % len(javares))
+    totalend = time.time()
+    totaltime = totalend - totalstart
+
+    logging.info('all %d tests passed' % len(javares))
+    logging.info('maxtime: {0}, mintime: {1}, totaltime: {2}'.format(
+        maxtime, mintime, totaltime))
