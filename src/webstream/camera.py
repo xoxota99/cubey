@@ -1,6 +1,6 @@
 import numpy as np
 import time
-import cv2
+from cv2 import cv2
 from frameEvent import FrameEvent
 import threading
 import yaml
@@ -31,7 +31,8 @@ class Camera(object):
         self.source = source
         self.event = FrameEvent()
 
-        if Camera.thread is None or not Camera.thread.isAlive():
+        # Thread method isAlive() was renamed to is_alive() in python verson 3.9
+        if Camera.thread is None or not Camera.thread.is_alive():
             self.last_access = time.time()
 
             # start background frame thread
