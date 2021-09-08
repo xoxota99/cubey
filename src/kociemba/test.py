@@ -7,6 +7,11 @@ import time
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+# globals
+maxtime = 0
+mintime = sys.maxsize
+cnt = 0
+
 # these results were produced by original Kociemba's Java implementation
 javares = [
     ("BBURUDBFUFFFRRFUUFLULUFUDLRRDBBDBDBLUDDFLLRRBRLLLBRDDF",
@@ -310,62 +315,52 @@ javares = [
      "D2 R' D' F2 B D R2 D2 R' F2 D' F2 U' B2 L2 U2 D R2 U "),
 ]
 
+
+def solve(t, r):
+    global maxtime, mintime, cnt
+
+    logging.info('running test %d...' % (cnt + 1))
+    start = time.time()
+    res = subprocess.check_output(
+        [cmd, t.strip()], stderr=open(os.devnull, 'wb')).strip()
+    end = time.time()
+    res = res.decode("utf-8")
+    logging.info(res)
+    if res != r.strip():
+        logging.error(
+            'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, repr(r), repr(res)))
+        sys.exit(1)
+
+    testtime = end-start
+
+    maxtime = max(maxtime, testtime)
+    mintime = min(mintime, testtime)
+    cnt += 1
+
+
 if __name__ == '__main__':
 
     cmd = './solve'
 
-    maxtime = 0
-    mintime = 0
     totaltime = 0
     totalstart = time.time()
     if len(sys.argv) > 1:
         fname = sys.argv[1]
         logging.info('loading tests from %s', fname)
         with open(fname) as f:
-            cnt = 0
             t = f.readline()
             while t:
-                logging.info('running test %d...' % (cnt + 1))
-                t = t.strip()
-                r = f.readline().strip()
-                start = time.time()
-                res = subprocess.check_output(
-                    [cmd, t], stderr=open(os.devnull, 'wb')).strip()
-                end = time.time()
-                if(end-start > maxtime or maxtime == 0):
-                    maxtime = end-start
-                if(end-start < mintime or mintime == 0):
-                    mintime = end-start
-                logging.info(res)
-                if res.decode("utf-8") != r.strip():
-                    logging.error(
-                        'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, repr(r), repr(res)))
-                    sys.exit(1)
-                cnt += 1
+                r = f.readline()
+                solve(t, r)
                 t = f.readline()
     else:
         for i, tst in enumerate(javares):
-            logging.info('running test %d of %d...' % (i + 1, len(javares)))
             t, r = tst
+            solve(t, r)
 
-            start = time.time()
-            res = subprocess.check_output(
-                [cmd, t], stderr=open(os.devnull, 'wb')).strip()
-            end = time.time()
-            if(end-start > maxtime or maxtime == 0):
-                maxtime = end-start
-            if(end-start < mintime or mintime == 0):
-                mintime = end-start
-
-            logging.info(res)
-
-            if res.decode("utf-8") != r.strip():
-                logging.error(
-                    'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, repr(r), repr(res)))
-                sys.exit(1)
     totalend = time.time()
     totaltime = totalend - totalstart
 
     logging.info('all %d tests passed' % len(javares))
-    logging.info('maxtime: {0}, mintime: {1}, totaltime: {2}'.format(
-        maxtime, mintime, totaltime))
+    logging.info('maxtime: {0}ms, mintime: {1}ms, totaltime: {2}ms'.format(
+        round(maxtime*1000), round(mintime*1000), round(totaltime*1000)))
