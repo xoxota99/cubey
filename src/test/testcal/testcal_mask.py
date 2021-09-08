@@ -38,8 +38,6 @@ config_file = "config.yaml"
 
 
 def collision_detect(config):
-    ccount = 1
-
     compared = {"R": [], "O": [], "Y": [], "G": [], "B": [], "W": []}
     cal = config["colors"]
 
