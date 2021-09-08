@@ -18,16 +18,13 @@ def test_color(color_name, raw_hsv, min_hsv, max_hsv):
     retval = True
 
     if color_name == "R":  # special case
-        if (raw_hsv[0] > max_hsv[0] and raw_hsv[0] < min_hsv[0]+255):
-            retval = False
-        else:
-            for i in range(1, 3):
-                if raw_hsv[i] < min_hsv[i] or raw_hsv[i] > max_hsv[i]:
-                    retval = False
+        retval = raw_hsv[0] in range(max_hsv[0], min_hsv[0]+256)  # for H
+        for i in range(1, 3):  # for each of S, V
+            retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i]+1)
     else:
         for i in range(3):  # for each of H, S, V
-            if raw_hsv[i] < min_hsv[i] or raw_hsv[i] > max_hsv[i]:
-                retval = False
+            retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i]+1)
+
     return retval
 
 
@@ -44,9 +41,7 @@ def guess_color(raw_hsv, calib_data):
             min_hsv[0] -= 255  # make hue negative.
 
         mid_hsv = np.mean(np.array([min_hsv, max_hsv]), axis=0)
-        hit = test_color(color_name, raw_hsv, min_hsv, max_hsv)
-
-        if hit:
+        if test_color(color_name, raw_hsv, min_hsv, max_hsv):
             dist = math.sqrt(((raw_hsv[0]-mid_hsv[0]) ** 2) + (
                 (raw_hsv[1]-mid_hsv[1]) ** 2) + ((raw_hsv[2]-mid_hsv[2]) ** 2))
 
