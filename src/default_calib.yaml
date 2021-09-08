@@ -23,44 +23,30 @@ camera:
   exposure: default     # for ELP cameras, you must set auto_exposure to 0.25 in order to use manual exposure. This also makes video capture much slower.
   
 colors: {
-    # the color "Orange" looks like these RGB values on each of the six Front-right facelets.
-    # colors are actually BGR here.
-    "O": {
-      rgb: [[0.0,165.0,255.0], [0.0,165.0,255.0],
-      [0.0,165.0,255.0], [0.0,165.0,255.0],
-      [0.0,165.0,255.0], [0.0,165.0,255.0]],
-      # plus-or-minus a margin of...
-      radius: 20.0 # Expressed as euclidean distance (in the RGB color space) from the sampled color to the "ideal" color.
+    # specify min-max HSV brackets for each color.
+    "O":  {
+      min: [8,170,20],
+      max: [24,255,255]
     },
     "R": { # "Red"
-      rgb: [[0.0,0.0,255.0], [0.0,0.0,255.0],
-      [0.0,0.0,255.0], [0.0,0.0,255.0],
-      [0.0,0.0,255.0], [0.0,0.0,255.0]],
-      radius: 20.0
+      min: [248,109,64], # TODO: Red wraps from 255 to 0. Use modulo.
+      max: [7,255,255]
     },
     "G": { # "Green"
-      rgb: [[0.0,200.0,0.0], [0.0,200.0,0.0],
-      [0.0,200.0,0.0], [0.0,200.0,0.0],
-      [0.0,200.0,0.0], [0.0,200.0,0.0]],
-      radius: 20.0
+      min: [60,109,50],
+      max: [100,255,255]
     },
     "B": { # "Blue"
-      rgb: [[180.0,0.0,0.0], [180.0,0.0,0.0],
-      [180.0,0.0,0.0], [180.0,0.0,0.0],
-      [180.0,0.0,0.0], [180.0,0.0,0.0]],
-      radius: 20.0
+      min: [140,109,20],
+      max: [185,255,255]
     },
     "Y": { # "Yellow"
-      rgb: [[0.0,200.0,200.0], [0.0,200.0,200.0],
-      [0.0,200.0,200.0], [0.0,200.0,200.0],
-      [0.0,200.0,200.0], [0.0,200.0,200.0]],
-      radius: 20.0
+      min: [25,190,20],
+      max: [46,255,255]
     },
     "W": { # "White"
-      rgb: [[200.0,200.0,200.0], [200.0,200.0,200.0],
-      [200.0,200.0,200.0], [200.0,200.0,200.0],
-      [200.0,200.0,200.0], [200.0,200.0,200.0]],
-      radius: 20.0
+      min: [0,0,100],
+      max: [255,60,255]
     }
 }
 
