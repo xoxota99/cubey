@@ -14,49 +14,47 @@ against_color_str = "     against '{0}', ({1}), distance is {2}."
 i_guess_color_str = "I guess color {0} is {1} , with distance {2}"
 
 
-def guess_color(raw_hsv, idx, calib_data):
+def test_color(color_name, raw_hsv, min_hsv, max_hsv):
+    retval = True
+
+    if color_name == "R":  # special case
+        if (raw_hsv[0] > max_hsv[0] and raw_hsv[0] < min_hsv[0]+255):
+            retval = False
+        else:
+            for i in range(1, 3):
+                if raw_hsv[i] < min_hsv[i] or raw_hsv[i] > max_hsv[i]:
+                    retval = False
+    else:
+        for i in range(3):  # for each of H, S, V
+            if raw_hsv[i] < min_hsv[i] or raw_hsv[i] > max_hsv[i]:
+                retval = False
+    return retval
+
+
+def guess_color(raw_hsv, calib_data):
     best_dist = 0
     best_color = "X"  # one of "W","O","R","B","G","Y"
-    logging.info(test_color_in_position_str.format(raw_hsv, idx))
 
     for _, (color_name, calib_color_data) in enumerate(calib_data["colors"]):
-
         min_hsv = np.array(calib_color_data["min"])
         max_hsv = np.array(calib_color_data["max"])
-        mid_hsv = np.array([0, 0, 0])
 
         if color_name == "R":
             # TODO: special case.
             min_hsv[0] -= 255  # make hue negative.
 
         mid_hsv = np.mean(np.array([min_hsv, max_hsv]), axis=0)
-
-        hit = True
-        if color_name == "R":  # special case
-            if (raw_hsv[0] > max_hsv[0] and raw_hsv[0] < min_hsv[0]+255):
-                hit = False
-                break
-            else:
-                for i in range(1, 3):
-                    if raw_hsv[i] < min_hsv[i] or raw_hsv[i] > max_hsv[i]:
-                        hit = False
-                        break
-        else:
-            for i in range(3):
-                if raw_hsv[i] < min_hsv[i] or raw_hsv[i] > max_hsv[i]:
-                    hit = False
-                    break
+        hit = test_color(color_name, raw_hsv, min_hsv, max_hsv)
 
         if hit:
-            dist = 0
             dist = math.sqrt(((raw_hsv[0]-mid_hsv[0]) ** 2) + (
                 (raw_hsv[1]-mid_hsv[1]) ** 2) + ((raw_hsv[2]-mid_hsv[2]) ** 2))
 
-            if color_name == "R":
-                # special case
-                if mid_hsv[0] < 0 and raw_hsv[0] > max_hsv[0] and raw_hsv[0] > min_hsv[0]+255:
-                    dist = math.sqrt(((raw_hsv[0]-mid_hsv[0]+255) ** 2) + (
-                        (raw_hsv[1]-mid_hsv[1]) ** 2) + ((raw_hsv[2]-mid_hsv[2]) ** 2))
+            if color_name == "R" and mid_hsv[0] < 0 and raw_hsv[0] > max_hsv[0] and raw_hsv[0] > min_hsv[0]+255:
+                # special case, when color is red, and mid_hsv is negative, and
+                # raw_hsv is on the "wrong" side of the modulo (ie: near 255, rather than 0).
+                dist = math.sqrt(((raw_hsv[0]-mid_hsv[0]+255) ** 2) + (
+                    (raw_hsv[1]-mid_hsv[1]) ** 2) + ((raw_hsv[2]-mid_hsv[2]) ** 2))
 
             if best_dist == 0 or dist < best_dist:
                 best_color = color_name
@@ -201,8 +199,9 @@ class Camera:
         retval = []
         for idx, raw_hsv in enumerate(arr):
             # Given the raw color, guess the actual color, based on calibrated lightning conditions.
+            logging.info(test_color_in_position_str.format(raw_hsv, idx))
             adj_color = guess_color(
-                raw_hsv, idx, self.calib_data["colors"])
+                raw_hsv, self.calib_data["colors"])
             face = self.config['cam']['colorFaceMap'][adj_color]
 
             retval.append(face)
