@@ -27,6 +27,72 @@ def debug(str, wait=False):
         input("press any key to continue.")
 
 
+def get_state_from_string(str):
+    # URFDLB
+    state = dict(SOLVED_STATE)  # Initialize to fully solved.
+    j = 0
+    for face in ["U", "R", "F", "D", "L", "B"]:
+        for i in range(9):
+            state[face][i] = str[j]
+            j += 1
+    return state
+
+
+def get_state_img(state):
+    """
+    Given a state representation of the cube, dynamically generate a cube image, represented as a "Cross".
+
+    e.g.:
+
+        |---|
+        |   |
+    |---|---|---|---|
+    |   |   |   |   |
+    |---|---|---|---|
+        |   |
+        |---|
+
+    """
+
+    colormap = {
+        "F": (255, 165, 0, 255),  # Front/Orange
+        "U": (255, 255, 0, 255),  # Up/Yellow
+        "R": (0, 0, 255, 255),    # Right/Blue
+        "B": (255, 0, 0, 255),    # Back/Red
+        "L": (0, 255, 0, 255),    # Left/Green
+        "D": (255, 255, 255, 255)  # Down/White
+    }
+
+    if isinstance(state, str):
+        # convert to state dict
+        state = get_state_from_string(state)
+
+    facelet_pixel_size = 8
+    img = Image.new('RGBA', (12 * facelet_pixel_size + 1, 9 *
+                    facelet_pixel_size + 1), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    face_coords = [
+        [3, 0],
+        [0, 3],
+        [3, 3],
+        [6, 3],
+        [9, 3],
+        [3, 6]
+    ]
+
+    for i, face in enumerate(["U", "L", "F", "R", "B", "D"]):
+        xb = face_coords[i][0] * facelet_pixel_size
+        yb = face_coords[i][1] * facelet_pixel_size
+        for y in range(3):
+            for x in range(3):
+                draw.rectangle([(xb + x * facelet_pixel_size, yb + y * facelet_pixel_size),
+                                (xb + (x + 1) * facelet_pixel_size, yb + (y + 1) * facelet_pixel_size)],
+                               fill=colormap[state[face][y * 3 + x]],
+                               outline=(0, 0, 0, 255), width=1)
+    return img
+
+
 class Scanner:
     """
     The Scanner class uses the camera to "scan" the state of the cube. 
@@ -36,7 +102,7 @@ class Scanner:
     def __init__(self, config):
         self.config = config
 
-        calib_file = "../"+config['cam']['calibration']
+        calib_file = "../" + config['cam']['calibration']
         calib = {}
         with open(calib_file, 'r') as ymlfile:
             calib = yaml.load(ymlfile, Loader=yaml.FullLoader)
@@ -183,106 +249,9 @@ class Scanner:
 
         return retval
 
-    def get_state_img(self, state=None):
-        """
-        Given a state representation of the cube, dynamically generate a cube image, represented as a "Cross".
 
-        e.g.:
-            |---|
-            |   |
-        |---|---|---|---|
-        |   |   |   |   |
-        |---|---|---|---|
-            |   |
-            |---|
+if __name__ == "__main__":
+    state = "FDUUUDRFF RFFLRLLFF BUDRFBLBB BRDRDRUUL LBDFLDRUU RBUDBLDLB"
 
-        """
-
-        colormap = {
-            "F": (255, 165, 0, 255),  # Front/Orange
-            "U": (255, 255, 0, 255),  # Up/Yellow
-            "R": (0, 0, 255, 255),    # Right/Blue
-            "B": (255, 0, 0, 255),    # Back/Red
-            "L": (0, 255, 0, 255),    # Left/Green
-            "D": (255, 255, 255, 255)  # Down/White
-        }
-
-        if state is None:
-            state = SOLVED_STATE  # scan_state()
-
-        facelet_pixel_size = 8
-        img = Image.new('RGBA', (12*facelet_pixel_size+1, 9 *
-                        facelet_pixel_size+1), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-
-        # draw the empty cube.
-        xb = 3 * facelet_pixel_size
-        yb = 0 * facelet_pixel_size
-        i = 0
-
-        # TODO: This could be more efficient....
-
-        for y in range(3):
-            for x in range(3):
-                draw.rectangle([(xb + x * facelet_pixel_size, yb + y * facelet_pixel_size),
-                                (xb + (x+1) * facelet_pixel_size, yb + (y + 1) * facelet_pixel_size)],
-                               fill=colormap[state["U"][i]],
-                               outline=(0, 0, 0, 255), width=1)
-                i += 1
-
-        xb = 0 * facelet_pixel_size
-        yb = 3 * facelet_pixel_size
-        i = 0
-        for y in range(3):
-            for x in range(3):
-                draw.rectangle([(xb + x * facelet_pixel_size, yb + y * facelet_pixel_size),
-                                (xb + (x+1) * facelet_pixel_size, yb + (y + 1) * facelet_pixel_size)],
-                               fill=colormap[state["L"][i]],
-                               outline=(0, 0, 0, 255), width=1)
-                i += 1
-
-        xb = 3 * facelet_pixel_size
-        yb = 3 * facelet_pixel_size
-        i = 0
-        for y in range(3):
-            for x in range(3):
-                draw.rectangle([(xb + x * facelet_pixel_size, yb + y * facelet_pixel_size),
-                                (xb + (x+1) * facelet_pixel_size, yb + (y + 1) * facelet_pixel_size)],
-                               fill=colormap[state["F"][i]],
-                               outline=(0, 0, 0, 255), width=1)
-                i += 1
-
-        xb = 6 * facelet_pixel_size
-        yb = 3 * facelet_pixel_size
-        i = 0
-        for y in range(3):
-            for x in range(3):
-                draw.rectangle([(xb + x * facelet_pixel_size, yb + y * facelet_pixel_size),
-                                (xb + (x+1) * facelet_pixel_size, yb + (y + 1) * facelet_pixel_size)],
-                               fill=colormap[state["R"][i]],
-                               outline=(0, 0, 0, 255), width=1)
-                i += 1
-
-        xb = 9 * facelet_pixel_size
-        yb = 3 * facelet_pixel_size
-        i = 0
-        for y in range(3):
-            for x in range(3):
-                draw.rectangle([(xb + x * facelet_pixel_size, yb + y * facelet_pixel_size),
-                                (xb + (x+1) * facelet_pixel_size, yb + (y + 1) * facelet_pixel_size)],
-                               fill=colormap[state["B"][i]],
-                               outline=(0, 0, 0, 255), width=1)
-                i += 1
-
-        xb = 3 * facelet_pixel_size
-        yb = 6 * facelet_pixel_size
-        i = 0
-        for y in range(3):
-            for x in range(3):
-                draw.rectangle([(xb + x * facelet_pixel_size, yb + y * facelet_pixel_size),
-                                (xb + (x+1) * facelet_pixel_size, yb + (y + 1) * facelet_pixel_size)],
-                               fill=colormap[state["D"][i]],
-                               outline=(0, 0, 0, 255), width=1)
-                i += 1
-
-        return img
+    # state = get_state_from_string(state)
+    get_state_img(state).save("{0}.png".format(state))
