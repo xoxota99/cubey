@@ -251,7 +251,6 @@ class Scanner:
 
 
 if __name__ == "__main__":
-    state = "FDUUUDRFF RFFLRLLFF BUDRFBLBB BRDRDRUUL LBDFLDRUU RBUDBLDLB"
+    state = "FDUUUDRFFRFFLRLLFFBUDRFBLBBBRDRDRUULLBDFLDRUURBUDBLDLB"
 
-    # state = get_state_from_string(state)
     get_state_img(state).save("{0}.png".format(state))
