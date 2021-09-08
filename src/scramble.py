@@ -6,6 +6,10 @@ import sys
 from cubey.stepper import MotorController
 from cubey.solver import Solver
 
+"""
+Utility for scrambling / descrambling the cube
+"""
+
 
 def descramble(recipe_str):
     """
