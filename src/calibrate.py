@@ -24,22 +24,55 @@ with open(calib_file, 'r') as ymlfile:
 camera = camera.Camera(config, calib)
 
 
+def collision_detect(config):
+    errors = []
+    compared = {"R": [], "O": [], "Y": [], "G": [], "B": [], "W": []}
+    cal = config["colors"]
+
+    for key1 in cal:  # 6
+        min_hsv_1 = cal[key1]["min"]
+        max_hsv_1 = cal[key1]["max"]
+        for key2 in cal:  # 5, 4, 3, 2, 1
+            compared[key1].append(key2)
+            if key2 != key1 and key1 not in compared[key2]:
+                min_hsv_2 = cal[key2]["min"]
+                max_hsv_2 = cal[key2]["max"]
+                # print("#Testing {0} against {1}".format(key1, key2))
+                # TODO: doesn't capture red / modulo
+                if (max_hsv_1[0] > min_hsv_2[0]) and (min_hsv_1[0] < max_hsv_2[0]) and (max_hsv_1[1] > min_hsv_2[1]) and (min_hsv_1[1] < max_hsv_2[1]) and (max_hsv_1[2] > min_hsv_2[2]) and (min_hsv_1[2] < max_hsv_2[2]):
+                    errors.append(
+                        {
+                            "color1": key1,
+                            "min_hsv_1": cal[key1]["min"],
+                            "max_hsv_1": cal[key1]["max"],
+                            "color2": key1,
+                            "min_hsv_2": cal[key2]["min"],
+                            "max_hsv_2": cal[key2]["max"]
+                        }
+                    )
+
+    if len(errors) > 0:
+        logging.warn("-----------------------------------------------")
+        logging.warn(
+            "There were collisions in the HSV color calibration:")
+        for err in errors:
+            logging.warn("\t{0}".format(err))
+        logging.warn("-----------------------------------------------")
+
+
 def calibrate(motors):
+    scanstr = "scanning {0}: {1}"
+
     """
-    Scan a (currently solved) cube, and use the mean of the resulting color values as calibrated color centers for
-    each edge / corner facelet. Generate radius based on the known values encountered.
+    Scan a (currently solved) cube, and use the mean of the resulting color values as calibrated color centers for each edge / corner facelet.
+    Generate min/max values based on the known values encountered.
 
-    ASSUME: That the cube is fully solved, and present in a known orientation (Orange facelets front, Yellow facelets up).
-
-    motors - An instance of MotorController
+    WE ASSUME: That the cube is fully solved, and present in a known orientation (Orange face front, Yellow face up).
     """
 
-    scanstr = "scanning edge {0}: {1}"
+    # colors, in HSV format.
 
-    # There are six facelets along the scanning edge of the cube. We want the RGB values for each color,
-    # at each facelet, so we can recognize it under these lighting conditions later, when scanning the
-    # cube. Store RGB values for each facelet / color.
-    raw_colors = {
+    colors = {
         'O': np.zeros((6, 3)).tolist(),
         'R': np.zeros((6, 3)).tolist(),
         'G': np.zeros((6, 3)).tolist(),
@@ -48,144 +81,71 @@ def calibrate(motors):
         'W': np.zeros((6, 3)).tolist()
     }
 
-    raw_colors['O'][0], raw_colors['B'][1], raw_colors['O'][2], raw_colors['B'][
-        3], raw_colors['O'][4], raw_colors['B'][5] = camera.get_raw_colors("1_OBOBOB")
+    # scan front
+
+    colors['O'][0], colors['B'][1], colors['O'][2], colors['B'][
+        3], colors['O'][4], colors['B'][5] = camera.get_raw_hsv("1_OBOBOB")
 
     logging.debug(scanstr.format("FR", "OBOBOB"))
 
-    motors.execute("U R'")
-    raw_colors['Y'][0], raw_colors['R'][1], raw_colors['Y'][2], raw_colors['R'][
-        3], raw_colors['Y'][4], raw_colors['R'][5] = camera.get_raw_colors("2_YRYRYR")
+    motors.execute("F2")
+    _, colors['G'][1], _, colors['G'][3], _, colors['G'][5] = camera.get_raw_hsv(
+        "2__G_G_G")
+    logging.debug(scanstr.format("FR", "_G_G_G"))
 
-    logging.debug(scanstr.format("UB", "YRYRYR"))
+    motors.execute("F")
+    _, colors['W'][1], _, colors['W'][3], _, colors['W'][5] = camera.get_raw_hsv(
+        "3__W_W_W")
+    logging.debug(scanstr.format("FR", "_W_W_W"))
 
-    motors.execute("R F")
-    raw_colors['B'][0], raw_colors['Y'][1], raw_colors['B'][2], raw_colors['Y'][
-        3], raw_colors['B'][4], raw_colors['Y'][5] = camera.get_raw_colors("3_BYBYBY")
+    motors.execute("F R")  # origin, then R.
+    colors['W'][0], _, colors['W'][2], _, colors['W'][4], _ = camera.get_raw_hsv(
+        "4_W_W_W_")
+    logging.debug(scanstr.format("FR", "W_W_W_"))
 
-    logging.debug(scanstr.format("RU", "BYBYBY"))
+    motors.execute("R' U R'")  # origin, then U R'
+    colors['Y'][0], colors['R'][1], colors['Y'][2], colors['R'][
+        3], colors['Y'][4], colors['R'][5] = camera.get_raw_hsv("5__YRYRYR")
+    logging.debug(scanstr.format("FR", "YRYRYR"))
 
-    # Blue and Yellow are complete.
+    motors.execute("R U' R U F")  # origin, then R U F
+    colors['B'][0], colors['O'][1], colors['B'][2], colors['O'][
+        3], colors['B'][4], colors['O'][5] = camera.get_raw_hsv("6_BOBOBO")
+    logging.debug(scanstr.format("FR", "BOBOBO"))
 
-    motors.execute("F U' R'")
-    raw_colors['W'][0], raw_colors['O'][1], raw_colors['W'][2], raw_colors['O'][
-        3], raw_colors['W'][4], raw_colors['O'][5] = camera.get_raw_colors("4_WOWOWO")
+    motors.execute("F' U' R' U' F")  # origin, then U' F
+    colors['G'][0], _, colors['G'][2], _, colors['G'][4], _ = camera.get_raw_hsv(
+        "7_G_G_G_")
+    logging.debug(scanstr.format("FR", "G_G_G_"))
 
-    logging.debug(scanstr.format("DF", "WOWOWO"))
+    motors.execute("F' U' F")
+    colors['R'][0], colors['Y'][1], colors['R'][2], colors['Y'][
+        3], colors['R'][4], colors['Y'][5] = camera.get_raw_hsv("8_RYRYRY")
+    logging.debug(scanstr.format("FR", "RYRYRY"))
 
-    # Orange is complete.
-
-    motors.execute("L2 F2")
-    raw_colors['R'][0], raw_colors['G'][1], raw_colors['R'][2], raw_colors['G'][
-        3], raw_colors['R'][4], raw_colors['G'][5] = camera.get_raw_colors("5_RGRGRG")
-
-    logging.debug(scanstr.format("BL", "RGRGRG"))
-
-    # Red is complete
-
-    motors.execute("F2 L2 R U F2 D F'")
-    raw_colors['G'][0], raw_colors['W'][1], raw_colors['G'][2], raw_colors['W'][
-        3], raw_colors['G'][4], raw_colors['W'][5] = camera.get_raw_colors("6_GWGWGW")
-
-    logging.debug(scanstr.format("LD", "GWGWGW"))
-
-    # Green and White are complete.
-
-    motors.execute("F D' U'")  # return to solved state.
-
-    # 6 scans, 24 moves.
+    motors.execute("F' U2")  # back to origin
 
     # at this point, we've scanned all the colors on each facelet.
-    # Now build the calibration data based on the gathered raw color data.
+    # Now lets build the calibration data based on the gathered hsv raw values.
     cal = {}
-    for key in raw_colors:
+    min_hsv = np.array([255, 255, 255])
+    max_hsv = np.array([0, 0, 0])
+    for key in colors:
         cal_entry = {}
-        # raw color data for all the facelets of a given color. (size=6)
-        facelets = raw_colors[key]
+        if(key == "R"):
+            # TODO: special case.
+            pass
+        else:
+            for hsv_entry in colors[key]:
+                min_hsv = np.minimum(min_hsv, hsv_entry)
+                max_hsv = np.maximum(max_hsv, hsv_entry)
 
-        # sum of r, g, and b values for this color, across all facelets. (size=3)
-        rgb_mean = np.sum(np.array(facelets), axis=0)
-
-        # divide the r, g, and b value by the number of facelets (6), obtaining the mean. (size=3)
-        rgb_mean = [x / len(facelets) for x in rgb_mean]
-
-        # rgb_deviation is the deviation from the rgb_mean value to the most outlying color sample.
-
-        rgb_deviation = [0.0, 0.0, 0.0]
-        for facelet in facelets:
-            rgb_diff = [abs(a_i - b_i) for a_i, b_i in zip(rgb_mean, facelet)]
-            rgb_deviation = [max(rgb1, rgb2)
-                             for rgb1, rgb2 in zip(rgb_diff, rgb_deviation)]
-
-        # raw color data for this color (6 samples)
-        cal_entry["rgb"] = raw_colors[key]
-
-        # acceptable deviation, with the raw samples
-        cal_entry["radius"] = rgb_deviation
-
+        cal_entry["min"] = min_hsv
+        cal_entry["max"] = max_hsv
         cal[key] = cal_entry
 
-    # collision-detection, to assert that no two non-equivalent color pseudo-spheres collide (e.g.:
-    # Is there a risk that a blue facelet could be mistaken for a yellow facelet, using any of the
-    # "blue" colors-plus-radius, and any of the "yellow" colors-plus-radius).
-    #
-    # Rough upper-bound is every facelet compared to every other facelet of a different color:
-    #       6 * (6+5+$+3+2+1) = 126 comparisons.
-
-    ccount = 1
-
-    compared = {"R": [], "O": [], "Y": [], "G": [], "B": [], "W": []}
-    errors = []
-    for key1 in cal:  # for each color
-        # get the six different rgb values for color 1
-        colors1 = cal[key1]["rgb"]
-        for key2 in cal:  # for each color
-            # keep track that we've already compared these two colors.
-            compared[key1].append(key2)
-            # if it's not the same as color 1, and it hasn't previously been reverse-compared
-            if key2 != key1 and key1 not in compared[key2]:
-                # get the six different rgb values for color 2
-                colors2 = cal[key2]["rgb"]
-
-                # only test against colors in the same facelet position.
-                for i in range(6):
-                    clr1 = colors1[i]
-                    clr2 = colors2[i]
-                    logging.info("#{4}: Testing {0}:{1} against {2}:{3}".format(
-                        key1, clr1, key2, clr2, ccount))
-                    ccount += 1
-                    dist = math.sqrt(((clr1[0] - clr2[0]) ** 2)
-                                     + ((clr1[1] - clr2[1]) ** 2)
-                                     + ((clr1[2] - clr2[2]) ** 2))  # euclidean distance
-
-                    if dist < cal[key1]["radius"] or dist < cal[key2]["radius"]:
-                        # these two colors "overlap" somehow.
-                        # TODO: This will definitely not work. Taking a single mean for r, g, and b values will mean an outlier in redspace will overlap with another outlier in bluespace.
-                        cal[key1]["radius"] = min(
-                            cal[key1]["radius"], round(dist, 2))
-                        cal[key2]["radius"] = min(
-                            cal[key2]["radius"], round(dist, 2))
-
-                        errors.append(
-                            {
-                                "color1": key1,
-                                "radius1": cal[key1]["radius"],
-                                "rgb1": clr1,
-                                "color2": key2,
-                                "radius2": cal[key2]["radius"],
-                                "rgb2": clr2,
-                                "dist": dist,
-                            }
-                        )
-        logging.info("compared: {0}".format(compared))
-
-    if len(errors) > 0:
-        logging.warn("-----------------------------------------------")
-        logging.warn(
-            "There were collisions in the color calibration, and radii were automatically adjusted:")
-        for err in errors:
-            logging.warn("\t{0}".format(err))
-        logging.warn("-----------------------------------------------")
+    # collision-detection
+    collision_detect(cal)
 
     retval = {"colors": cal, "sample_size": camera.calib_data["sample_size"]}
     return retval

@@ -5,7 +5,7 @@
 from cv2 import cv2     # OpenCV 4.5.3 and later
 import numpy as np
 import time
-
+import math
 import yaml
 import logging
 
@@ -14,126 +14,60 @@ against_color_str = "     against '{0}', ({1}), distance is {2}."
 i_guess_color_str = "I guess color {0} is {1} , with distance {2}"
 
 
-def guess_color_normalized_euclidean(raw_color, idx, calib_data):
-    """Guess color using Normalized Euclidean distance"""
-    norm_v = [float(i) / max(raw_color) for i in raw_color]
+def guess_color(raw_hsv, idx, calib_data):
     best_dist = 0
-    best_color = None
-    logging.info(test_color_in_position_str.format(raw_color, idx))
-    for _, (k, v2) in enumerate(calib_data["colors"]):
-        rgb = v2['rgb'][idx]
-        norm_rgb = [float(i) / max(rgb) for i in rgb]
+    best_color = "X"  # one of "W","O","R","B","G","Y"
+    logging.info(test_color_in_position_str.format(raw_hsv, idx))
 
-        dist2 = (norm_rgb[0] - norm_v[0]) ** 2 + \
-            (norm_rgb[1] - norm_v[1]) ** 2 + \
-            (norm_rgb[2] - norm_v[2]) ** 2
-
-        logging.info("     against '{0}', ({1}), normalized distance is {2}.".format(
-            k, rgb, dist2))
-        if dist2 < best_dist or best_color is None:
-            best_dist = dist2
-            best_color = k
-
-    if best_color >= 0:  # and best_dist < colorCenters[best_color]['radius']:
-        logging.info(i_guess_color_str.format(
-            raw_color, best_color, best_dist))
-        return best_color
-    else:
-        return 'X'  # Unknown color.
-
-
-def guess_color_euclidean(raw_color, idx, calib_data):
-    """Guess color using Euclidean distance"""
-    best_dist = 0
-    best_color = None
-    logging.info(test_color_in_position_str.format(raw_color, idx))
-    for _, (k, v2) in enumerate(calib_data["colors"]):
-        rgb = v2['rgb'][idx]
-        dist2 = (rgb[0] - raw_color[0]) ** 2 + \
-            (rgb[1] - raw_color[1]) ** 2 + \
-            (rgb[2] - raw_color[2]) ** 2
-
-        logging.info(against_color_str.format(
-            k, rgb, dist2))
-        if dist2 < best_dist or best_color is None:
-            best_dist = dist2
-            best_color = k
-
-    if best_color >= 0:  # and best_dist < colorCenters[best_color]['radius']:
-        logging.info(i_guess_color_str.format(
-            raw_color, best_color, best_dist))
-        return best_color
-    else:
-        return 'X'  # Unknown color.
-
-
-def guess_color_cie2000(raw_color, idx, calib_data):
-    """
-    Guess the color using the CIE2000 color space transformation, per http://hanzratech.in/2015/01/16/color-difference-between-2-colors-using-python.html
-    """
-    from colormath.color_objects import sRGBColor, LabColor
-    from colormath.color_conversions import convert_color
-    from colormath.color_diff import delta_e_cie2000
-
-    color1_rgb = sRGBColor(raw_color[2], raw_color[1], raw_color[0])
-    best_dist = 0
-    best_color = None
-    logging.info(test_color_in_position_str.format(raw_color, idx))
-    for _, (k, v2) in enumerate(calib_data["colors"]):
-        rgb = v2['rgb'][idx]
-        color2_rgb = sRGBColor(rgb[2], rgb[1], rgb[0])
-        color1_lab = convert_color(color1_rgb, LabColor)
-        color2_lab = convert_color(color2_rgb, LabColor)
-        # Find the color difference using CIE2000
-        dist = delta_e_cie2000(color1_lab, color2_lab)
-        logging.info(against_color_str.format(
-            k, rgb, dist))
-        if dist < best_dist or best_color is None:
-            best_dist = dist
-            best_color = k
-
-    if best_color >= 0:  # and best_dist < colorCenters[best_color]['radius']:
-        logging.info(i_guess_color_str.format(
-            raw_color, best_color, best_dist))
-        return best_color
-    else:
-        return 'X'  # Unknown color.
-
-
-def guess_color_linalg(raw_color, idx, calib_data):
-    """
-    Guess the color using numpy's crappy linalg normalization.
-        raw_color - the raw color data (from the camera)
-        idx - the index facelet to test
-        calib_data - calibrated data for a specific color
-    """
-
-    best_dist = 0
-    best_color = None  # one of "W","O","R","B","G","Y"
-    logging.info(test_color_in_position_str.format(raw_color, idx))
     for _, (color_name, calib_color_data) in enumerate(calib_data["colors"]):
-        # the calibrated RGB data for this color, in this position.
-        rgb = calib_color_data['rgb'][idx]
-        # get the "distance" to this candidate color.
-        dist = np.linalg.norm(raw_color - rgb)
 
-        logging.info(against_color_str.format(
-            color_name, rgb, dist))
-        if dist < best_dist or best_color == -1:
-            best_dist = dist    # how "close" are we to the idealized calibrated color?
-            # best color so far. color_name is one of "W","O","R","B","G","Y"
-            best_color = color_name
+        min_hsv = np.array(calib_color_data["min"])
+        max_hsv = np.array(calib_color_data["max"])
+        mid_hsv = np.array([0, 0, 0])
 
-    if best_color >= 0:  # and best_dist < colorCenters[best_color]['radius']:
-        logging.info(i_guess_color_str.format(
-            raw_color, best_color, best_dist))
-        return best_color
+        if color_name == "R":
+            # TODO: special case.
+            min_hsv[0] -= 255  # make hue negative.
+
+        mid_hsv = np.mean(np.array([min_hsv, max_hsv]), axis=0)
+
+        hit = True
+        if color_name == "R":  # special case
+            if (raw_hsv[0] > max_hsv[0] and raw_hsv[0] < min_hsv[0]+255):
+                hit = False
+                break
+            else:
+                for i in range(1, 3):
+                    if raw_hsv[i] < min_hsv[i] or raw_hsv[i] > max_hsv[i]:
+                        hit = False
+                        break
+        else:
+            for i in range(3):
+                if raw_hsv[i] < min_hsv[i] or raw_hsv[i] > max_hsv[i]:
+                    hit = False
+                    break
+
+        if hit:
+            dist = 0
+            dist = math.sqrt(((raw_hsv[0]-mid_hsv[0]) ** 2) + (
+                (raw_hsv[1]-mid_hsv[1]) ** 2) + ((raw_hsv[2]-mid_hsv[2]) ** 2))
+
+            if color_name == "R":
+                # special case
+                if mid_hsv[0] < 0 and raw_hsv[0] > max_hsv[0] and raw_hsv[0] > min_hsv[0]+255:
+                    dist = math.sqrt(((raw_hsv[0]-mid_hsv[0]+255) ** 2) + (
+                        (raw_hsv[1]-mid_hsv[1]) ** 2) + ((raw_hsv[2]-mid_hsv[2]) ** 2))
+
+            if best_dist == 0 or dist < best_dist:
+                best_color = color_name
+                best_dist = dist
+
+    if best_color == "X":
+        logging.warn("UNKNOWN COLOR {0}".format(raw_hsv))
     else:
-        return 'X'  # Unknown color.
+        logging.info(i_guess_color_str.format(raw_hsv, best_color, best_dist))
 
-
-# function pointer to whatever color guessing algorithm we would like to use.
-guess_color = guess_color_linalg
+    return best_color
 
 
 class Camera:
@@ -202,14 +136,16 @@ class Camera:
         # self.warmup_time(cfg['cam']['warmup_delay_ms'])
         self.warmup_frames(30)
 
-    def get_raw_colors(self, filename=None):
+    def get_raw_hsv(self, filename=None):
         """
-        Given a camera reference, take a vertical edge-on picture of the cube, and 
-        return an array of raw RGB values that refer to the facelets in the (zero-based) 
-        F2, R0, F5, R3, F8, R6 positions., one for each of the coordinates in 
+        Given a camera reference, take a vertical edge-on picture of the cube, and
+        return an array of raw hsv values that refer to the facelets in the (zero-based)
+        F2, R0, F5, R3, F8, R6 positions, one for each of the coordinates in
         config.colorSampleCoords.
+
+        return an array of shape (6,3)
         """
-        arr = []
+        retval = []
 
         # take a couple of frames. For a USB camera, frames can be buffered on the device,
         # so it can take time between the actual scene changing, and an updated frame popping
@@ -222,50 +158,51 @@ class Camera:
             logging.warn("no frames!")
             return np.full(6, [0.0, 0.0, 0.0]).tolist()
 
+        hsvframe = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
+
         if self.config['cam']['flipCamera']:
             logging.info("FLIP")
-            frame = cv2.flip(
-                frame, flipCode=self.config['cam']['flipCode'])
+            hsvframe = cv2.flip(
+                hsvframe, flipCode=self.config['cam']['flipCode'])
 
         is_black = True
         r = self.calib_data["sample_size"]
-        for coord in self.sample_coords:    # for each of the edge facelet coords
+        for coord in self.sample_coords:    # for each of the 6 edge facelet coords
             x, y = coord[0], coord[1]
 
             # define a small square (x1,y1,x2,y2) in the frame to sample for color.
             x1, y1 = x - r, y - r
             x2, y2 = x + r, y + r
 
-            block = frame[y1:y2, x1:x2]
-            block_r = block[:, :, 0]    # red
-            block_g = block[:, :, 1]    # green
-            block_b = block[:, :, 2]    # blue
+            block = hsvframe[y1:y2, x1:x2]
 
-            # get the average color within the block, for each R/G/B component.
-            clr = np.array(
-                (np.median(block_r), np.median(block_g), np.median(block_b))).tolist()
+            # average hsv in the sample area.
+            avg = block.mean(axis=0).mean(axis=0)
 
-            is_black = is_black and clr[0] == 0 and clr[1] == 0 and clr[2] == 0
+            # value is "too dark". (value ==0/255)
+            is_black = is_black and avg[2] == 0
 
-            arr.append(clr)
+            retval.append(avg)   # append average hsv values.
             if filename is not None:
+                # write the captured raw image, for debugging.
                 cv2.imwrite(filename + ".png", frame)
 
         if is_black:
             logging.warn("All colors are BLACK. Is the lense cap on?")
 
-        return arr
+        return retval
 
     def get_faces(self):
         """
         Given a set of colors, return an array of FURBDL values 
         So, rather than returning e.g. "W" (for White), return "D" (for Down)
         """
-        arr = self.get_raw_colors()
+        arr = self.get_raw_hsv()
         retval = []
-        for idx, raw_color in enumerate(arr):
+        for idx, raw_hsv in enumerate(arr):
             # Given the raw color, guess the actual color, based on calibrated lightning conditions.
-            adj_color = guess_color(raw_color, idx, self.calib_data["colors"])
+            adj_color = guess_color(
+                raw_hsv, idx, self.calib_data["colors"])
             face = self.config['cam']['colorFaceMap'][adj_color]
 
             retval.append(face)

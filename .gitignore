@@ -109,3 +109,4 @@ doc/eagle/*.b#*
 doc/~$*
 scrap/
 .DS_Store
+*.code-workspace
