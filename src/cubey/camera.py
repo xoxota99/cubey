@@ -214,12 +214,12 @@ if __name__ == "__main__":
     config_file = "../config.yaml"
     config = {}
     with open(config_file, 'r') as ymlfile:
-        config = yaml.load(ymlfile)
+        config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     calib_file = "../"+config['cam']['calibration']
     calib = {}
     with open(calib_file, 'r') as ymlfile:
-        calib = yaml.load(ymlfile)
+        calib = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     camera = Camera(config, calib)
 

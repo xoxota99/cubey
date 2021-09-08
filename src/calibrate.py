@@ -10,7 +10,7 @@ from cubey.stepper import MotorController
 config_file = "config.yaml"
 config = {}
 with open(config_file, 'r') as ymlfile:
-    config = yaml.load(ymlfile)
+    config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
 logging.basicConfig(
     level=logging.getLevelName(config['app']['logLevel']), format=config['app']['logFormat'])
@@ -19,7 +19,7 @@ colorSampleCoords = config['cam']['colorSampleCoords']
 calib_file = config['cam']['calibration']
 calib = {}
 with open(calib_file, 'r') as ymlfile:
-    calib = yaml.load(ymlfile)
+    calib = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
 camera = camera.Camera(config, calib)
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     config_file = "config.yaml"
     config = {}
     with open(config_file, 'r') as ymlfile:
-        config = yaml.load(ymlfile)
+        config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     logging.basicConfig(
         level=logging.getLevelName(config['app']['logLevel']), format=config['app']['logFormat'])

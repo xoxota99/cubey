@@ -32,7 +32,7 @@ if __name__ == "__main__":
     config_file = "config.yaml"
     config = {}
     with open(config_file, 'r') as ymlfile:
-        config = yaml.load(ymlfile)
+        config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     logging.basicConfig(
         level=logging.getLevelName(config['app']['logLevel']), format=config['app']['logFormat'])

@@ -70,7 +70,7 @@ if __name__ == "__main__":
     config_file = "config.yaml"
     config = {}
     with open(config_file, 'r') as ymlfile:
-        config = yaml.load(ymlfile)
+        config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     logging.basicConfig(
         level=logging.getLevelName(config['app']['logLevel']), format=config['app']['logFormat'])
@@ -79,15 +79,16 @@ if __name__ == "__main__":
     motors = MotorController(config)
 
     solvers = {
-        "DEFAULT" : solve,
-        "-I" : solve_interactive
+        "DEFAULT": solve,
+        "-I": solve_interactive
     }
-    
+
     mode = "DEFAULT"
-    
+
     if len(sys.argv) > 1:
         mode = sys.argv[1].upper()
 
-    func = solvers.get(mode,solve)  #non-interactive solver is the default, if not found.
+    # non-interactive solver is the default, if not found.
+    func = solvers.get(mode, solve)
 
     sys.exit(func(scanner, solver, motors))

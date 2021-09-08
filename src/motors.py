@@ -35,7 +35,7 @@ class MyPrompt(Cmd):
         self.motors.execute(inp.upper())
 
     def emptyline(self):
-        #do nothing.
+        # do nothing.
         pass
 
     def do_q(self, inp):
@@ -46,11 +46,11 @@ class MyPrompt(Cmd):
 if __name__ == "__main__":
     config_file = "config.yaml"
     with open(config_file, 'r') as ymlfile:
-        config = yaml.load(ymlfile)
+        config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     motors = stepper.MotorController(config)
 
-    print ("""
+    print("""
     Utility for interactively commanding the Stepper motors of the robot, using typical Rubik's Cube notation:
     R - Turn RIGHT face clockwise 90 degrees
     R2 - Turn RIGHT face 180 degrees (in an undefined direction)

@@ -39,7 +39,7 @@ class Scanner:
         calib_file = "../"+config['cam']['calibration']
         calib = {}
         with open(calib_file, 'r') as ymlfile:
-            calib = yaml.load(ymlfile)
+            calib = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
         self.camera = Camera(config, calib)
 
