@@ -39,25 +39,21 @@ def collision_detect(config):
             bracket2 = cal[keys[j]]
             collide = False
 
-            if(bracket1["max"][0] < bracket1["min"][0] or bracket2["max"][0] < bracket2["min"][0]):
-                # special case (red). Max H value is less than min.
-                red = bracket1
-                nonred = bracket2
-                if bracket2[1][0] < bracket2[0][0]:  # swap
-                    red = bracket2
-                    nonred = bracket1
-
-                collide = (red["max"][0] > nonred["min"][0]
-                           or red["min"][0] < nonred["max"][0])
+            if bracket1["max"][0] < bracket1["min"][0]:
+                collide = (bracket1["max"][0] > bracket2["min"][0]) or (
+                    bracket1["min"][0] < bracket2["max"][0])
+            elif bracket1["max"][0] < bracket1["min"][0]:
+                collide = (bracket2["max"][0] > bracket1["min"][0]) or (
+                    bracket2["min"][0] < bracket1["max"][0])
             else:
                 # non-red. Do these hues overlap?
-                collide = (bracket1["max"][0] > bracket2["min"][0])
+                collide = (bracket1["max"][0] > bracket2["min"][0]) and (
+                    bracket1["min"][0] < bracket2["max"][0])
 
             # now check S and V, which are the same for red and non-red.
             collide = collide and (
-                bracket1["min"][0] < bracket2["max"][0]) and (
                 bracket1["max"][1] > bracket2["min"][1]) and (
-                bracket1["min"][1] < bracket1["max"][1]) and (
+                bracket1["min"][1] < bracket2["max"][1]) and (
                 bracket1["max"][2] > bracket2["min"][2]) and (
                 bracket1["min"][2] < bracket2["max"][2])
 
