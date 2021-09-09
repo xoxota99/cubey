@@ -1,6 +1,5 @@
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=bugs)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=code_smells)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=coverage)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=ncloc)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
 

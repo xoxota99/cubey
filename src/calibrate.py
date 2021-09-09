@@ -128,12 +128,12 @@ def calibrate(motors):
         3], facelet_hsv["R"][4], facelet_hsv["F"][5] = camera.get_raw_hsv("6_RFRFRF")
     logging.debug(scanstr.format("RF", "RFRFRF"))
 
-    motors.execute("F" U" R" U" F")  # origin, then U" F
+    motors.execute("F' U' R' U' F")  # origin, then U' F
     facelet_hsv["L"][0], _, facelet_hsv["L"][2], _, facelet_hsv["L"][4], _ = camera.get_raw_hsv(
         "7_L_L_L_")
     logging.debug(scanstr.format("L_", "L_L_L_"))
 
-    motors.execute("F" U" F")
+    motors.execute("F' U' F")
     facelet_hsv["B"][0], facelet_hsv["U"][1], facelet_hsv["B"][2], facelet_hsv["U"][
         3], facelet_hsv["B"][4], facelet_hsv["U"][5] = camera.get_raw_hsv("8_BUBUBU")
     logging.debug(scanstr.format("BU", "BUBUBU"))
