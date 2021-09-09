@@ -6,7 +6,7 @@ import yaml
  A manual test of given hsv calibration settings.
 
  Read the image, scan them with the provided HSV calibration data / brackets, output
- the list of "guessed" colors (O, R, W, G, B, Y), in the order:
+ the list of "guessed" colors (F, U, R, B, L, D), in the order:
 
  +---+---+---+
  | 1 | 2 | 3 |
@@ -20,15 +20,15 @@ import yaml
 config_file = "config.yaml"
 img_file = "images/rub00.jpg"
 sample_coords = [
-    [68, 71],    # W
-    [190, 71],   # O
-    [305, 68],   # B
-    [69, 189],   # R
-    [187, 187],  # G
-    [300, 181],  # B
-    [72, 302],   # O
-    [186, 304],  # O
-    [306, 297],  # Y
+    [68, 71],    # D
+    [190, 71],   # F
+    [305, 68],   # R
+    [69, 189],   # B
+    [187, 187],  # L
+    [300, 181],  # R
+    [72, 302],   # F
+    [186, 304],  # F
+    [306, 297],  # U
 ]
 
 if __name__ == "__main__":

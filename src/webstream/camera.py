@@ -10,7 +10,7 @@ with open("../config.yaml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
 calib = {}
-calib_file = "../"+cfg['cam']['calibration']
+calib_file = "../" + cfg['cam']['calibration']
 with open(calib_file, 'r') as ymlfile:
     calib = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
@@ -18,7 +18,7 @@ with open(calib_file, 'r') as ymlfile:
 Camera singleton, that publishes "frame-ready" events to any listeners.
 """
 
-default_sample_coords = cfg["cam"]["colorSampleCoords"]
+default_sample_coords = cfg["cam"]["sample_coords"]
 sample_size = calib["sample_size"]
 
 

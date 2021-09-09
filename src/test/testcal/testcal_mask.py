@@ -38,7 +38,7 @@ config_file = "config.yaml"
 
 
 def collision_detect(config):
-    compared = {"R": [], "O": [], "Y": [], "G": [], "B": [], "W": []}
+    compared = {"F": [], "U": [], "R": [], "B": [], "L": [], "D": []}
     cal = config["colors"]
 
     for key1 in cal:  # 6

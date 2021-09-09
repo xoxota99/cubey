@@ -31,7 +31,7 @@ def test_color(raw_hsv, min_hsv, max_hsv):
 
 def guess_color(raw_hsv, calib_data):
     best_dist = 0
-    best_color = "X"  # one of "W","O","R","B","G","Y". "X" is "unknown".
+    best_color = "X"  # one of "F","U","R","B","L","D". "X" is "unknown".
 
     for _, (color_name, calib_color_data) in enumerate(calib_data["colors"]):
         min_hsv = np.array(calib_color_data["min"])
@@ -125,7 +125,7 @@ class Camera:
                             calib_data["camera"]["exposure"])
 
         self.calib_data = calib_data
-        self.sample_coords = config['cam']['colorSampleCoords']
+        self.sample_coords = config['cam']['sample_coords']
 
         # self.warmup_time(cfg['cam']['warmup_delay_ms'])
         self.warmup_frames(30)
@@ -135,7 +135,7 @@ class Camera:
         Given a camera reference, take a vertical edge-on picture of the cube, and
         return an array of raw hsv values that refer to the facelets in the (zero-based)
         F2, R0, F5, R3, F8, R6 positions, one for each of the coordinates in
-        config.colorSampleCoords.
+        config.sample_coords.
 
         return an array of shape (6,3)
         """
@@ -188,8 +188,7 @@ class Camera:
 
     def get_faces(self):
         """
-        Given a set of colors, return an array of FURBDL values 
-        So, rather than returning e.g. "W" (for White), return "D" (for Down)
+        Given an array of HSV values, return an array of FURBDL values 
         """
         arr = self.get_raw_hsv()
         retval = []
@@ -198,9 +197,8 @@ class Camera:
             logging.info(test_color_in_position_str.format(raw_hsv, idx))
             adj_color = guess_color(
                 raw_hsv, self.calib_data["colors"])
-            face = self.config['cam']['colorFaceMap'][adj_color]
 
-            retval.append(face)
+            retval.append(adj_color)
 
         return tuple(retval)
 

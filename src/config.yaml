@@ -13,21 +13,11 @@ cam:
 
   calibration : "default_calib.yaml"
 
-  colorFaceMap: 
-    O: "F"            # Orange facing front.
-    W: "D"            # White facing down.
-    Y: "U"            # Yellow facing up.
-    B: "L"            # Blue facing left.
-    G: "R"            # Green facing right.
-    R: "B"            # Red facing back.
-    X: "X"            # UNKNOWN.
-
   frameWidth: 640
   frameHeight: 480
   fps: 60
 
-  # I'd rather use a tuple for these, but that requires YAML gymnastics in config.
-  colorSampleCoords: [
+  sample_coords: [
       [300, 30], [440, 40],
       [270, 220], [440, 220],
       [270, 430], [420, 440]

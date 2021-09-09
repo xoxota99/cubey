@@ -10,7 +10,6 @@
 
 # When sampling (or scanning) a coordinate in the captured image, average the color from a square 
 # of twice this width / height in pixels.
-
 sample_size: 10 # 20x20 pixel square
 
 camera: 
@@ -24,27 +23,27 @@ camera:
   
 colors: {
     # specify min-max HSV brackets for each color.
-    "O":  {
+    "F":  { # Front (Orange)
       min: [8,170,20],
       max: [24,255,255]
     },
-    "R": { # "Red"
+    "B": { # Back (Red)
       min: [248,109,64],
       max: [7,255,255]
     },
-    "G": { # "Green"
+    "L": { # Left (Green)
       min: [60,109,50],
       max: [100,255,255]
     },
-    "B": { # "Blue"
+    "R": { # Right (Blue)
       min: [140,109,20],
       max: [185,255,255]
     },
-    "Y": { # "Yellow"
+    "U": { # Up (Yellow)
       min: [25,190,20],
       max: [46,255,255]
     },
-    "W": { # "White"
+    "D": { # Down (White)
       min: [0,0,100],
       max: [255,60,255]
     }
