@@ -1,5 +1,4 @@
-import logging
-from cubey import stepper
+from lib.motorcontroller import MotorController
 from cmd import Cmd
 import yaml
 
@@ -48,7 +47,7 @@ if __name__ == "__main__":
     with open(config_file, 'r') as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    motors = stepper.MotorController(config)
+    motors = MotorController(config)
 
     print("""
     Utility for interactively commanding the Stepper motors of the robot, using typical Rubik's Cube notation:

@@ -1,5 +1,3 @@
-# Used to safely shutdown the pi by pushing a momentary switch. Also indicates "power" with an LED
-
 import pigpio
 import time
 from subprocess import call

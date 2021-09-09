@@ -7,6 +7,10 @@ from lib.motorcontroller import MotorController
 from lib.scanner import Scanner
 from lib.solver import Solver
 
+"""
+Main Cubey application
+"""
+
 
 def solve(scanner, solver, motors):
     """scan the cube, get a solution from kociemba, then execute it on the robot."""

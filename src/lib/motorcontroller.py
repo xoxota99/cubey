@@ -1,6 +1,10 @@
 from time import sleep
 import pigpio
 
+"""
+Controller for stepper motors.
+"""
+
 config = {}
 DIR_PIN = 0          # GPIO pin to set direction (cw / ccw)
 DISABLE_PIN = 0      # GPIO pin to disable the stepper
@@ -86,7 +90,7 @@ class MotorController:
 
     def _tx_pulses(self, pin, hertz, num, pulse_len=1):
         assert hertz < 500000
-        length_us = int(1000000/hertz)
+        length_us = int(1000000 / hertz)
         assert int(pulse_len) < length_us
         assert num < 65536
 

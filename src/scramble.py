@@ -1,10 +1,9 @@
 from time import sleep
 import logging
-import random
-import os
 import sys
-from cubey.stepper import MotorController
-from cubey.solver import Solver
+
+from lib.motorcontroller import MotorController
+from lib.solver import Solver
 
 """
 Utility for scrambling / descrambling the cube

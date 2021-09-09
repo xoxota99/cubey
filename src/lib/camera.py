@@ -1,13 +1,14 @@
-"""
-    Camera control module, including functions for scanning and
-    returning best-guess color state of the camera-facing cube "edge".
-"""
 from cv2 import cv2     # OpenCV 4.5.3 and later
 import numpy as np
 import time
 import math
 import yaml
 import logging
+
+"""
+    Camera control module, including functions for scanning and
+    returning best-guess color state of the camera-facing cube "edge".
+"""
 
 test_color_in_position_str = "Testing color {0} in position {1}:"
 against_color_str = "     against '{0}', ({1}), distance is {2}."
@@ -18,12 +19,12 @@ def test_color(color_name, raw_hsv, min_hsv, max_hsv):
     retval = True
 
     if color_name == "R":  # special case
-        retval = raw_hsv[0] in range(max_hsv[0], min_hsv[0]+256)  # for H
+        retval = raw_hsv[0] in range(max_hsv[0], min_hsv[0] + 256)  # for H
         for i in range(1, 3):  # for each of S, V
-            retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i]+1)
+            retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i] + 1)
     else:
         for i in range(3):  # for each of H, S, V
-            retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i]+1)
+            retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i] + 1)
 
     return retval
 
@@ -42,14 +43,14 @@ def guess_color(raw_hsv, calib_data):
 
         mid_hsv = np.mean(np.array([min_hsv, max_hsv]), axis=0)
         if test_color(color_name, raw_hsv, min_hsv, max_hsv):
-            dist = math.sqrt(((raw_hsv[0]-mid_hsv[0]) ** 2) + (
-                (raw_hsv[1]-mid_hsv[1]) ** 2) + ((raw_hsv[2]-mid_hsv[2]) ** 2))
+            dist = math.sqrt(((raw_hsv[0] - mid_hsv[0]) ** 2) + (
+                (raw_hsv[1] - mid_hsv[1]) ** 2) + ((raw_hsv[2] - mid_hsv[2]) ** 2))
 
-            if color_name == "R" and mid_hsv[0] < 0 and raw_hsv[0] > max_hsv[0] and raw_hsv[0] > min_hsv[0]+255:
+            if color_name == "R" and mid_hsv[0] < 0 and raw_hsv[0] > max_hsv[0] and raw_hsv[0] > min_hsv[0] + 255:
                 # special case, when color is red, and mid_hsv is negative, and
                 # raw_hsv is on the "wrong" side of the modulo (ie: near 255, rather than 0).
-                dist = math.sqrt(((raw_hsv[0]-mid_hsv[0]+255) ** 2) + (
-                    (raw_hsv[1]-mid_hsv[1]) ** 2) + ((raw_hsv[2]-mid_hsv[2]) ** 2))
+                dist = math.sqrt(((raw_hsv[0] - mid_hsv[0] + 255) ** 2) + (
+                    (raw_hsv[1] - mid_hsv[1]) ** 2) + ((raw_hsv[2] - mid_hsv[2]) ** 2))
 
             if best_dist == 0 or dist < best_dist:
                 best_color = color_name
@@ -210,7 +211,7 @@ if __name__ == "__main__":
     with open(config_file, 'r') as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    calib_file = "../"+config['cam']['calibration']
+    calib_file = "../" + config['cam']['calibration']
     calib = {}
     with open(calib_file, 'r') as ymlfile:
         calib = yaml.load(ymlfile, Loader=yaml.FullLoader)

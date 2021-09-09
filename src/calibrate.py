@@ -4,8 +4,12 @@ import yaml
 import math
 import sys
 
-from cubey import camera
-from cubey.stepper import MotorController
+from lib import camera
+from lib.motorcontroller import MotorController
+
+"""
+Utility for creating HSV calibration data
+"""
 
 config_file = "config.yaml"
 config = {}

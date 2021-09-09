@@ -2,6 +2,10 @@ import os
 import subprocess
 import random
 
+"""
+    Cube solver. Mostly delegating to a command-line kociemba implementation.
+"""
+
 
 class Solver:
 
@@ -34,7 +38,7 @@ class Solver:
             min_scramble_moves = self.config['app']['max_scramble_moves']
 
         recipe = ""
-        move_count = random.randint(min_scramble_moves, max_scramble_moves+1)
+        move_count = random.randint(min_scramble_moves, max_scramble_moves + 1)
         base = "X"
         last_base = "X"
 

@@ -1,14 +1,14 @@
+import logging
+import numpy as np
+import yaml
+
+from PIL import Image, ImageDraw
+from lib.camera import Camera
+
 """
     Functions for scanning, evaluating and representing the state of a cube. Depends on camera.py and stepper.py
     to control the camera and stepper motors, respectively.
 """
-
-import logging
-import numpy as np
-import yaml
-from PIL import Image, ImageDraw
-
-from camera import Camera
 
 # Default state of the cube, fully solved.
 SOLVED_STATE = {
@@ -140,7 +140,7 @@ class Scanner:
         """
 
         state = dict(SOLVED_STATE)  # Initialize to fully solved.
-
+        # pylint: disable=unbalanced-tuple-unpacking
         state['F'][2], state['R'][0], state['F'][5], state['R'][3], state['F'][8], state['R'][6] = self.camera.get_faces()
 
         motors.execute('F')     # rotate front face clockwise
