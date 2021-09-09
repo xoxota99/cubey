@@ -1,5 +1,4 @@
 from flask import Flask, render_template, Response
-import argparse
 from camera import Camera
 
 app = Flask(__name__)
