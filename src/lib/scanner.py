@@ -54,12 +54,12 @@ def get_state_img(state):
 
     """
 
-    colormap = {
-        "F": (255, 165, 0, 255),  # Front/Orange
-        "U": (255, 255, 0, 255),  # Up/Yellow
-        "R": (0, 0, 255, 255),    # Right/Blue
-        "B": (255, 0, 0, 255),    # Back/Red
-        "L": (0, 255, 0, 255),    # Left/Green
+    palette = {
+        "F": (255, 165, 0, 255),   # Front/Orange
+        "U": (255, 255, 0, 255),   # Up/Yellow
+        "R": (0, 0, 255, 255),     # Right/Blue
+        "B": (255, 0, 0, 255),     # Back/Red
+        "L": (0, 255, 0, 255),     # Left/Green
         "D": (255, 255, 255, 255)  # Down/White
     }
 
@@ -88,14 +88,14 @@ def get_state_img(state):
             for x in range(3):
                 draw.rectangle([(xb + x * facelet_pixel_size, yb + y * facelet_pixel_size),
                                 (xb + (x + 1) * facelet_pixel_size, yb + (y + 1) * facelet_pixel_size)],
-                               fill=colormap[state[face][y * 3 + x]],
+                               fill=palette[state[face][y * 3 + x]],
                                outline=(0, 0, 0, 255), width=1)
     return img
 
 
 class Scanner:
     """
-    The Scanner class uses the camera to "scan" the state of the cube. 
+    The Scanner class uses the camera to "scan" the state of the cube.
     This scanning process is very sensitive to lighting conditions.
     """
 
@@ -134,12 +134,13 @@ class Scanner:
                      |*D6**D7**D8*|
                      |------------|
 
-        The camera is always pointed at the edge <F2-R0-F5-R3-F8-R6>. We obtain the entire cube state by getting the 
-        colors of all facelets on that edge, then rotating the cube through a predetermined sequence, such that all 
+        The camera is always pointed at the edge <F2-R0-F5-R3-F8-R6>. We obtain the entire cube state by getting the
+        colors of all facelets on that edge, then rotating the cube through a predetermined sequence, such that all
         edge facelets rotate through that edge.
         """
 
         state = dict(SOLVED_STATE)  # Initialize to fully solved.
+
         # pylint: disable=unbalanced-tuple-unpacking
         state['F'][2], state['R'][0], state['F'][5], state['R'][3], state['F'][8], state['R'][6] = self.camera.get_faces()
 
