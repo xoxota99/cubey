@@ -51,22 +51,22 @@ if __name__ == "__main__":
         avg = block.mean(axis=0).mean(axis=0)
         for clr in config["colors"]:
             e = config["colors"][clr]  # blue
-            minHSV = np.array(e["min"])
-            maxHSV = np.array(e["max"])
+            min_hsv = np.array(e["min"])
+            max_hsv = np.array(e["max"])
             h, w, c = img.shape
-            maskHSV = np.full((h, w, c), (0, 0, 0), dtype=np.uint8)
+            mask_hsv = np.full((h, w, c), (0, 0, 0), dtype=np.uint8)
 
-            if clr == "R":
+            if max_hsv[0] < min_hsv[0]:
                 # red
-                mask1 = cv2.inRange(hsv_img, minHSV, np.array(
-                    [255, maxHSV[1], maxHSV[2]]))
+                mask1 = cv2.inRange(hsv_img, min_hsv, np.array(
+                    [255, max_hsv[1], max_hsv[2]]))
                 mask2 = cv2.inRange(hsv_img, np.array(
-                    [0, minHSV[1], minHSV[2]]), maxHSV)
+                    [0, min_hsv[1], min_hsv[2]]), max_hsv)
                 # add masks
-                maskHSV = cv2.add(mask1, mask2)
+                mask_hsv = cv2.add(mask1, mask2)
             else:
-                maskHSV = cv2.inRange(hsv_img, minHSV, maxHSV)
+                mask_hsv = cv2.inRange(hsv_img, min_hsv, max_hsv)
 
-            if maskHSV[y, x] != 0:      # Why are x and y reversed? No idea.
+            if mask_hsv[y, x] != 0:      # Why are x and y reversed? No idea.
                 print(clr)
                 break

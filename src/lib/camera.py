@@ -15,40 +15,40 @@ against_color_str = "     against '{0}', ({1}), distance is {2}."
 i_guess_color_str = "I guess color {0} is {1} , with distance {2}"
 
 
-def test_color(color_name, raw_hsv, min_hsv, max_hsv):
+def test_color(raw_hsv, min_hsv, max_hsv):
     retval = True
 
-    if color_name == "R":  # special case
+    if max_hsv[0] < min_hsv[0]:  # special case (red)
         retval = raw_hsv[0] in range(max_hsv[0], min_hsv[0] + 256)  # for H
-        for i in range(1, 3):  # for each of S, V
-            retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i] + 1)
     else:
-        for i in range(3):  # for each of H, S, V
-            retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i] + 1)
+        retval = raw_hsv[0] in range(min_hsv[0], max_hsv[0] + 1)    # for H
+
+    for i in range(1, 3):  # for each of S, V
+        retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i] + 1)
 
     return retval
 
 
 def guess_color(raw_hsv, calib_data):
     best_dist = 0
-    best_color = "X"  # one of "W","O","R","B","G","Y"
+    best_color = "X"  # one of "W","O","R","B","G","Y". "X" is "unknown".
 
     for _, (color_name, calib_color_data) in enumerate(calib_data["colors"]):
         min_hsv = np.array(calib_color_data["min"])
         max_hsv = np.array(calib_color_data["max"])
 
-        if color_name == "R":
-            # TODO: special case.
-            min_hsv[0] -= 255  # make hue negative.
+        if max_hsv[0] < min_hsv[0]:
+            min_hsv[0] -= 255  # make minH negative.
 
         mid_hsv = np.mean(np.array([min_hsv, max_hsv]), axis=0)
-        if test_color(color_name, raw_hsv, min_hsv, max_hsv):
+        if test_color(raw_hsv, min_hsv, max_hsv):
+            # calculate the distance between the raw HSV value and the "middle" of the range of HSV values for this color.
             dist = math.sqrt(((raw_hsv[0] - mid_hsv[0]) ** 2) + (
                 (raw_hsv[1] - mid_hsv[1]) ** 2) + ((raw_hsv[2] - mid_hsv[2]) ** 2))
 
-            if color_name == "R" and mid_hsv[0] < 0 and raw_hsv[0] > max_hsv[0] and raw_hsv[0] > min_hsv[0] + 255:
-                # special case, when color is red, and mid_hsv is negative, and
-                # raw_hsv is on the "wrong" side of the modulo (ie: near 255, rather than 0).
+            if max_hsv[0] < min_hsv[0] and raw_hsv[0] > min_hsv[0] + 255:
+                # special case, when color is red. mid_hsv can end up on the opposite end of
+                # the H spectrum from raw_hsv, producing an incorrect distance.
                 dist = math.sqrt(((raw_hsv[0] - mid_hsv[0] + 255) ** 2) + (
                     (raw_hsv[1] - mid_hsv[1]) ** 2) + ((raw_hsv[2] - mid_hsv[2]) ** 2))
 

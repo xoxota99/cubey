@@ -29,7 +29,7 @@ colors: {
       max: [24,255,255]
     },
     "R": { # "Red"
-      min: [248,109,64], # TODO: Red wraps from 255 to 0. Use modulo.
+      min: [248,109,64],
       max: [7,255,255]
     },
     "G": { # "Green"

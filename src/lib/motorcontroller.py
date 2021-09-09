@@ -152,7 +152,7 @@ class MotorController:
         Take a recipe, of the form (e.g.) "R L2 F B U' F' D F' U B2 L' U2 B2 U D' B2 U2 L2 D' R2 D2"
         and execute it using the attached stepper motors.
         """
-        # print("EXECUTING....")
+
         if not is_init:
             self._initialize()
         recipe = recipe_str.split()
