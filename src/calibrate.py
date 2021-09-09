@@ -42,7 +42,7 @@ def collision_detect(config):
             if bracket1["max"][0] < bracket1["min"][0]:
                 collide = (bracket1["max"][0] > bracket2["min"][0]) or (
                     bracket1["min"][0] < bracket2["max"][0])
-            elif bracket1["max"][0] < bracket1["min"][0]:
+            elif bracket2["max"][0] < bracket2["min"][0]:
                 collide = (bracket2["max"][0] > bracket1["min"][0]) or (
                     bracket2["min"][0] < bracket1["max"][0])
             else:
