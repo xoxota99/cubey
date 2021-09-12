@@ -46,14 +46,14 @@ def solve_interactive(scanner, solver, motors):
     t0 = round(time.time() * 1000)
     state_str = scanner.get_state_string(motors)
     t1 = round(time.time() * 1000)
-    print("Scan complete! Cube state: {0}\n".format(state_str))
+    logging.info("Scan complete! Cube state: {0}\n".format(state_str))
 
     input("Press any key to generate the solution.")
 
     t2 = round(time.time() * 1000)
     solution = solver.solve(state_str)
     t3 = round(time.time() * 1000)
-    print("Finished solving! Solution: {0}\n".format(solution))
+    logging.info("Finished solving! Solution: {0}\n".format(solution))
 
     input("Press any key to execute the solution.")
 
@@ -61,9 +61,9 @@ def solve_interactive(scanner, solver, motors):
     motors.execute(solution)
     t5 = round(time.time() * 1000)
 
-    print('Scan time: {:d}ms'.format(t1 - t0))
-    print('Solve time: {:d}ms'.format(t3 - t2))
-    print('Execution time: {:d}ms'.format(t5 - t4))
+    logging.info('Scan time: {:d}ms'.format(t1 - t0))
+    logging.info('Solve time: {:d}ms'.format(t3 - t2))
+    logging.info('Execution time: {:d}ms'.format(t5 - t4))
 
     return(0)
 

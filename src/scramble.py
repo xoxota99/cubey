@@ -12,8 +12,8 @@ Utility for scrambling / descrambling the cube
 
 def descramble(recipe_str):
     """
-    Fun but useless function to take a known scramble recipe, and play it backwards. 
-    So we can scramble the cube, then descramble it. Could be useful for running 
+    Fun but useless function to take a known scramble recipe, and play it backwards.
+    So we can scramble the cube, then descramble it. Could be useful for running
     mechanical stress testing ending in a known cube state?
     """
     recipe_arr = recipe_str.split()
@@ -50,30 +50,30 @@ if __name__ == "__main__":
 
     if mode == "S":  # scramble
         recipe = slv.scramble(20, 30)
-        print(recipe)
+        logging.info(recipe)
         motors.execute(recipe)
     elif mode == "D":  # descramble. Optionally provide a recipe.
         if(len(sys.argv) > 2):
             s = sys.argv[2].upper()
         else:
             s = slv.scramble(20, 30)
-            print("Scramble: {:s}", s)
+            logging.info("Scramble: {:s}".format(s))
             motors.execute(s)
             sleep(1)
 
         d = descramble(s)
-        print("Descramble: {:s}", d)
+        logging.info("Descramble: {:s}".format(d))
         motors.execute(d)
 
     elif mode == "DD":  # INFINITE scramble / descramble.
         while True:
-            print()
+            logging.info()
             s = slv.scramble(20, 30)
-            print("Scramble: {:s}", s)
+            logging.info("Scramble: {:s}".format(s))
             motors.execute(s)
             sleep(1)
 
             d = descramble(s)
-            print("Descramble: {:s}", d)
+            logging.info("Descramble: {:s}".format(d))
             motors.execute(d)
             sleep(1)
