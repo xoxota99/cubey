@@ -35,7 +35,7 @@ class Solver:
             min_scramble_moves = self.config['app']['min_scramble_moves']
 
         if max_scramble_moves is None:
-            min_scramble_moves = self.config['app']['max_scramble_moves']
+            max_scramble_moves = self.config['app']['max_scramble_moves']
 
         recipe = ""
         move_count = random.randint(min_scramble_moves, max_scramble_moves + 1)
@@ -45,10 +45,10 @@ class Solver:
         for _ in range(move_count):
             while base == last_base:
                 # pick a random face
-                base = random.choice(["U", "R", "F", "D", "L", "B"])
+                base = random.choice(["F", "U", "R", "B", "L", "D"])
 
             last_base = base
-            add = random.randint(0, 3)
+            add = random.randint(0, 4)
             xtra = ""
 
             if add == 1:
