@@ -99,27 +99,35 @@ class Camera:
         self.config = config
         self.vidcap = cv2.VideoCapture(config['cam']['camera_deviceID'])
 
-        self.vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, config['cam']['frameWidth'])
+        self.vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, config['cam']['frame_width'])
+
         self.vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT,
-                        config['cam']['frameHeight'])
+                        config['cam']['frame_height'])
+
         self.vidcap.set(cv2.CAP_PROP_FPS, config['cam']['fps'])
 
         if calib_data["camera"]["brightness"] != "default":
             self.vidcap.set(cv2.CAP_PROP_BRIGHTNESS,
                             calib_data["camera"]["brightness"])
+
         if calib_data["camera"]["contrast"] != "default":
             self.vidcap.set(cv2.CAP_PROP_CONTRAST,
                             calib_data["camera"]["contrast"])
+
         if calib_data["camera"]["saturation"] != "default":
             self.vidcap.set(cv2.CAP_PROP_SATURATION,
                             calib_data["camera"]["saturation"])
+
         if calib_data["camera"]["hue"] != "default":
             self.vidcap.set(cv2.CAP_PROP_HUE, calib_data["camera"]["hue"])
+
         if calib_data["camera"]["gain"] != "default":
             self.vidcap.set(cv2.CAP_PROP_GAIN, calib_data["camera"]["gain"])
+
         if calib_data["camera"]["auto_exposure"] != "default":
             self.vidcap.set(cv2.CAP_PROP_AUTO_EXPOSURE,
                             calib_data["camera"]["auto_exposure"])
+
         if calib_data["camera"]["exposure"] != "default":
             self.vidcap.set(cv2.CAP_PROP_EXPOSURE,
                             calib_data["camera"]["exposure"])
@@ -154,10 +162,10 @@ class Camera:
 
         hsvframe = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
 
-        if self.config['cam']['flipCamera']:
+        if self.config['cam']['flip_camera']:
             logging.info("FLIP")
             hsvframe = cv2.flip(
-                hsvframe, flipCode=self.config['cam']['flipCode'])
+                hsvframe, flipCode=self.config['cam']['flip_code'])
 
         is_black = True
         r = self.calib_data["sample_size"]

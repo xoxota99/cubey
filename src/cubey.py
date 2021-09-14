@@ -75,7 +75,7 @@ if __name__ == "__main__":
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     logging.basicConfig(
-        level=logging.getLevelName(config['app']['logLevel']), format=config['app']['logFormat'])
+        level=logging.getLevelName(config['app']['log_level']), format=config['app']['log_format'])
 
     scanner = Scanner(config)
     solver = Solver(config)

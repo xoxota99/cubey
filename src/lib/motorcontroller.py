@@ -29,7 +29,7 @@ class MotorController:
 
         config = _config
 
-        pins = _config['stepper']['pins']
+        pins = _config['stepper']['pin_map']
 
         # Direction GPIO Pin
         DIR_PIN = pins['dir']

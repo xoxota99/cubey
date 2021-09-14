@@ -11,7 +11,7 @@ class Solver:
 
     def __init__(self, config):
         self.config = config
-        self.solver_cmd = config['app']['solverCMD']
+        self.solver_cmd = config['app']['solver_cmd']
 
     def solve(self, cube_state):
         """

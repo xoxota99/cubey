@@ -1,8 +1,8 @@
 app:
-  logLevel : "INFO"
-  logFormat : "%(asctime)s - %(levelname)s - %(message)s"
+  log_level : "INFO"
+  log_format : "%(asctime)s - %(levelname)s - %(message)s"
 
-  solverCMD : "../kociemba/solve"
+  solver_cmd : "../kociemba/solve"
 
   min_scramble_moves : 20
   max_scramble_moves : 50
@@ -13,8 +13,8 @@ cam:
 
   calibration : "default_calib.yaml"
 
-  frameWidth: 640
-  frameHeight: 480
+  frame_width: 640
+  frame_height: 480
   fps: 60
 
   sample_coords: [
@@ -23,13 +23,13 @@ cam:
       [270, 430], [420, 440]
     ]
 
-  flipCamera: False
-  flipCode: 1       # 0 = vertical flip, 1 for horizontal, -1 for both.
+  flip_camera: False
+  flip_code: 1       # 0 = vertical flip, 1 for horizontal, -1 for both.
 
 
 stepper:
-  
-  pincfg_v2: &pincfg_v2       # GPIO pin mapping to function.
+
+  pin_map: # GPIO pin mapping to function.
     back: 2
     front: 3
     left: 22
@@ -38,10 +38,7 @@ stepper:
     down: 13
     up: 19
     dir: 26
-  
 
-  pins: *pincfg_v2
-  rpm: 60
   steps_per_rev: 200
   move_delay: 0.01   # seconds to wait between cube moves.
   hertz: 2000       # pulses per second. Basically speed. Do not exceed 4000 Hz.

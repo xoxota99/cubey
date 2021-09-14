@@ -17,7 +17,7 @@ with open(config_file, "r") as ymlfile:
     config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
 logging.basicConfig(
-    level=logging.getLevelName(config["app"]["logLevel"]), format=config["app"]["logFormat"])
+    level=logging.getLevelName(config["app"]["log_level"]), format=config["app"]["log_format"])
 
 sample_coords = config["cam"]["sample_coords"]
 calib_file = config["cam"]["calibration"]
@@ -180,7 +180,7 @@ if __name__ == "__main__":
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     logging.basicConfig(
-        level=logging.getLevelName(config["app"]["logLevel"]), format=config["app"]["logFormat"])
+        level=logging.getLevelName(config["app"]["log_level"]), format=config["app"]["log_format"])
 
     motors = MotorController(config)
 
