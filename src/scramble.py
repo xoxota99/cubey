@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     elif mode == "DD":  # INFINITE scramble / descramble.
         while True:
-            logging.info()
+            logging.info("")
             s = slv.scramble(20, 30)
             logging.info("Scramble: {:s}".format(s))
             motors.execute(s)

@@ -70,3 +70,6 @@ if __name__ == "__main__":
             if mask_hsv[y, x] != 0:      # Why are x and y reversed? No idea.
                 print(clr)
                 break
+        else:
+            # no colors found!
+            print("No known colors found at ({0}, {1})".format(x, y))
