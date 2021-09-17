@@ -19,7 +19,7 @@ butPin = 4
 ledPin = 14     # You may have to disable UART to use pin 14.
 
 
-def shut_down(channel):
+def shut_down(gpio, level, tick):
     print("Shutting Down")
     call("sudo shutdown -P now", shell=True)
 
@@ -34,7 +34,7 @@ def main():
     pi.callback(butPin, pigpio.FALLING_EDGE, shut_down)
 
     pi.set_mode(ledPin, pigpio.OUTPUT)
-    pi.write(ledPin, 0)
+    pi.write(ledPin, 0)  # inverted signal. zero is lit, 1 is unlit.
 
     # Now wait!
     while 1:
