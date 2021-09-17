@@ -12,12 +12,12 @@ from lib.camera import Camera
 
 # Default state of the cube, fully solved.
 SOLVED_STATE = {
-    'F': np.full(9, "F").tolist(),
-    'B': np.full(9, "B").tolist(),
-    'L': np.full(9, "L").tolist(),
-    'R': np.full(9, "R").tolist(),
     'U': np.full(9, "U").tolist(),
-    'D': np.full(9, "D").tolist()
+    'R': np.full(9, "R").tolist(),
+    'F': np.full(9, "F").tolist(),
+    'D': np.full(9, "D").tolist(),
+    'L': np.full(9, "L").tolist(),
+    'B': np.full(9, "B").tolist()
 }
 
 
@@ -75,6 +75,7 @@ def get_state_img(state):
         [3, 6]
     ]
 
+    # The order here is nonstanndard, and important.
     for i, face in enumerate(["U", "L", "F", "R", "B", "D"]):
         xb = face_coords[i][0] * facelet_pixel_size
         yb = face_coords[i][1] * facelet_pixel_size

@@ -45,7 +45,7 @@ class Solver:
         for _ in range(move_count):
             while base == last_base:
                 # pick a random face
-                base = random.choice(["F", "U", "R", "B", "L", "D"])
+                base = random.choice(["U", "R", "F", "D", "L", "B"])
 
             last_base = base
             add = random.randint(0, 4)

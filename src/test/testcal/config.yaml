@@ -1,27 +1,27 @@
 colors: {
     # specify min-max HSV brackets for each color.
-    "F":  { # Front (Orange)
-      min: [8,170,20],
-      max: [24,255,255]
-    },
-    "B": { # Back (Red)
-      min: [248,109,64],
-      max: [7,255,255]
-    },
-    "L": { # Left (Green)
-      min: [60,109,50],
-      max: [100,255,255]
+    "U": { # Up (Yellow)
+      min: [25,190,20],
+      max: [46,255,255]
     },
     "R": { # Right (Blue)
       min: [140,109,20],
       max: [185,255,255]
     },
-    "U": { # Up (Yellow)
-      min: [25,190,20],
-      max: [46,255,255]
+    "F":  { # Front (Orange)
+      min: [8,170,20],
+      max: [24,255,255]
     },
     "D": { # Down (White)
       min: [0,0,100],
       max: [255,60,255]
+    },
+    "L": { # Left (Green)
+      min: [60,109,50],
+      max: [100,255,255]
+    },
+    "B": { # Back (Red)
+      min: [248,109,64],
+      max: [7,255,255]
     }
 }

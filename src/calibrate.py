@@ -1,7 +1,6 @@
 import numpy as np
 import logging
 import yaml
-import math
 import sys
 
 from lib import camera
@@ -30,7 +29,7 @@ camera = camera.Camera(config, calib)
 
 def collision_detect(config):
     collisions = []
-    keys = ["F", "U", "R", "B", "L", "D"]
+    keys = ["U", "R", "F", "D", "L", "B"]
     cal = config["colors"]
 
     for i in range(0, 6):
@@ -85,12 +84,12 @@ def calibrate(motors):
 
     # colors, in HSV format.
     facelet_hsv = {
-        "F": np.zeros((6, 3)).tolist(),
         "U": np.zeros((6, 3)).tolist(),
         "R": np.zeros((6, 3)).tolist(),
-        "B": np.zeros((6, 3)).tolist(),
+        "F": np.zeros((6, 3)).tolist(),
+        "D": np.zeros((6, 3)).tolist(),
         "L": np.zeros((6, 3)).tolist(),
-        "D": np.zeros((6, 3)).tolist()
+        "B": np.zeros((6, 3)).tolist()
     }
 
     facelet_hsv["F"][0], facelet_hsv["R"][1], facelet_hsv["F"][2], facelet_hsv["R"][

@@ -31,7 +31,7 @@ def test_color(raw_hsv, min_hsv, max_hsv):
 
 def guess_color(raw_hsv, calib_data):
     best_dist = 0
-    best_color = "X"  # one of "F","U","R","B","L","D". "X" is "unknown".
+    best_color = "X"  # one of "U","R","F","D","L","B". "X" is "unknown".
 
     for _, (color_name, calib_color_data) in enumerate(calib_data["colors"]):
         min_hsv = np.array(calib_color_data["min"])
