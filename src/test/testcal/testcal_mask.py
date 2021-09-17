@@ -38,7 +38,7 @@ config_file = "config.yaml"
 
 
 def collision_detect(config):
-    compared = {"F": [], "U": [], "R": [], "B": [], "L": [], "D": []}
+    compared = {"U": [], "R": [], "F": [], "D": [], "L": [], "B": []}
     cal = config["colors"]
 
     for key1 in cal:  # 6
@@ -52,7 +52,7 @@ def collision_detect(config):
                     # special case (red). Max H value is less than min.
                     red = bracket1
                     nonred = bracket2
-                    if bracket2[1][0] < bracket2[0][0]:  # swap
+                    if bracket2["max"][0] < bracket2["min"][0]:  # swap
                         red = bracket2
                         nonred = bracket1
 
