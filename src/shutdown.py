@@ -22,7 +22,7 @@ ledPin = 14     # You may have to disable UART to use pin 14.
 
 def shut_down(gpio, level, tick):
     print("Shutting Down")
-    call("sudo shutdown -P now", shell=True)
+    call("sudo shutdown now warning-message System is shutting down NOW...", shell=True)
 
 
 def main():
