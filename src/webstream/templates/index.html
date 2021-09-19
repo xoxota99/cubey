@@ -3,6 +3,16 @@
 
 <head>
   <title>Cubey 1.0 Live Feed</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+        $("img").on("click", function(event) {
+            var x = event.pageX - this.offsetLeft;
+            var y = event.pageY - this.offsetTop;
+            console.log('alt',"X Coordinate: " + x + " Y Coordinate: " + y);
+        });
+    });
+</script>
 </head>
 
 <body style="background:white">
