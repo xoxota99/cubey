@@ -15,8 +15,8 @@ STEP_FACTOR = 8  # number of pulses per step. (for microstepping)
 MOVE_DELAY = 0.05  # take a small break beween stepper movements.
 HERTZ = 400
 
-CW = 0
-CCW = 1
+CW = 1
+CCW = 0
 
 pi = None       # pigpio reference
 is_init = False
