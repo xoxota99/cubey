@@ -103,8 +103,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 .vscode/
-src/kociemba/prunetables
-src/kociemba/solve
 doc/eagle/*.b#*
 doc/~$*
 scrap/

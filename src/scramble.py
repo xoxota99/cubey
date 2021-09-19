@@ -1,13 +1,44 @@
 from time import sleep
 import logging
 import sys
+import random
 
 from lib.motorcontroller import MotorController
-from lib.solver import Solver
 
 """
 Utility for scrambling / descrambling the cube
 """
+
+
+def scramble(min_scramble_moves, max_scramble_moves):
+    """
+    Return a move list to scramble the cube.
+    The number of moves in the scramble is determined by the config settings app.min_scramble_moves and app.max_scramble_moves
+    Example output: "U R' B2 D F' U' D' R F' U2 F' L2 F2 B2 D2 F2 D' F2 B2 U' B2"
+    """
+
+    recipe = ""
+    move_count = random.randint(min_scramble_moves, max_scramble_moves + 1)
+    base = "X"
+    last_base = "X"
+
+    for _ in range(move_count):
+        while base == last_base:
+            # pick a random face
+            base = random.choice(["U", "R", "F", "D", "L", "B"])
+
+        last_base = base
+        add = random.randint(0, 4)
+        xtra = ""
+
+        if add == 1:
+            xtra = "'"
+        elif add == 2:
+            xtra = "2"
+
+        recipe = recipe + base + xtra + " "
+
+    return recipe
 
 
 def descramble(recipe_str):
@@ -42,21 +73,20 @@ if __name__ == "__main__":
 
     mode = "S"  # scramble by default.
 
-    slv = Solver(config)
     motors = MotorController(config)
 
     if len(sys.argv) > 1:
         mode = sys.argv[1].upper()
 
     if mode == "S":  # scramble
-        recipe = slv.scramble(20, 30)
+        recipe = scramble(20, 30)
         logging.info(recipe)
         motors.execute(recipe)
     elif mode == "D":  # descramble. Optionally provide a recipe.
         if(len(sys.argv) > 2):
             s = sys.argv[2].upper()
         else:
-            s = slv.scramble(20, 30)
+            s = scramble(20, 30)
             logging.info("Scramble: {:s}".format(s))
             motors.execute(s)
             sleep(1)
@@ -68,7 +98,7 @@ if __name__ == "__main__":
     elif mode == "DD":  # INFINITE scramble / descramble.
         while True:
             logging.info("")
-            s = slv.scramble(20, 30)
+            s = scramble(20, 30)
             logging.info("Scramble: {:s}".format(s))
             motors.execute(s)
             sleep(1)

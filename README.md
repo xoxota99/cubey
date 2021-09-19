@@ -22,4 +22,4 @@ I'm using all the same hardware and 3D-printed parts as [HighFrequencyTwister](h
 I've also created a [custom PCB](https://oshpark.com/shared_projects/dzYt5cpy) to tidy up the wiring of the DRV8825 carrier boards. It sits where a Raspberry pi hat would sit, but definitely does NOT conform to the RPI Hat specification (no cutouts for display connector, no EEPROM for board identification, etc.)
 
 ## Software
-I use the same offline C implementation of the kociemba solver as [HighFrequencyTwister](https://github.com/jayflatland/HighFrequencyTwister), and all other code is written in Python, with GPIO control for stepper motor control via [piGPIO](https://github.com/joan2937/pigpio). Cubey uses a single camera for Cube State estimation, which simplifies calibration, but impacts speed. Cubey definitely *won't* set any world speed records.
+cubey uses the python implementation of the [kociemba solver](https://github.com/muodov/kociemba), and [piGPIO](https://github.com/joan2937/pigpio) for stepper motor control. Cubey uses a single camera for Cube State estimation, which simplifies calibration, but impacts speed. Cubey definitely *won't* set any world speed records.

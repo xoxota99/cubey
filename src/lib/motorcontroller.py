@@ -76,7 +76,7 @@ class MotorController:
 
             # Set up pins as an output
             pi.set_mode(DIR_PIN, pigpio.OUTPUT)
-            for _, val in config['stepper']['pins'].items():
+            for _, val in config['stepper']['pin_map'].items():
                 pi.set_mode(val, pigpio.OUTPUT)
 
             is_init = True

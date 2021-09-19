@@ -2,11 +2,6 @@ app:
   log_level : "INFO"
   log_format : "%(asctime)s - %(levelname)s - %(message)s"
 
-  solver_cmd : "../kociemba/solve"
-
-  min_scramble_moves : 20
-  max_scramble_moves : 50
-
 cam:
   warmup_delay_ms : 1000
   camera_deviceID : 0

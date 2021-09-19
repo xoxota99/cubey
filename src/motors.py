@@ -27,7 +27,6 @@ class MyPrompt(Cmd):
         super(MyPrompt, self).__init__()
 
     def default(self, inp):
-
         if inp == "Q" or inp == "EOF":
             return self.do_q(inp)
 

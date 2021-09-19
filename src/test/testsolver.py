@@ -3,6 +3,7 @@ import os
 import subprocess
 import logging
 import time
+import kociemba
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -321,17 +322,16 @@ def solve(t, r):
 
     logging.info('running test %d...' % (cnt + 1))
     start = time.time()
-    res = subprocess.check_output(
-        [cmd, t.strip()], stderr=open(os.devnull, 'wb')).strip()
+    res = kociemba.solve(t)
     end = time.time()
-    res = res.decode("utf-8")
+
     logging.info(res)
     if res != r.strip():
         logging.error(
             'Error for %s:\n\tmust be: %s\n\tgot: %s' % (t, repr(r), repr(res)))
         sys.exit(1)
 
-    testtime = end-start
+    testtime = end - start
 
     maxtime = max(maxtime, testtime)
     mintime = min(mintime, testtime)
@@ -344,6 +344,7 @@ if __name__ == '__main__':
 
     totaltime = 0
     totalstart = time.time()
+    cnt = 0
     if len(sys.argv) > 1:
         fname = sys.argv[1]
         logging.info('loading tests from %s', fname)
@@ -351,16 +352,18 @@ if __name__ == '__main__':
             t = f.readline()
             while t:
                 r = f.readline()
+                cnt += 1
                 solve(t, r)
                 t = f.readline()
     else:
         for i, tst in enumerate(javares):
             t, r = tst
+            cnt += 1
             solve(t, r)
 
     totalend = time.time()
     totaltime = totalend - totalstart
 
-    logging.info('all %d tests passed' % len(javares))
+    logging.info('all %d tests passed' % cnt)
     logging.info('maxtime: {0}ms, mintime: {1}ms, totaltime: {2}ms'.format(
-        round(maxtime*1000), round(mintime*1000), round(totaltime*1000)))
+        round(maxtime * 1000), round(mintime * 1000), round(totaltime * 1000)))

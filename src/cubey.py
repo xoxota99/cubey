@@ -5,14 +5,14 @@ import yaml
 
 from lib.motorcontroller import MotorController
 from lib.scanner import Scanner
-from lib.solver import Solver
+import kociemba
 
 """
 Main Cubey application
 """
 
 
-def solve(scanner, solver, motors):
+def solve(scanner, motors):
     """scan the cube, get a solution from kociemba, then execute it on the robot."""
     logging.info("Scanning...")
     t0 = round(time.time() * 1000)
@@ -24,7 +24,7 @@ def solve(scanner, solver, motors):
 
     logging.info("Solving...")
     t2 = round(time.time() * 1000)
-    solution = solver.solve(state_str)
+    solution = kociemba.solve(state_str)
     t3 = round(time.time() * 1000)
     logging.info("Solution: " + solution)
 
@@ -40,7 +40,7 @@ def solve(scanner, solver, motors):
     return(0)
 
 
-def solve_interactive(scanner, solver, motors):
+def solve_interactive(scanner, motors):
     """scan the cube, get a solution from kociemba, then execute it on the robot."""
     input("Press any key to begin scanning the cube.")
     t0 = round(time.time() * 1000)
@@ -51,7 +51,7 @@ def solve_interactive(scanner, solver, motors):
     input("Press any key to generate the solution.")
 
     t2 = round(time.time() * 1000)
-    solution = solver.solve(state_str)
+    solution = kociemba.solve(state_str)
     t3 = round(time.time() * 1000)
     logging.info("Finished solving! Solution: {0}\n".format(solution))
 
@@ -78,7 +78,6 @@ if __name__ == "__main__":
         level=logging.getLevelName(config['app']['log_level']), format=config['app']['log_format'])
 
     scanner = Scanner(config)
-    solver = Solver(config)
     motors = MotorController(config)
 
     solvers = {
@@ -94,4 +93,4 @@ if __name__ == "__main__":
     # non-interactive solver is the default, if not found.
     func = solvers.get(mode, solve)
 
-    sys.exit(func(scanner, solver, motors))
+    sys.exit(func(scanner, motors))
