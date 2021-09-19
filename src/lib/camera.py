@@ -29,13 +29,13 @@ def test_color(raw_hsv, min_hsv, max_hsv):
     return retval
 
 
-def guess_color(raw_hsv, calib_data):
+def guess_color(raw_hsv, colors):
     best_dist = 0
     best_color = "X"  # one of "U","R","F","D","L","B". "X" is "unknown".
 
-    for _, (color_name, calib_color_data) in enumerate(calib_data["colors"]):
-        min_hsv = np.array(calib_color_data["min"])
-        max_hsv = np.array(calib_color_data["max"])
+    for color_name in colors:
+        min_hsv = np.array(colors[color_name]["min"])
+        max_hsv = np.array(colors[color_name]["max"])
 
         if max_hsv[0] < min_hsv[0]:
             min_hsv[0] -= 255  # make minH negative.
@@ -186,19 +186,25 @@ class Camera:
 
             retval.append(avg)   # append average hsv values.
             if filename is not None:
-                # write the captured raw image, for debugging.
-                cv2.imwrite(filename + ".png", frame)
+                # draw the sample aperture on the raw frame.
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(frame, "h: {0}\ns: {1}\nv: {2}".format(avg[0], avg[1], avg[2]), (x2, y2),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+        if filename is not None:
+            # write the captured raw image, for debugging.
+            cv2.imwrite(filename + ".png", frame)
 
         if is_black:
             logging.warning("All colors are BLACK. Is the lense cap on?")
 
         return retval
 
-    def get_faces(self):
+    def get_faces(self, filename=None):
         """
         Given an array of HSV values, return an array of FURBDL values 
         """
-        arr = self.get_raw_hsv()
+        arr = self.get_raw_hsv(filename)
         retval = []
         for idx, raw_hsv in enumerate(arr):
             # Given the raw color, guess the actual color, based on calibrated lightning conditions.
@@ -224,4 +230,4 @@ if __name__ == "__main__":
 
     camera = Camera(config, calib)
 
-    logging.info(camera.get_faces())
+    logging.info(camera.get_faces("test"))
