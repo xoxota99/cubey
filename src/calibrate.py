@@ -65,11 +65,11 @@ def collision_detect(config):
                 )
 
     if len(collisions) > 0:
-        logging.warn("-----------------------------------------------")
-        logging.warn("There were collisions in the HSV calibration:")
+        logging.warning("-----------------------------------------------")
+        logging.warning("There were collisions in the HSV calibration:")
         for c in collisions:
-            logging.warn("\t{0}".format(c))
-        logging.warn("-----------------------------------------------")
+            logging.warning("\t{0}".format(c))
+        logging.warning("-----------------------------------------------")
 
 
 def calibrate(motors):

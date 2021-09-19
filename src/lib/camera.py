@@ -57,7 +57,7 @@ def guess_color(raw_hsv, calib_data):
                 best_dist = dist
 
     if best_color == "X":
-        logging.warn("UNKNOWN COLOR {0}".format(raw_hsv))
+        logging.warning("UNKNOWN COLOR {0}".format(raw_hsv))
     else:
         logging.info(i_guess_color_str.format(raw_hsv, best_color, best_dist))
 
@@ -157,7 +157,7 @@ class Camera:
         _, frame = self.vidcap.read()   # take a picture.
 
         if frame is None:
-            logging.warn("no frames!")
+            logging.warning("no frames!")
             return np.full(6, [0.0, 0.0, 0.0]).tolist()
 
         hsvframe = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
@@ -190,7 +190,7 @@ class Camera:
                 cv2.imwrite(filename + ".png", frame)
 
         if is_black:
-            logging.warn("All colors are BLACK. Is the lense cap on?")
+            logging.warning("All colors are BLACK. Is the lense cap on?")
 
         return retval
 
