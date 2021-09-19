@@ -153,7 +153,7 @@ def calibrate(motors):
     collision_detect(cal)
 
     retval = {"colors": cal,
-              "sample_size": camera.calib_data["sample_size"]}
+              "sample_aperture": config["cam"]["sample_aperture"]}
     return retval
 
 

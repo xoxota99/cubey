@@ -8,19 +8,19 @@
 # NOTE: we *still* need half-decent lighting. In low-light conditions, blue, red, yellow, all 
 # look pretty much alike, and the solver will misread those colors even with calibration.
 
-# When sampling (or scanning) a coordinate in the captured image, average the color from a square 
-# of twice this width / height in pixels.
-sample_size: 10 # 20x20 pixel square
-
+# valid range for each of these arguments is very camera-dependent. (use 'v4l2-ctl --list-ctrls')
 camera: 
-  hue: 0.5
-  saturation: 0.390625
-  brightness: 0.5
-  gain: 0.0
-  contrast: 0.3263157894736842
-  auto_exposure: 0.75   # 0.25 for manual, 0.75 for auto.
-  exposure: default     # for ELP cameras, you must set auto_exposure to 0.25 in order to use manual exposure (see https://github.com/opencv/opencv/issues/9738). This also makes video capture much slower.
-  
+  CAP_PROP_FRAME_WIDTH: 640
+  CAP_PROP_FRAME_HEIGHT: 480
+  CAP_PROP_FPS: 60
+  CAP_PROP_HUE: default
+  CAP_PROP_SATURATION: default
+  CAP_PROP_BRIGHTNESS: default
+  CAP_PROP_GAIN: default
+  CAP_PROP_CONTRAST: default
+  CAP_PROP_AUTO_EXPOSURE: default
+  CAP_PROP_EXPOSURE: default 
+
 colors: {
     # specify min-max HSV brackets for each color.
     "U": { # Up (Yellow)

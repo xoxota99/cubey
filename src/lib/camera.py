@@ -71,24 +71,15 @@ class Camera:
 
     def get_settings(self):
         return {
-            "brightness": self.vidcap.get(cv2.CAP_PROP_BRIGHTNESS),
-            "contrast": self.vidcap.get(cv2.CAP_PROP_CONTRAST),
-            "saturation": self.vidcap.get(cv2.CAP_PROP_SATURATION),
-            "hue": self.vidcap.get(cv2.CAP_PROP_HUE),
-            "gain": self.vidcap.get(cv2.CAP_PROP_GAIN),
-            "auto_exposure": self.vidcap.get(cv2.CAP_PROP_AUTO_EXPOSURE),
-            "exposure": self.vidcap.get(cv2.CAP_PROP_EXPOSURE),
-            "sample_size": self.calib_data["sample_size"]
+            "CAP_PROP_BRIGHTNESS": self.vidcap.get(cv2.CAP_PROP_BRIGHTNESS),
+            "CAP_PROP_CONTRAST": self.vidcap.get(cv2.CAP_PROP_CONTRAST),
+            "CAP_PROP_SATURATION": self.vidcap.get(cv2.CAP_PROP_SATURATION),
+            "CAP_PROP_HUE": self.vidcap.get(cv2.CAP_PROP_HUE),
+            "CAP_PROP_GAIN": self.vidcap.get(cv2.CAP_PROP_GAIN),
+            "CAP_PROP_AUTO_EXPOSURE": self.vidcap.get(cv2.CAP_PROP_AUTO_EXPOSURE),
+            "CAP_PROP_EXPOSURE": self.vidcap.get(cv2.CAP_PROP_EXPOSURE),
+            "sample_aperture": self.config["cam"]["sample_aperture"]
         }
-
-    def warmup_time(self, millis):
-        t = time.time() * 1000
-        while True:
-            s = time.time() * 1000
-            if s - t <= millis:
-                self.vidcap.grab()
-            else:
-                break
 
     def warmup_frames(self, frames):
         for _ in range(frames):
@@ -97,46 +88,53 @@ class Camera:
     def __init__(self, config, calib_data):
 
         self.config = config
-        self.vidcap = cv2.VideoCapture(config['cam']['camera_deviceID'])
+        self.vidcap = cv2.VideoCapture(config["cam"]["camera_deviceID"])
 
-        self.vidcap.set(cv2.CAP_PROP_FRAME_WIDTH, config['cam']['frame_width'])
+        for prop_name in calib_data["camera"]:
+            if calib_data["camera"][prop_name] != "default" and hasattr(cv2, prop_name):
+                self.vidcap.set(getattr(cv2, prop_name),
+                                calib_data["camera"][prop_name])
 
-        self.vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT,
-                        config['cam']['frame_height'])
+        # self.vidcap.set(cv2.CAP_PROP_FRAME_WIDTH,
+        #                 config['cam']['CAP_PROP_FRAME_WIDTH'])
 
-        self.vidcap.set(cv2.CAP_PROP_FPS, config['cam']['fps'])
+        # self.vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT,
+        #                 config['cam']['CAP_PROP_FRAME_HEIGHT'])
 
-        if calib_data["camera"]["brightness"] != "default":
-            self.vidcap.set(cv2.CAP_PROP_BRIGHTNESS,
-                            calib_data["camera"]["brightness"])
+        # self.vidcap.set(cv2.CAP_PROP_FPS, config['cam']['CAP_PROP_FPS'])
 
-        if calib_data["camera"]["contrast"] != "default":
-            self.vidcap.set(cv2.CAP_PROP_CONTRAST,
-                            calib_data["camera"]["contrast"])
+        # if calib_data["camera"]["CAP_PROP_BRIGHTNESS"] != "default":
+        #     self.vidcap.set(cv2.CAP_PROP_BRIGHTNESS,
+        #                     calib_data["camera"]["CAP_PROP_BRIGHTNESS"])
 
-        if calib_data["camera"]["saturation"] != "default":
-            self.vidcap.set(cv2.CAP_PROP_SATURATION,
-                            calib_data["camera"]["saturation"])
+        # if calib_data["camera"]["CAP_PROP_CONTRAST"] != "default":
+        #     self.vidcap.set(cv2.CAP_PROP_CONTRAST,
+        #                     calib_data["camera"]["CAP_PROP_CONTRAST"])
 
-        if calib_data["camera"]["hue"] != "default":
-            self.vidcap.set(cv2.CAP_PROP_HUE, calib_data["camera"]["hue"])
+        # if calib_data["camera"]["CAP_PROP_SATURATION"] != "default":
+        #     self.vidcap.set(cv2.CAP_PROP_SATURATION,
+        #                     calib_data["camera"]["CAP_PROP_SATURATION"])
 
-        if calib_data["camera"]["gain"] != "default":
-            self.vidcap.set(cv2.CAP_PROP_GAIN, calib_data["camera"]["gain"])
+        # if calib_data["camera"]["CAP_PROP_HUE"] != "default":
+        #     self.vidcap.set(cv2.CAP_PROP_HUE,
+        #                     calib_data["camera"]["CAP_PROP_HUE"])
 
-        if calib_data["camera"]["auto_exposure"] != "default":
-            self.vidcap.set(cv2.CAP_PROP_AUTO_EXPOSURE,
-                            calib_data["camera"]["auto_exposure"])
+        # if calib_data["camera"]["CAP_PROP_GAIN"] != "default":
+        #     self.vidcap.set(cv2.CAP_PROP_GAIN,
+        #                     calib_data["camera"]["CAP_PROP_GAIN"])
 
-        if calib_data["camera"]["exposure"] != "default":
-            self.vidcap.set(cv2.CAP_PROP_EXPOSURE,
-                            calib_data["camera"]["exposure"])
+        # if calib_data["camera"]["CAP_PROP_AUTO_EXPOSURE"] != "default":
+        #     self.vidcap.set(cv2.CAP_PROP_AUTO_EXPOSURE,
+        #                     calib_data["camera"]["CAP_PROP_AUTO_EXPOSURE"])
+
+        # if calib_data["camera"]["CAP_PROP_EXPOSURE"] != "default":
+        #     self.vidcap.set(cv2.CAP_PROP_EXPOSURE,
+        #                     calib_data["camera"]["CAP_PROP_EXPOSURE"])
 
         self.calib_data = calib_data
         self.sample_coords = config['cam']['sample_coords']
 
-        # self.warmup_time(cfg['cam']['warmup_delay_ms'])
-        self.warmup_frames(30)
+        self.warmup_frames(config['cam']['warmup_frames'])
 
     def get_raw_hsv(self, filename=None):
         """
@@ -168,7 +166,7 @@ class Camera:
                 hsvframe, flipCode=self.config['cam']['flip_code'])
 
         is_black = True
-        r = self.calib_data["sample_size"]
+        r = self.config["cam"]["sample_aperture"]
         for coord in self.sample_coords:    # for each of the 6 edge facelet coords
             x, y = coord[0], coord[1]
 

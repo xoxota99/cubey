@@ -5,12 +5,12 @@ from frameEvent import FrameEvent
 import threading
 import yaml
 
-cfg = {}
+config = {}
 with open("../config.yaml", 'r') as ymlfile:
-    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+    config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
 calib = {}
-calib_file = "../" + cfg['cam']['calibration']
+calib_file = "../" + config['cam']['calibration']
 with open(calib_file, 'r') as ymlfile:
     calib = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
@@ -18,8 +18,8 @@ with open(calib_file, 'r') as ymlfile:
 Camera singleton, that publishes "frame-ready" events to any listeners.
 """
 
-default_sample_coords = cfg["cam"]["sample_coords"]
-sample_size = calib["sample_size"]
+default_sample_coords = config["cam"]["sample_coords"]
+sample_size = config["cam"]["sample_aperture"]
 
 
 class Camera(object):
@@ -92,15 +92,10 @@ class Camera(object):
         self.cap.set(cv2.CAP_PROP_EXPOSURE, 500)
         """
 
-        # warmup the cameras. Discard all frames for two seconds.
-        t = time.time() * 1000
-
-        while True:
-            s = time.time() * 1000
-            if s - t <= 2000:
-                self.cap.grab()
-            else:
-                break
+        # warmup the cameras.
+        frames = config["cam"]["warmup_frames"]
+        for _ in range(frames):
+            self.cap.grab()
 
         try:
             while True:

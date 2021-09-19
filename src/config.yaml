@@ -3,14 +3,14 @@ app:
   log_format : "%(asctime)s - %(levelname)s - %(message)s"
 
 cam:
-  warmup_delay_ms : 1000
+  warmup_frames : 30
   camera_deviceID : 0
 
   calibration : "default_calib.yaml"
-
-  frame_width: 640
-  frame_height: 480
-  fps: 60
+  
+  # When sampling (or scanning) a coordinate in the captured image, average the color from a square 
+  # of twice this width / height in pixels.
+  sample_aperture: 10 # 20x20 pixel square
 
   sample_coords: [
       [300, 30], [440, 40],
