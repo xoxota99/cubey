@@ -71,12 +71,26 @@ class Camera(object):
                 break
         Camera.thread = None
 
-    def frames(self):
+    def stop(self):
+        if self.cap != None:
+            self.cap.release()
 
-        cap = cv2.VideoCapture(self.source)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # CV_CAP_PROP_FRAME_WIDTH
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)  # CV_CAP_PROP_FRAME_HEIGHT
-        cap.set(cv2.CAP_PROP_FPS, 60)   # CAP_PROP_FPS
+    def frames(self):
+        self.cap = cv2.VideoCapture(self.source)
+
+        """
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # CV_CAP_PROP_FRAME_WIDTH
+        # CV_CAP_PROP_FRAME_HEIGHT
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        self.cap.set(cv2.CAP_PROP_FPS, 60)   # CAP_PROP_FPS
+        self.cap.set(cv2.CAP_PROP_BRIGHTNESS, 64)
+        self.cap.set(cv2.CAP_PROP_CONTRAST, 95)
+        self.cap.set(cv2.CAP_PROP_SATURATION, 128)
+        self.cap.set(cv2.CAP_PROP_HUE, -2000)
+        self.cap.set(cv2.CAP_PROP_GAIN, 100)
+        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
+        self.cap.set(cv2.CAP_PROP_EXPOSURE, 500)
+        """
 
         # warmup the cameras. Discard all frames for two seconds.
         t = time.time() * 1000
@@ -84,27 +98,32 @@ class Camera(object):
         while True:
             s = time.time() * 1000
             if s - t <= 2000:
-                cap.grab()
+                self.cap.grab()
             else:
                 break
 
-        while True:
-            # read current frame
-            _, frame = cap.read()
+        try:
+            while True:
 
-            # overlay sampling coordinates.
-            num = 1
-            for coord in default_sample_coords:
-                cv2.rectangle(
-                    frame, (coord[0] - sample_size, coord[1] - sample_size), (coord[0] + sample_size, coord[1] + sample_size), (0, 255, 0), 2)
-                cv2.putText(
-                    frame, str(num), (coord[0] + sample_size, coord[1] - sample_size), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                # read current frame
+                _, frame = self.cap.read()
+
+                # overlay sampling coordinates.
+                num = 1
+                for coord in default_sample_coords:
+                    cv2.rectangle(
+                        frame, (coord[0] - sample_size, coord[1] - sample_size), (coord[0] + sample_size, coord[1] + sample_size), (0, 255, 0), 2)
+                    cv2.putText(
+                        frame, str(num), (coord[0] + sample_size, coord[1] - sample_size), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+                    num += 1
 
                 cv2.line(frame, (320, 0), (320, 30), (0.0, 255.0, 0.0), 2)
                 cv2.line(frame, (320, 480), (320, 450), (0.0, 255.0, 0.0), 2)
                 cv2.line(frame, (0, 240), (30, 240), (0.0, 255.0, 0.0), 2)
                 cv2.line(frame, (640, 240), (610, 240), (0.0, 255.0, 0.0), 2)
 
-                num += 1
-
-            yield cv2.imencode('.jpg', frame)[1].tobytes()
+                yield cv2.imencode('.jpg', frame)[1].tobytes()
+        except KeyboardInterrupt:
+            self.cap.release()
+            pass

@@ -1,7 +1,17 @@
 from flask import Flask, render_template, Response
 from camera import Camera
+import signal
+import sys
 
 app = Flask(__name__)
+cam = None
+
+
+def signal_handler(sig, frame):
+    print('You pressed Ctrl+C!')
+    if(cam != None):
+        cam.stop()
+    sys.exit(0)
 
 
 @app.route('/')
@@ -33,7 +43,9 @@ def gen(camera):
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(Camera(0)),
+    global cam
+    cam = Camera(0)
+    return Response(gen(cam),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # TODO: Also provide a graphic of the cube's state estimation.
@@ -41,4 +53,7 @@ def video_feed():
 
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal_handler)
+    # signal.pause()
+    print("starting")
     app.run(host='0.0.0.0', threaded=True)
