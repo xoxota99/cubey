@@ -1,0 +1,6 @@
+kociemba
+flask
+pillow
+greenlet
+opencv-python 
+opencv-contrib-python
