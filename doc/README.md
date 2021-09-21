@@ -101,7 +101,9 @@ This includes:
 * Prebuilt [OpenCV addons](https://pypi.org/project/opencv-contrib-python/) for python
 
 ## Enable shutdown button and power LED (Optional)
+In */boot/firmware/config.txt*, add the following:
+
     dtoverlay=gpio-poweroff,gpiopin=14
     dtoverlay=gpio-shutdown,gpio_pin=4,active_low=1
 
-Comment out `enable_uart=1` in */boot/firmware/config.txt*
+and comment out `enable_uart=1`
