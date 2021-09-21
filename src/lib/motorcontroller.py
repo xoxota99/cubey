@@ -88,10 +88,12 @@ class MotorController:
             sleep(0.001)
             is_init = False
 
-    def _tx_pulses(self, pin, hertz, num, pulse_len=1):
+    def _tx_pulses(self, pin, hertz, num):
         assert hertz < 500000
+
+        # length of shortest possible pulse, in microseconds.
         length_us = int(1000000 / hertz)
-        assert int(pulse_len) < length_us
+
         assert num < 65536
 
         if DISABLE_PIN:
@@ -103,8 +105,10 @@ class MotorController:
 
         waveform = []
 
-        waveform.append(pigpio.pulse(1 << pin, 0, pulse_len))
-        waveform.append(pigpio.pulse(0, 1 << pin, length_us - pulse_len))
+        waveform.append(pigpio.pulse(gpio_on=1 << pin,
+                        gpio_off=0, delay=1))    # rising edge
+        waveform.append(pigpio.pulse(
+            gpio_on=0, gpio_off=1 << pin, delay=length_us - 1))     # falling edge
 
         pi.wave_add_generic(waveform)
 
@@ -133,7 +137,7 @@ class MotorController:
 
         self._tx_pulses(motor_pin, HERTZ, steps)
 
-    def rot_180(self, motor_pin, direction=None):
+    def rot_180(self, motor_pin):
         """
         rotate 180 degrees in the specified direction (CW or CCW)
         param:motor_pin - One of UP, RIGHT, FRONT, DOWN, LEFT, or BACK, as defined above.
@@ -141,8 +145,7 @@ class MotorController:
         """
         if not is_init:
             self._initialize()
-        if direction is not None:
-            pi.write(DIR_PIN, direction)
+        pi.write(DIR_PIN, CW)
         steps = int(180 * STEPS_PER_DEGREE * STEP_FACTOR)
 
         self._tx_pulses(motor_pin, HERTZ, steps)

@@ -16,6 +16,10 @@ i_guess_color_str = "I guess color {0} is {1} , with distance {2}"
 
 
 def test_color(raw_hsv, min_hsv, max_hsv):
+    """
+    Return whether a given raw_hsv value is within the range of min_hsv and max_hsv.
+    """
+
     retval = True
 
     if max_hsv[0] < min_hsv[0]:  # special case (red)
@@ -30,6 +34,10 @@ def test_color(raw_hsv, min_hsv, max_hsv):
 
 
 def guess_color(raw_hsv, colors):
+    """
+    Given a raw hsv value, and a set of color brackets, guess what color we're looking at.
+    """
+
     best_dist = 0
     best_color = "X"  # one of "U","R","F","D","L","B". "X" is "unknown".
 
