@@ -136,11 +136,13 @@ def calibrate(motors):
     # at this point, we"ve scanned all the colors on each facelet.
     # Now lets build the calibration data based on the gathered hsv raw values.
     cal = {}
-    min_hsv = np.array([255, 255, 255])
-    max_hsv = np.array([0, 0, 0])
     for key in facelet_hsv:
         # note: we don"t account for red overflow here, jsut store the min H larger than the max H
         cal_entry = {}
+        # Reset min/max for each color
+        min_hsv = np.array([255, 255, 255])
+        max_hsv = np.array([0, 0, 0])
+        
         for hsv_entry in facelet_hsv[key]:
             min_hsv = np.minimum(min_hsv, hsv_entry)
             max_hsv = np.maximum(max_hsv, hsv_entry)
