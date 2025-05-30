@@ -58,7 +58,11 @@ def guess_color(raw_hsv, colors):
             if max_hsv[0] < min_hsv[0] and raw_hsv[0] > min_hsv[0] + 255:
                 # special case, when color is red. mid_hsv can end up on the opposite end of
                 # the H spectrum from raw_hsv, producing an incorrect distance.
-                dist = math.sqrt(((raw_hsv[0] - mid_hsv[0] + 255) ** 2) + (
+                dist = math.sqrt(((raw_hsv[0] - 255 - mid_hsv[0]) ** 2) + (
+                    (raw_hsv[1] - mid_hsv[1]) ** 2) + ((raw_hsv[2] - mid_hsv[2]) ** 2))
+            elif max_hsv[0] < min_hsv[0] and raw_hsv[0] < max_hsv[0]:
+                # Another edge case for red when raw_hsv is on the low end of the spectrum
+                dist = math.sqrt(((raw_hsv[0] + 255 - mid_hsv[0]) ** 2) + (
                     (raw_hsv[1] - mid_hsv[1]) ** 2) + ((raw_hsv[2] - mid_hsv[2]) ** 2))
 
             if best_dist == 0 or dist < best_dist:
