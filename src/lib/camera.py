@@ -6,6 +6,7 @@ import math
 import yaml
 from time import sleep
 import os
+from typing import Dict, List, Tuple, Optional, Union, Any, cast
 from lib.logger import setup_logging
 
 """
@@ -13,34 +14,51 @@ from lib.logger import setup_logging
     returning best-guess color state of the camera-facing cube "edge".
 """
 
+# Type aliases
+HSVValue = np.ndarray  # Shape (3,) for H, S, V values
+ColorCalibration = Dict[str, Dict[str, np.ndarray]]  # Color calibration data
+
 test_color_in_position_str = "Testing color {0} in position {1}:"
 against_color_str = "     against '{0}', ({1}), distance is {2}."
 i_guess_color_str = "I guess color {0} is {1} , with distance {2}"
 
 
-def test_color(raw_hsv, min_hsv, max_hsv):
+def test_color(raw_hsv: HSVValue, min_hsv: HSVValue, max_hsv: HSVValue) -> bool:
     """
     Return whether a given raw_hsv value is within the range of min_hsv and max_hsv.
+    
+    Args:
+        raw_hsv: HSV value to test
+        min_hsv: Minimum HSV values
+        max_hsv: Maximum HSV values
+        
+    Returns:
+        True if the raw_hsv is within the range, False otherwise
     """
-
     retval = True
 
     if max_hsv[0] < min_hsv[0]:  # special case (red)
-        retval = raw_hsv[0] in range(max_hsv[0], min_hsv[0] + 256)  # for H
+        retval = int(raw_hsv[0]) in range(int(max_hsv[0]), int(min_hsv[0]) + 256)  # for H
     else:
-        retval = raw_hsv[0] in range(min_hsv[0], max_hsv[0] + 1)    # for H
+        retval = int(raw_hsv[0]) in range(int(min_hsv[0]), int(max_hsv[0]) + 1)    # for H
 
     for i in range(1, 3):  # for each of S, V
-        retval = retval and raw_hsv[i] in range(min_hsv[i], max_hsv[i] + 1)
+        retval = retval and int(raw_hsv[i]) in range(int(min_hsv[i]), int(max_hsv[i]) + 1)
 
     return retval
 
 
-def guess_color(raw_hsv, colors):
+def guess_color(raw_hsv: HSVValue, colors: ColorCalibration) -> str:
     """
     Given a raw hsv value, and a set of color brackets, guess what color we're looking at.
+    
+    Args:
+        raw_hsv: HSV value to test
+        colors: Dictionary of color calibration data
+        
+    Returns:
+        Color name (one of "U","R","F","D","L","B") or "X" for unknown
     """
-
     best_dist = 0
     best_color = "X"  # one of "U","R","F","D","L","B". "X" is "unknown".
 
@@ -75,7 +93,7 @@ def guess_color(raw_hsv, colors):
         logging.warning("UNKNOWN COLOR {0}".format(raw_hsv))
     else:
         logging.info(i_guess_color_str.format(raw_hsv, best_color, best_dist))
-    def get_settings(self):
+    def get_settings(self) -> Dict[str, Any]:
         """
         Get current camera settings
         
@@ -93,7 +111,7 @@ def guess_color(raw_hsv, colors):
             "sample_aperture": self.config["cam"]["sample_aperture"]
         }
 
-    def warmup_frames(self, frames):
+    def warmup_frames(self, frames: int) -> None:
         """
         Grab a specified number of frames to clear the camera buffer
         
@@ -121,9 +139,9 @@ class Camera:
     """Camera class for capturing and processing cube images"""
     
     vidcap = None
-    sample_coords = []
+    sample_coords: List[List[int]] = []
     
-    def __init__(self, config, calib_data):
+    def __init__(self, config: Dict[str, Any], calib_data: Dict[str, Any]) -> None:
         """
         Initialize the camera with configuration and calibration data
         
@@ -144,27 +162,31 @@ class Camera:
 
         self.warmup_frames(config['cam']['warmup_frames'])
         
-    def __del__(self):
+    def __del__(self) -> None:
         """Clean up camera resources when the object is destroyed"""
         if self.vidcap is not None:
             self.vidcap.release()
             
-    def close(self):
+    def close(self) -> None:
         """Explicitly release camera resources"""
         if self.vidcap is not None:
             self.vidcap.release()
             self.vidcap = None
 
-    def get_raw_hsv(self, filename=None):
+    def get_raw_hsv(self, filename: Optional[str] = None) -> List[HSVValue]:
         """
         Given a camera reference, take a vertical edge-on picture of the cube, and
         return an array of raw hsv values that refer to the facelets in the (zero-based)
         F2, R0, F5, R3, F8, R6 positions, one for each of the coordinates in
         config.sample_coords.
-
-        return an array of shape (6,3)
+        
+        Args:
+            filename: Optional filename to save the captured image for debugging
+            
+        Returns:
+            List of HSV values for each sampled facelet
         """
-        retval = []
+        retval: List[HSVValue] = []
 
         # take a couple of frames. For a USB camera, frames can be buffered on the device,
         # so it can take time between the actual scene changing, and an updated frame popping
@@ -175,7 +197,7 @@ class Camera:
 
         if frame is None:
             logging.warning("no frames!")
-            return np.full(6, [0.0, 0.0, 0.0]).tolist()
+            return cast(List[HSVValue], np.full((6, 3), [0.0, 0.0, 0.0]).tolist())
 
         hsvframe = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
 
@@ -217,12 +239,18 @@ class Camera:
 
         return retval
 
-    def get_faces(self, filename=None):
+    def get_faces(self, filename: Optional[str] = None) -> Tuple[str, str, str, str, str, str]:
         """
-        Given an array of HSV values, return an array of FURBDL values 
+        Given an array of HSV values, return an array of FURBDL values
+        
+        Args:
+            filename: Optional filename to save the captured image for debugging
+            
+        Returns:
+            Tuple of 6 color values (one for each facelet)
         """
         arr = self.get_raw_hsv(filename)
-        retval = []
+        retval: List[str] = []
         for idx, raw_hsv in enumerate(arr):
             # Given the raw color, guess the actual color, based on calibrated lightning conditions.
             logging.info(test_color_in_position_str.format(raw_hsv, idx))
@@ -231,7 +259,12 @@ class Camera:
 
             retval.append(adj_color)
 
-        return tuple(retval)
+        # Ensure we always return exactly 6 values
+        while len(retval) < 6:
+            retval.append("X")  # Add unknown color if we don't have enough
+            
+        # Cast to the expected return type
+        return cast(Tuple[str, str, str, str, str, str], tuple(retval))
 
 
 if __name__ == "__main__":
