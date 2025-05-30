@@ -7,6 +7,7 @@ import os
 from lib.motorcontroller import MotorController
 from lib.scanner import Scanner
 from lib.logger import setup_logging
+from config_validator import load_and_validate_config
 import kociemba
 
 """
@@ -84,28 +85,32 @@ if __name__ == "__main__":
     # Use absolute path for configuration file
     script_dir = os.path.dirname(os.path.abspath(__file__))
     config_file = os.path.join(script_dir, "config.yaml")
-    config = {}
-    with open(config_file, 'r') as ymlfile:
-        config = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-    # Set up logging using the centralized logger
-    setup_logging(config_file)
-    logger = logging.getLogger(__name__)
-
-    scanner = Scanner(config)
-    motors = MotorController(config)
-
-    solvers = {
-        "DEFAULT": solve,
-        "-I": solve_interactive
-    }
-
-    mode = "DEFAULT"
-
-    if len(sys.argv) > 1:
-        mode = sys.argv[1].upper()
-
-    # non-interactive solver is the default, if not found.
-    func = solvers.get(mode, solve)
-
-    sys.exit(func(scanner, motors))
+    
+    try:
+        # Load and validate configuration
+        config = load_and_validate_config(config_file)
+        
+        # Set up logging using the centralized logger
+        setup_logging(config_file)
+        logger = logging.getLogger(__name__)
+        
+        scanner = Scanner(config)
+        motors = MotorController(config)
+        
+        solvers = {
+            "DEFAULT": solve,
+            "-I": solve_interactive
+        }
+        
+        mode = "DEFAULT"
+        
+        if len(sys.argv) > 1:
+            mode = sys.argv[1].upper()
+        
+        # non-interactive solver is the default, if not found.
+        func = solvers.get(mode, solve)
+        
+        sys.exit(func(scanner, motors))
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
