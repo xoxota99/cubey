@@ -75,16 +75,13 @@ def guess_color(raw_hsv, colors):
         logging.warning("UNKNOWN COLOR {0}".format(raw_hsv))
     else:
         logging.info(i_guess_color_str.format(raw_hsv, best_color, best_dist))
-
-    return best_color
-
-
-class Camera:
-    vidcap = None
-
-    sample_coords = []
-
     def get_settings(self):
+        """
+        Get current camera settings
+        
+        Returns:
+            dict: Dictionary of camera settings
+        """
         return {
             "CAP_PROP_BRIGHTNESS": self.vidcap.get(cv2.CAP_PROP_BRIGHTNESS),
             "CAP_PROP_CONTRAST": self.vidcap.get(cv2.CAP_PROP_CONTRAST),
@@ -97,7 +94,12 @@ class Camera:
         }
 
     def warmup_frames(self, frames):
-        """Grab a specified number of frames to clear the camera buffer"""
+        """
+        Grab a specified number of frames to clear the camera buffer
+        
+        Args:
+            frames: Number of frames to grab
+        """
         success_count = 0
         max_attempts = frames * 2  # Allow for some failures
         attempts = 0
@@ -112,9 +114,23 @@ class Camera:
             
         # Small delay to ensure frames are processed
         sleep(0.05)
+    return best_color
 
+
+class Camera:
+    """Camera class for capturing and processing cube images"""
+    
+    vidcap = None
+    sample_coords = []
+    
     def __init__(self, config, calib_data):
-
+        """
+        Initialize the camera with configuration and calibration data
+        
+        Args:
+            config: Configuration dictionary
+            calib_data: Calibration data dictionary
+        """
         self.config = config
         self.vidcap = cv2.VideoCapture(config["cam"]["camera_deviceID"])
 
@@ -123,46 +139,21 @@ class Camera:
                 self.vidcap.set(getattr(cv2, prop_name),
                                 calib_data["camera"][prop_name])
 
-        # self.vidcap.set(cv2.CAP_PROP_FRAME_WIDTH,
-        #                 config['cam']['CAP_PROP_FRAME_WIDTH'])
-
-        # self.vidcap.set(cv2.CAP_PROP_FRAME_HEIGHT,
-        #                 config['cam']['CAP_PROP_FRAME_HEIGHT'])
-
-        # self.vidcap.set(cv2.CAP_PROP_FPS, config['cam']['CAP_PROP_FPS'])
-
-        # if calib_data["camera"]["CAP_PROP_BRIGHTNESS"] != "default":
-        #     self.vidcap.set(cv2.CAP_PROP_BRIGHTNESS,
-        #                     calib_data["camera"]["CAP_PROP_BRIGHTNESS"])
-
-        # if calib_data["camera"]["CAP_PROP_CONTRAST"] != "default":
-        #     self.vidcap.set(cv2.CAP_PROP_CONTRAST,
-        #                     calib_data["camera"]["CAP_PROP_CONTRAST"])
-
-        # if calib_data["camera"]["CAP_PROP_SATURATION"] != "default":
-        #     self.vidcap.set(cv2.CAP_PROP_SATURATION,
-        #                     calib_data["camera"]["CAP_PROP_SATURATION"])
-
-        # if calib_data["camera"]["CAP_PROP_HUE"] != "default":
-        #     self.vidcap.set(cv2.CAP_PROP_HUE,
-        #                     calib_data["camera"]["CAP_PROP_HUE"])
-
-        # if calib_data["camera"]["CAP_PROP_GAIN"] != "default":
-        #     self.vidcap.set(cv2.CAP_PROP_GAIN,
-        #                     calib_data["camera"]["CAP_PROP_GAIN"])
-
-        # if calib_data["camera"]["CAP_PROP_AUTO_EXPOSURE"] != "default":
-        #     self.vidcap.set(cv2.CAP_PROP_AUTO_EXPOSURE,
-        #                     calib_data["camera"]["CAP_PROP_AUTO_EXPOSURE"])
-
-        # if calib_data["camera"]["CAP_PROP_EXPOSURE"] != "default":
-        #     self.vidcap.set(cv2.CAP_PROP_EXPOSURE,
-        #                     calib_data["camera"]["CAP_PROP_EXPOSURE"])
-
         self.calib_data = calib_data
         self.sample_coords = config['cam']['sample_coords']
 
         self.warmup_frames(config['cam']['warmup_frames'])
+        
+    def __del__(self):
+        """Clean up camera resources when the object is destroyed"""
+        if self.vidcap is not None:
+            self.vidcap.release()
+            
+    def close(self):
+        """Explicitly release camera resources"""
+        if self.vidcap is not None:
+            self.vidcap.release()
+            self.vidcap = None
 
     def get_raw_hsv(self, filename=None):
         """
