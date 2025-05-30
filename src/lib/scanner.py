@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 import yaml
+import os
 
 from PIL import Image, ImageDraw
 from lib.camera import Camera
@@ -97,7 +98,10 @@ class Scanner:
     def __init__(self, config):
         self.config = config
 
-        calib_file = "../" + config['cam']['calibration']
+        import os
+        # Use os.path.join for proper path resolution
+        calib_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+                                 config['cam']['calibration'])
         calib = {}
         with open(calib_file, 'r') as ymlfile:
             calib = yaml.load(ymlfile, Loader=yaml.FullLoader)
