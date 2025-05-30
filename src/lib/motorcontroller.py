@@ -161,11 +161,45 @@ class MotorController:
         """
         Take a recipe, of the form (e.g.) "R L2 F B U' F' D F' U B2 L' U2 B2 U D' B2 U2 L2 D' R2 D2"
         and execute it using the attached stepper motors.
+        
+        Args:
+            recipe_str: String containing cube notation moves to execute
+            
+        Returns:
+            bool: True if execution was successful, False otherwise
+            
+        Raises:
+            ValueError: If the recipe contains invalid cube notation
         """
+        if not recipe_str or not isinstance(recipe_str, str):
+            logging.error(f"Invalid recipe: {recipe_str}")
+            return False
 
         if not is_init:
             self._initialize()
+            
         recipe = recipe_str.split()
+        valid_faces = set(FACE_MOTOR_MAP.keys())
+        valid_modifiers = set(['', '\'', '2'])
+        
+        # Validate the recipe before executing
+        for step_str in recipe:
+            if not step_str or len(step_str) > 2:
+                logging.error(f"Invalid move in recipe: {step_str}")
+                return False
+                
+            base = step_str[0]
+            modifier = step_str[1:] if len(step_str) > 1 else ''
+            
+            if base not in valid_faces:
+                logging.error(f"Invalid face in recipe: {base}")
+                return False
+                
+            if modifier not in valid_modifiers:
+                logging.error(f"Invalid modifier in recipe: {modifier}")
+                return False
+        
+        # Execute the validated recipe
         for step_str in recipe:
             base = step_str[0]
             # TODO: We can execute opposite sides simultaneously, if the NEXT item in the list is OPPOSITE this item AND has the SAME orientation (CW or CCW) as this item.
@@ -180,3 +214,4 @@ class MotorController:
                 self.rot_90(pin)
             sleep(MOVE_DELAY)
         self._stop()
+        return True
