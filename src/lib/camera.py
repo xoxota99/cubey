@@ -1,9 +1,10 @@
+import logging
 from cv2 import cv2     # OpenCV 4.5.3 and later
 import numpy as np
 import time
 import math
 import yaml
-import logging
+from time import sleep
 
 """
     Camera control module, including functions for scanning and
@@ -90,8 +91,21 @@ class Camera:
         }
 
     def warmup_frames(self, frames):
-        for _ in range(frames):
-            self.vidcap.grab()
+        """Grab a specified number of frames to clear the camera buffer"""
+        success_count = 0
+        max_attempts = frames * 2  # Allow for some failures
+        attempts = 0
+        
+        while success_count < frames and attempts < max_attempts:
+            if self.vidcap.grab():
+                success_count += 1
+            attempts += 1
+            
+        if success_count < frames:
+            logging.warning(f"Could only grab {success_count}/{frames} frames during warmup")
+            
+        # Small delay to ensure frames are processed
+        sleep(0.05)
 
     def __init__(self, config, calib_data):
 
