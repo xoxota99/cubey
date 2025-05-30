@@ -18,6 +18,11 @@ def solve(scanner, motors):
     t0 = round(time.time() * 1000)
     state_str = scanner.get_state_string(motors)
     t1 = round(time.time() * 1000)
+    
+    if state_str is None:
+        logging.error("Failed to get a valid cube state. Please check the cube and try again.")
+        return 1
+        
     logging.info("Scanned state: " + state_str)
 
     time.sleep(1)
@@ -46,6 +51,11 @@ def solve_interactive(scanner, motors):
     t0 = round(time.time() * 1000)
     state_str = scanner.get_state_string(motors)
     t1 = round(time.time() * 1000)
+    
+    if state_str is None:
+        logging.error("Failed to get a valid cube state. Please check the cube and try again.")
+        return 1
+        
     logging.info("Scan complete! Cube state: {0}\n".format(state_str))
 
     input("Press any key to generate the solution.")
