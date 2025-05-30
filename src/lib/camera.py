@@ -242,12 +242,14 @@ class Camera:
 
 
 if __name__ == "__main__":
-    config_file = "../config.yaml"
+    import os
+    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    config_file = os.path.join(script_dir, "config.yaml")
     config = {}
     with open(config_file, 'r') as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    calib_file = "../" + config['cam']['calibration']
+    calib_file = os.path.join(script_dir, config['cam']['calibration'])
     calib = {}
     with open(calib_file, 'r') as ymlfile:
         calib = yaml.load(ymlfile, Loader=yaml.FullLoader)

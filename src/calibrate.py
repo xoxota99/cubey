@@ -2,6 +2,7 @@ import numpy as np
 import logging
 import yaml
 import sys
+import os
 
 from lib import camera
 from lib.motorcontroller import MotorController
@@ -10,7 +11,9 @@ from lib.motorcontroller import MotorController
 Utility for creating HSV calibration data
 """
 
-config_file = "config.yaml"
+# Use absolute path for configuration file
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config_file = os.path.join(script_dir, "config.yaml")
 config = {}
 with open(config_file, "r") as ymlfile:
     config = yaml.load(ymlfile, Loader=yaml.FullLoader)
@@ -19,7 +22,7 @@ logging.basicConfig(
     level=logging.getLevelName(config["app"]["log_level"]), format=config["app"]["log_format"])
 
 sample_coords = config["cam"]["sample_coords"]
-calib_file = config["cam"]["calibration"]
+calib_file = os.path.join(script_dir, config["cam"]["calibration"])
 calib = {}
 with open(calib_file, "r") as ymlfile:
     calib = yaml.load(ymlfile, Loader=yaml.FullLoader)
@@ -135,10 +138,12 @@ def calibrate(motors):
 
     # at this point, we"ve scanned all the colors on each facelet.
     # Now lets build the calibration data based on the gathered hsv raw values.
+    
     cal = {}
     for key in facelet_hsv:
-        # note: we don"t account for red overflow here, jsut store the min H larger than the max H
+        # note: we don"t account for red overflow here, just store the min H larger than the max H
         cal_entry = {}
+        
         # Reset min/max for each color
         min_hsv = np.array([255, 255, 255])
         max_hsv = np.array([0, 0, 0])
@@ -175,7 +180,9 @@ def process_args(argv):
 if __name__ == "__main__":
     args = process_args(sys.argv)
 
-    config_file = "config.yaml"
+    # Use absolute path for configuration file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(script_dir, "config.yaml")
     config = {}
     with open(config_file, "r") as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
