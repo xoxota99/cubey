@@ -65,21 +65,26 @@ class MotorController:
         """
         global pi, is_init
 
-        # Connect to pigpiod daemon
-        pi = pigpio.pi()
-        sleep(0.001)
+        try:
+            # Connect to pigpiod daemon
+            pi = pigpio.pi()
+            sleep(0.001)
 
-        if force or not is_init:
-            if DISABLE_PIN:
-                pi.set_mode(DISABLE_PIN, pigpio.OUTPUT)
-                pi.write(DISABLE_PIN, 1)
+            if force or not is_init:
+                if DISABLE_PIN:
+                    pi.set_mode(DISABLE_PIN, pigpio.OUTPUT)
+                    pi.write(DISABLE_PIN, 1)
 
-            # Set up pins as an output
-            pi.set_mode(DIR_PIN, pigpio.OUTPUT)
-            for _, val in config['stepper']['pin_map'].items():
-                pi.set_mode(val, pigpio.OUTPUT)
+                # Set up pins as an output
+                pi.set_mode(DIR_PIN, pigpio.OUTPUT)
+                for _, val in config['stepper']['pin_map'].items():
+                    pi.set_mode(val, pigpio.OUTPUT)
 
-            is_init = True
+                is_init = True
+        except Exception as e:
+            logging.error(f"Failed to initialize motor controller: {e}")
+            self._stop()
+            raise
 
     def _stop(self):
         global is_init
