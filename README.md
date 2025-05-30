@@ -1,25 +1,141 @@
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=bugs)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=code_smells)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=ncloc)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=alert_status)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=security_rating)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=sqale_index)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=xoxota99_cubey&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=xoxota99_cubey)
+# Cubey - Rubik's Cube Solving Robot
 
+[![Python Tests](https://github.com/cubey/cubey/actions/workflows/python-tests.yml/badge.svg)](https://github.com/cubey/cubey/actions/workflows/python-tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)](https://www.python.org/downloads/)
 
-# cubey
-A Raspberry pi-based Rubik's Cube solving robot.
+Cubey is a Raspberry Pi-based Rubik's Cube solving robot that uses computer vision to scan a cube, calculates a solution, and manipulates the cube to solve it using stepper motors.
 
-## Thanks
-All credit goes to Jay Flatland, and his [HighFrequencyTwister](https://github.com/jayflatland/HighFrequencyTwister) as the inspiration for this project. This build is just a ghetto version of Jay's project, with a bit of cleaned up documentation, EAGLE files for the relevant PCB, a BOM, and extraneous (to me) stuff removed.
+## Features
 
-## Hardware
-I'm using all the same hardware and 3D-printed parts as [HighFrequencyTwister](https://github.com/jayflatland/HighFrequencyTwister) , but replaced the PC / Arduino combination with a single Raspberry pi. 
+- Computer vision-based cube scanning with OpenCV
+- Efficient solving algorithm using Kociemba's two-phase algorithm
+- Precise stepper motor control for cube manipulation
+- Web interface for remote operation
+- Command-line interface for local operation
+- Comprehensive logging and error handling
 
-I've also created a [custom PCB](https://oshpark.com/shared_projects/dzYt5cpy) to tidy up the wiring of the DRV8825 carrier boards. It sits where a Raspberry pi hat would sit, but definitely does NOT conform to the RPI Hat specification (no cutouts for display connector, no EEPROM for board identification, etc.)
+## Installation
 
-## Software
-cubey uses the python implementation of the [kociemba solver](https://github.com/muodov/kociemba), and [piGPIO](https://github.com/joan2937/pigpio) for stepper motor control. Cubey uses a single camera for Cube State estimation, which simplifies calibration, but impacts speed. Cubey definitely *won't* set any world speed records.
+### System Requirements
+
+- Raspberry Pi 3 or newer
+- Raspberry Pi Camera Module
+- Stepper motors and drivers
+- Python 3.7 or newer
+
+### Install System Dependencies
+
+```bash
+# Run the dependency installation script
+sudo ./scripts/install_dependencies.sh
+```
+
+### Install Cubey
+
+```bash
+# Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install from PyPI
+pip install cubey
+
+# Or install from source
+pip install -e .
+```
+
+## Quick Start
+
+### Command Line Interface
+
+```bash
+# Solve a cube
+cubey solve
+
+# Scramble a cube
+cubey scramble
+
+# Calibrate the scanner
+cubey calibrate
+
+# Start the web interface
+cubey web
+```
+
+### Python API
+
+```python
+from cubey.core.scanner import Scanner
+from cubey.core.motorcontroller import MotorController
+import cubey
+
+# Initialize components
+scanner = Scanner(config)
+motors = MotorController(config)
+
+# Scan the cube
+state = scanner.get_state_string(motors)
+
+# Solve the cube
+solution = cubey.kociemba.solve(state)
+motors.execute(solution)
+```
+
+## Web Interface
+
+Start the web server:
+
+```bash
+cubey web
+```
+
+Then open a browser to http://localhost:5000/
+
+## Configuration
+
+Configuration is stored in YAML files:
+
+- `cubey/data/config.yaml`: Main configuration
+- `cubey/data/default_calib.yaml`: Camera calibration
+
+You can override the configuration by creating a custom config file and specifying it with the `--config` option:
+
+```bash
+cubey --config /path/to/custom_config.yaml solve
+```
+
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
+### Setting Up Development Environment
+
+```bash
+# Clone the repository
+git clone https://github.com/cubey/cubey.git
+cd cubey
+
+# Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install in development mode
+pip install -e ".[dev]"
+```
+
+### Running Tests
+
+```bash
+pytest
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Herbert Kociemba](http://kociemba.org/cube.htm) for the two-phase algorithm
+- [OpenCV](https://opencv.org/) for computer vision capabilities
+- All contributors to this project
