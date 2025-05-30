@@ -233,19 +233,19 @@ class Scanner:
         # fast (imperfect) test for a valid cube state.
         if len(retval) != 54:  # Is the string exactly 54 characters?
             logging.error("Invalid Cube State! (not enough faces!)")
-            retval = ""
+            return None
 
         if (len(state['U']) != 9 or len(state['R']) != 9 or len(state['F']) != 9 or len(state['D']) != 9 or len(state['L']) != 9 or len(state['B']) != 9):
             # Is each face exactly 9 facelets?
             logging.error('Invalid Cube State! (inconsistent colors: U={:d}, R={:d}, F={:d}, D={:d}, L={:d}, B={:d})'.format(
                 len(state['U']), len(state['R']), len(state['F']), len(state['D']), len(state['L']), len(state['B'])))
-            retval = ""
+            return None
 
         if state['U'][4] != 'U' or state['R'][4] != 'R' or state['F'][4] != 'F' or state['D'][4] != 'D' or state['L'][4] != 'L' or state['B'][4] != 'B':
             # Is the center facelet of each face the same as the face itself? (since center squares can't move)
             logging.error(
                 'Invalid Cube State! (Center facelets are not correct)')
-            retval = ""
+            return None
 
         return retval
 
