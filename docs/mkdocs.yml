@@ -19,6 +19,9 @@ nav:
   - Home: index.md
   - API Reference: api.md
   - Development Guide: development.md
+  - Hardware:
+    - Overview: hardware/index.md
+    - Setup Guide: hardware/setup.md
   - Changelog: ../CHANGELOG.md
   - Contributing: ../CONTRIBUTING.md
 
