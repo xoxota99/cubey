@@ -160,8 +160,8 @@ def calibrate(motors):
 
 
 def process_args(argv):
+    retval = {}
     if len(argv) > 1:
-        retval = {}
         param_name = ""
         for i, arg in enumerate(argv):
             if i % 2 == 0:
