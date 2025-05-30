@@ -14,7 +14,7 @@ from cubey.hardware.motorcontroller import MotorController
 from cubey.solver.scanner import Scanner
 from cubey.solver.kociemba_solver import KociembaSolver
 from cubey.solver.scrambler import Scrambler
-from cubey.utils.config import get_merged_config
+from cubey.config import get_merged_config
 
 class WebController:
     """

@@ -9,7 +9,7 @@ import argparse
 import logging
 from typing import Optional, List, Dict, Any
 
-from cubey.utils.config import get_merged_config
+from cubey.config import get_merged_config
 from cubey.utils.logging_config import setup_logging, get_logger
 from cubey.utils.error_handler import handle_errors, setup_global_exception_handler
 from cubey.exceptions import CubeyError
