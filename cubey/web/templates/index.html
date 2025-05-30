@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cubey Web Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .video-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .video-feed {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .cube-state {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        .btn-group {
+            margin-bottom: 10px;
+        }
+        .status-indicator {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status-idle {
+            background-color: #e2e3e5;
+        }
+        .status-scanning {
+            background-color: #cce5ff;
+        }
+        .status-solving {
+            background-color: #d4edda;
+        }
+        .status-executing {
+            background-color: #fff3cd;
+        }
+        .status-error {
+            background-color: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Cubey Web Interface</h1>
+        
+        <div class="status-indicator" id="status-display">
+            Status: Idle
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="video-container">
+                    <img class="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="cube-state" id="cube-state">
+                    <h4>Cube State</h4>
+                    <p id="state-text">No scan available</p>
+                    <div id="solution-text"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <h4>Controls</h4>
+            
+            <div class="btn-group d-flex mb-3">
+                <button class="btn btn-primary w-100" id="scan-btn">Scan Cube</button>
+                <button class="btn btn-success w-100" id="solve-btn">Solve Cube</button>
+            </div>
+            
+            <h5>Manual Controls</h5>
+            <div class="btn-group d-flex mb-2">
+                <button class="move-btn btn btn-secondary" data-move="U">U</button>
+                <button class="move-btn btn btn-secondary" data-move="U'">U'</button>
+                <button class="move-btn btn btn-secondary" data-move="U2">U2</button>
+                <button class="move-btn btn btn-secondary" data-move="D">D</button>
+                <button class="move-btn btn btn-secondary" data-move="D'">D'</button>
+                <button class="move-btn btn btn-secondary" data-move="D2">D2</button>
+            </div>
+            
+            <div class="btn-group d-flex mb-2">
+                <button class="move-btn btn btn-secondary" data-move="R">R</button>
+                <button class="move-btn btn btn-secondary" data-move="R'">R'</button>
+                <button class="move-btn btn btn-secondary" data-move="R2">R2</button>
+                <button class="move-btn btn btn-secondary" data-move="L">L</button>
+                <button class="move-btn btn btn-secondary" data-move="L'">L'</button>
+                <button class="move-btn btn btn-secondary" data-move="L2">L2</button>
+            </div>
+            
+            <div class="btn-group d-flex mb-2">
+                <button class="move-btn btn btn-secondary" data-move="F">F</button>
+                <button class="move-btn btn btn-secondary" data-move="F'">F'</button>
+                <button class="move-btn btn btn-secondary" data-move="F2">F2</button>
+                <button class="move-btn btn btn-secondary" data-move="B">B</button>
+                <button class="move-btn btn btn-secondary" data-move="B'">B'</button>
+                <button class="move-btn btn btn-secondary" data-move="B2">B2</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Update status periodically
+            function updateStatus() {
+                $.get('/api/status', function(data) {
+                    const statusDisplay = $('#status-display');
+                    statusDisplay.removeClass('status-idle status-scanning status-solving status-executing status-error');
+                    
+                    let statusText = 'Status: ';
+                    switch(data.state) {
+                        case 'idle':
+                            statusDisplay.addClass('status-idle');
+                            statusText += 'Idle';
+                            break;
+                        case 'scanning':
+                            statusDisplay.addClass('status-scanning');
+                            statusText += 'Scanning...';
+                            break;
+                        case 'solving':
+                            statusDisplay.addClass('status-solving');
+                            statusText += 'Solving...';
+                            break;
+                        case 'executing':
+                            statusDisplay.addClass('status-executing');
+                            statusText += 'Executing moves...';
+                            break;
+                        case 'error':
+                            statusDisplay.addClass('status-error');
+                            statusText += 'Error: ' + data.error;
+                            break;
+                    }
+                    
+                    statusDisplay.text(statusText);
+                    
+                    // Update cube state if available
+                    if (data.last_scan) {
+                        $('#state-text').text(data.last_scan);
+                    }
+                    
+                    // Update solution if available
+                    if (data.last_solution) {
+                        $('#solution-text').html('<strong>Solution:</strong> ' + data.last_solution);
+                    }
+                });
+            }
+            
+            // Initial status update and set interval
+            updateStatus();
+            setInterval(updateStatus, 1000);
+            
+            // Scan button
+            $('#scan-btn').click(function() {
+                $(this).prop('disabled', true);
+                
+                $.ajax({
+                    url: '/api/scan',
+                    type: 'POST',
+                    success: function(data) {
+                        if (data.success) {
+                            $('#state-text').text(data.state);
+                        } else {
+                            alert('Scan failed: ' + data.error);
+                        }
+                    },
+                    error: function() {
+                        alert('Error communicating with the server');
+                    },
+                    complete: function() {
+                        $('#scan-btn').prop('disabled', false);
+                    }
+                });
+            });
+            
+            // Solve button
+            $('#solve-btn').click(function() {
+                $(this).prop('disabled', true);
+                
+                $.ajax({
+                    url: '/api/solve',
+                    type: 'POST',
+                    success: function(data) {
+                        if (data.success) {
+                            $('#solution-text').html('<strong>Solution:</strong> ' + data.solution);
+                        } else {
+                            alert('Solve failed: ' + data.error);
+                        }
+                    },
+                    error: function() {
+                        alert('Error communicating with the server');
+                    },
+                    complete: function() {
+                        $('#solve-btn').prop('disabled', false);
+                    }
+                });
+            });
+            
+            // Move buttons
+            $('.move-btn').click(function() {
+                const move = $(this).data('move');
+                $(this).prop('disabled', true);
+                
+                $.ajax({
+                    url: '/api/move',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ move: move }),
+                    success: function(data) {
+                        if (!data.success) {
+                            alert('Move failed: ' + data.error);
+                        }
+                    },
+                    error: function() {
+                        alert('Error communicating with the server');
+                    },
+                    complete: function() {
+                        $('.move-btn').prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

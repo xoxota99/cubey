@@ -1,0 +1,6 @@
+include LICENSE
+include README.md
+include requirements.txt
+recursive-include cubey/data *.yaml
+recursive-include cubey/web/templates *.html
+recursive-include cubey/web/static *
