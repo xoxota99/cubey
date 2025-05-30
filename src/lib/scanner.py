@@ -2,6 +2,7 @@ import logging
 import numpy as np
 import yaml
 import os
+from typing import Dict, List, Tuple, Optional, Union, Any
 
 from PIL import Image, ImageDraw
 from lib.camera import Camera
@@ -12,8 +13,12 @@ from lib.logger import setup_logging
     to control the camera and stepper motors, respectively.
 """
 
+# Type aliases
+CubeState = Dict[str, List[str]]
+FaceColor = str
+
 # Default state of the cube, fully solved.
-SOLVED_STATE = {
+SOLVED_STATE: CubeState = {
     'U': np.full(9, "U").tolist(),
     'R': np.full(9, "R").tolist(),
     'F': np.full(9, "F").tolist(),
@@ -23,18 +28,27 @@ SOLVED_STATE = {
 }
 
 
-def get_state_from_string(str):
+def get_state_from_string(state_str: str) -> CubeState:
+    """
+    Convert a string representation of the cube state to a dictionary representation.
+    
+    Args:
+        state_str: String representation of the cube state (54 characters)
+        
+    Returns:
+        Dictionary representation of the cube state
+    """
     # URFDLB
     state = dict(SOLVED_STATE)  # Initialize to fully solved.
     j = 0
     for face in ["U", "R", "F", "D", "L", "B"]:
         for i in range(9):
-            state[face][i] = str[j]
+            state[face][i] = state_str[j]
             j += 1
     return state
 
 
-def get_state_img(state):
+def get_state_img(state: Union[str, CubeState]) -> Image.Image:
     """
     Given a state representation of the cube, dynamically generate a cube image, represented as a "Cross".
 
@@ -96,7 +110,13 @@ class Scanner:
     This scanning process is very sensitive to lighting conditions.
     """
 
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
+        """
+        Initialize the Scanner with the given configuration.
+        
+        Args:
+            config: Dictionary containing configuration parameters
+        """
         self.config = config
 
         import os
@@ -109,7 +129,7 @@ class Scanner:
 
         self.camera = Camera(config, calib)
 
-    def scan_state(self, motors):
+    def scan_state(self, motors: Any) -> CubeState:
         """
         Scan the current state of the cube, and return a map of <facename:array<facename>> to represent the cube state.
         Cube state is represented like:
@@ -137,6 +157,12 @@ class Scanner:
         The camera is always pointed at the edge <F2-R0-F5-R3-F8-R6>. We obtain the entire cube state by getting the
         colors of all facelets on that edge, then rotating the cube through a predetermined sequence, such that all
         edge facelets rotate through that edge.
+        
+        Args:
+            motors: MotorController instance to control the cube rotations
+            
+        Returns:
+            Dictionary representation of the cube state
         """
 
         state = dict(SOLVED_STATE)  # Initialize to fully solved.
@@ -191,7 +217,7 @@ class Scanner:
 
         return state
 
-    def get_state_string(self, motors, state=None):
+    def get_state_string(self, motors: Any, state: Optional[CubeState] = None) -> Optional[str]:
         """
         Given a map of <face,array<facelet>>, representing the cube state, return a
         string representation, according to the order U0, U1, U2, U3, U4, U5, U6, U7, U8, R0, R1,
@@ -212,6 +238,14 @@ class Scanner:
         |------------|------------|------------|------------|
         |*L **L **U *|*F **F **F *|*D **R **B *|*R **B **U *|
         |------------|------------|------------|------------|
+        
+        Args:
+            motors: MotorController instance to control the cube rotations
+            state: Optional cube state dictionary. If None, will scan the cube.
+            
+        Returns:
+            String representation of the cube state, or None if the state is invalid
+        """
         |*B **U **L *|*B **R **D *|*B **R **R *|*F **B **U *|
         |------------|------------|------------|------------|
                      |*U **D **L *|
