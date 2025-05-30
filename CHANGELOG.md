@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added enhanced logging with rotating file handlers
 - Added web security features with CSRF protection
 - Added comprehensive tests for camera and web interface
+- Added dedicated configuration module with schema validation
 
 ### Changed
 - Refactored global variables into class attributes
