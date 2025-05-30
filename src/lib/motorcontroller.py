@@ -137,7 +137,7 @@ class MotorController:
 
         self._tx_pulses(motor_pin, HERTZ, steps)
 
-    def rot_180(self, motor_pin):
+    def rot_180(self, motor_pin, direction=CW):
         """
         rotate 180 degrees in the specified direction (CW or CCW)
         param:motor_pin - One of UP, RIGHT, FRONT, DOWN, LEFT, or BACK, as defined above.
@@ -145,7 +145,7 @@ class MotorController:
         """
         if not is_init:
             self._initialize()
-        pi.write(DIR_PIN, CW)
+        pi.write(DIR_PIN, direction)
         steps = int(180 * STEPS_PER_DEGREE * STEP_FACTOR)
 
         self._tx_pulses(motor_pin, HERTZ, steps)
