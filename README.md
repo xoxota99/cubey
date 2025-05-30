@@ -15,6 +15,42 @@ Cubey is a Raspberry Pi-based Rubik's Cube solving robot that uses computer visi
 - Command-line interface for local operation
 - Comprehensive logging and error handling
 
+## Project Structure
+
+```
+/cubey/
+├── cubey/                      # Main package directory
+│   ├── __init__.py             # Package initialization
+│   ├── cli.py                  # Command-line interface
+│   ├── exceptions.py           # Custom exceptions
+│   ├── hardware/               # Hardware interfaces
+│   │   ├── __init__.py
+│   │   ├── camera.py           # Camera interface
+│   │   ├── motorcontroller.py  # Motor controller
+│   │   └── calibration.py      # Hardware calibration
+│   ├── solver/                 # Cube solving algorithms
+│   │   ├── __init__.py
+│   │   ├── kociemba_solver.py  # Kociemba solver
+│   │   ├── scanner.py          # Cube state scanner
+│   │   └── scrambler.py        # Cube scrambler
+│   ├── ui/                     # User interfaces
+│   │   ├── __init__.py
+│   │   ├── cli_controller.py   # CLI controller
+│   │   └── web_controller.py   # Web interface controller
+│   ├── utils/                  # Utility modules
+│   │   ├── __init__.py
+│   │   ├── config.py           # Configuration management
+│   │   ├── error_handler.py    # Error handling
+│   │   └── logging_config.py   # Logging configuration
+│   └── data/                   # Configuration and data files
+│       ├── config.yaml
+│       └── default_calib.yaml
+├── tests/                      # Test suite
+├── docs/                       # Documentation
+├── scripts/                    # Utility scripts
+└── ...
+```
+
 ## Installation
 
 ### System Requirements
@@ -66,19 +102,21 @@ cubey web
 ### Python API
 
 ```python
-from cubey.core.scanner import Scanner
-from cubey.core.motorcontroller import MotorController
-import cubey
+from cubey.hardware.motorcontroller import MotorController
+from cubey.solver.scanner import Scanner
+from cubey.solver.kociemba_solver import KociembaSolver
 
 # Initialize components
+config = {...}  # Your configuration
 scanner = Scanner(config)
 motors = MotorController(config)
+solver = KociembaSolver(config)
 
 # Scan the cube
 state = scanner.get_state_string(motors)
 
 # Solve the cube
-solution = cubey.kociemba.solve(state)
+solution = solver.solve(state)
 motors.execute(solution)
 ```
 
