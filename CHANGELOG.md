@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated dependency management with version pinning
 - Removed redundant src directory in favor of new package structure
 - Merged doc and docs directories to follow standard naming convention
+- Updated Python version requirement to 3.10+ (from 3.7+)
 
 ### Fixed
 - Fixed configuration file path resolution

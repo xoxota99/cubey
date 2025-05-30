@@ -44,6 +44,24 @@ if [ -f /etc/os-release ]; then
             gstreamer1.0-plugins-ugly \
             gstreamer1.0-tools
             
+        # Install Python 3.12
+        echo "Installing Python 3.12..."
+        sudo apt-get install -y \
+            build-essential \
+            software-properties-common \
+            v4l-utils
+            
+        # Add deadsnakes PPA for Python 3.12
+        sudo add-apt-repository -y ppa:deadsnakes/ppa
+        sudo apt-get update
+        sudo apt-get install -y \
+            python3.12 \
+            python3.12-venv \
+            python3.12-dev
+            
+        # Set Python 3.12 as default
+        sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
+            
         # Install dependencies for GPIO control
         sudo apt-get install -y \
             python3-rpi.gpio \

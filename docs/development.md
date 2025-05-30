@@ -126,3 +126,7 @@ mkdocs build  # Build documentation
    python -m build
    python -m twine upload dist/*
    ```
+
+## Python Version Support
+
+Cubey requires Python 3.10 or newer. We test on Python 3.10, 3.11, and 3.12.

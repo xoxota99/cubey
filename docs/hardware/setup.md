@@ -1,10 +1,10 @@
 # Setting Up your Raspberry Pi
 
-These instructions are for Ubuntu 21.04 or later on Raspberry Pi. Other than service setup, they should be applicable to any debian-based, reasonably recent OS (such as Raspbian, or whatever they're calling it now).
+These instructions are for Ubuntu 22.04 or later on Raspberry Pi. Other than service setup, they should be applicable to any debian-based, reasonably recent OS (such as Raspberry Pi OS).
 
 ## The Basics
 
-Install Ubuntu Server 21.04 or later: https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview 
+Install Ubuntu Server 22.04 or later: https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#1-overview 
 
 SSH into your new, up-and-running RPi using "ubuntu/ubuntu". Change the password.
 
@@ -44,25 +44,28 @@ sudo apt dist-upgrade
 
 Now would be a good time to reboot the RPi (using `sudo reboot`), and reconnect.
 
-## Install Python (3.9)
+## Install Python (3.12)
 
 ```bash
-sudo apt install -y build-essential python3-setuptools software-properties-common python3.9 python3.9-venv python3.9-dev python3-pip v4l-utils
+sudo apt install -y build-essential python3-setuptools software-properties-common v4l-utils
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install -y python3.12 python3.12-venv python3.12-dev python3-pip
 ```
 
-Set python 3.9 as the default for python3
+Set python 3.12 as the default for python3
 
 ```bash
 cd /usr/bin
 
 sudo rm aarch64-linux-gnu-python3-config pdb3 pydoc3 pygettext3 python3 python3-config
 
-sudo sh -c 'ln -s aarch64-linux-gnu-python3.9-config aarch64-linux-gnu-python3-config && \
-ln -s pdb3.9 pdb3 && \
-ln -s pydoc3.9 pydoc3 && \
-ln -s pygettext3.9 pygettext3 && \
-ln -s python3.9 python3 && \
-ln -s python3.9-config python3-config'
+sudo sh -c 'ln -s aarch64-linux-gnu-python3.12-config aarch64-linux-gnu-python3-config && \
+ln -s pdb3.12 pdb3 && \
+ln -s pydoc3.12 pydoc3 && \
+ln -s pygettext3.12 pygettext3 && \
+ln -s python3.12 python3 && \
+ln -s python3.12-config python3-config'
 ```
 
 ## Install OpenCV

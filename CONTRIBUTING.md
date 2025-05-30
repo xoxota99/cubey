@@ -61,7 +61,7 @@ pytest --cov=cubey
 
 1. Update the README.md and documentation with details of changes if appropriate
 2. Update the CHANGELOG.md with your changes
-3. The PR should work for Python 3.7, 3.8, and 3.9
+3. The PR should work for Python 3.10, 3.11, and 3.12
 4. Make sure all tests pass and code style checks pass
 5. Your PR will be reviewed by maintainers
 

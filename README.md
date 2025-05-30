@@ -2,7 +2,7 @@
 
 [![Python Tests](https://github.com/cubey/cubey/actions/workflows/python-tests.yml/badge.svg)](https://github.com/cubey/cubey/actions/workflows/python-tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 
 Cubey is a Raspberry Pi-based Rubik's Cube solving robot that uses computer vision to scan a cube, calculates a solution, and manipulates the cube to solve it using stepper motors.
 
@@ -22,7 +22,7 @@ Cubey is a Raspberry Pi-based Rubik's Cube solving robot that uses computer visi
 - Raspberry Pi 3 or newer
 - Raspberry Pi Camera Module
 - Stepper motors and drivers
-- Python 3.7 or newer
+- Python 3.10 or newer
 
 ### Install System Dependencies
 
