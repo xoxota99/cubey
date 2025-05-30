@@ -6,37 +6,34 @@ class CubeyError(Exception):
     """Base exception for all Cubey errors"""
     pass
 
-
-class ConfigurationError(CubeyError):
-    """Exception raised for errors in the configuration"""
+class ConfigError(CubeyError):
+    """Error related to configuration"""
     pass
 
-
-class CameraError(CubeyError):
-    """Exception raised for camera-related errors"""
+class HardwareError(CubeyError):
+    """Base exception for hardware-related errors"""
     pass
 
-
-class MotorError(CubeyError):
-    """Exception raised for motor-related errors"""
+class CameraError(HardwareError):
+    """Error related to camera operations"""
     pass
 
-
-class ScannerError(CubeyError):
-    """Exception raised for scanner-related errors"""
+class MotorError(HardwareError):
+    """Error related to motor operations"""
     pass
-
-
-class InvalidCubeStateError(CubeyError):
-    """Exception raised when the cube state is invalid"""
-    pass
-
 
 class SolverError(CubeyError):
-    """Exception raised for solver-related errors"""
+    """Error related to cube solving"""
     pass
 
+class ScannerError(CubeyError):
+    """Error related to cube scanning"""
+    pass
+
+class CalibrationError(CubeyError):
+    """Error related to calibration"""
+    pass
 
 class WebInterfaceError(CubeyError):
-    """Exception raised for web interface-related errors"""
+    """Error related to the web interface"""
     pass

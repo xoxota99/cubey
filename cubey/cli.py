@@ -13,6 +13,8 @@ from cubey.utils.config import get_merged_config
 from cubey.utils.logging_config import setup_logging, get_logger
 from cubey.utils.error_handler import handle_errors, setup_global_exception_handler
 from cubey.exceptions import CubeyError
+from cubey.ui.cli_controller import CLIController
+from cubey.ui.web_controller import main as run_web_server
 
 logger = get_logger(__name__)
 
@@ -54,6 +56,12 @@ def parse_args(args: Optional[List[str]] = None) -> argparse.Namespace:
         help="Cube state string (if not provided, will scan the cube)",
         default=None
     )
+    solve_parser.add_argument(
+        "--interactive",
+        "-i",
+        action="store_true",
+        help="Run in interactive mode"
+    )
     
     # Scramble command
     scramble_parser = subparsers.add_parser("scramble", help="Scramble the cube")
@@ -73,7 +81,12 @@ def parse_args(args: Optional[List[str]] = None) -> argparse.Namespace:
     )
     
     # Calibrate command
-    subparsers.add_parser("calibrate", help="Calibrate the scanner")
+    calibrate_parser = subparsers.add_parser("calibrate", help="Calibrate the scanner")
+    calibrate_parser.add_argument(
+        "--output",
+        help="Output file for calibration data",
+        default=None
+    )
     
     # Manual command
     manual_parser = subparsers.add_parser("manual", help="Manual control")
@@ -125,105 +138,31 @@ def main(args: Optional[List[str]] = None) -> int:
     # Load configuration
     config = get_merged_config(parsed_args.config)
     
+    # Create CLI controller
+    controller = CLIController(config)
+    
     # Execute command
     if parsed_args.command == "solve":
-        from cubey.core.scanner import Scanner
-        from cubey.core.motorcontroller import MotorController
-        import cubey
-        
-        motors = MotorController(config)
-        scanner = Scanner(config)
-        
-        if parsed_args.state:
-            state = parsed_args.state
-        else:
-            logger.info("Scanning cube...")
-            state = scanner.get_state_string(motors)
-            
-        if not state:
-            logger.error("Failed to get cube state")
-            return 1
-            
-        logger.info(f"Cube state: {state}")
-        logger.info("Solving...")
-        solution = cubey.kociemba.solve(state)
-        logger.info(f"Solution: {solution}")
-        
-        logger.info("Executing solution...")
-        motors.execute(solution)
-        logger.info("Done!")
-        
+        return controller.solve(parsed_args.state, parsed_args.interactive)
     elif parsed_args.command == "scramble":
-        from cubey.core.motorcontroller import MotorController
-        from cubey.scramble import generate_scramble
-        
-        motors = MotorController(config)
-        
-        scramble = generate_scramble(parsed_args.moves)
-        logger.info(f"Scramble: {scramble}")
-        
-        logger.info("Executing scramble...")
-        motors.execute(scramble)
-        logger.info("Done!")
-        
+        return controller.scramble(parsed_args.moves)
     elif parsed_args.command == "scan":
-        from cubey.core.scanner import Scanner
-        from cubey.core.motorcontroller import MotorController
-        
-        motors = MotorController(config)
-        scanner = Scanner(config)
-        
-        logger.info("Scanning cube...")
-        state = scanner.get_state_string(motors)
-        
-        if not state:
-            logger.error("Failed to get cube state")
-            return 1
-            
-        logger.info(f"Cube state: {state}")
-        
-        if parsed_args.output:
-            with open(parsed_args.output, "w") as f:
-                f.write(state)
-            logger.info(f"State written to {parsed_args.output}")
-            
+        return controller.scan(parsed_args.output)
     elif parsed_args.command == "calibrate":
-        from cubey.calibrate import calibrate
-        
-        logger.info("Starting calibration...")
-        calibrate(config)
-        
+        from cubey.hardware.calibration import calibrate
+        return calibrate(config, parsed_args.output)
     elif parsed_args.command == "manual":
-        from cubey.core.motorcontroller import MotorController
-        
-        motors = MotorController(config)
-        
-        if parsed_args.moves:
-            logger.info(f"Executing moves: {parsed_args.moves}")
-            motors.execute(parsed_args.moves)
-            logger.info("Done!")
-        else:
-            logger.info("Enter moves (e.g., 'F R U R\\' U\\' F\\'). Type 'quit' to exit.")
-            while True:
-                try:
-                    moves = input("> ")
-                    if moves.lower() in ("quit", "exit", "q"):
-                        break
-                    motors.execute(moves)
-                except Exception as e:
-                    logger.error(f"Error: {e}")
-                    
+        return controller.manual(parsed_args.moves)
     elif parsed_args.command == "web":
-        from cubey.web.app import main as run_web_server
-        
-        logger.info(f"Starting web server on {parsed_args.host}:{parsed_args.port}...")
-        run_web_server(host=parsed_args.host, port=parsed_args.port, config_path=parsed_args.config)
-        
+        run_web_server(
+            host=parsed_args.host,
+            port=parsed_args.port,
+            config_path=parsed_args.config
+        )
+        return 0
     else:
         logger.error("No command specified. Use --help for usage information.")
         return 1
-        
-    return 0
 
 
 if __name__ == "__main__":
