@@ -16,12 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added centralized logging system
 - Added configuration validation
 - Added web interface improvements
+- Added custom exceptions and global error handling
+- Added enhanced configuration management with environment variable support
+- Added enhanced logging with rotating file handlers
+- Added web security features with CSRF protection
+- Added comprehensive tests for camera and web interface
 
 ### Changed
 - Refactored global variables into class attributes
 - Improved camera resource management
 - Enhanced CLI with argparse
 - Updated dependency management with version pinning
+- Removed redundant src directory in favor of new package structure
 
 ### Fixed
 - Fixed configuration file path resolution
