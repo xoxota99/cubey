@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced CLI with argparse
 - Updated dependency management with version pinning
 - Removed redundant src directory in favor of new package structure
+- Merged doc and docs directories to follow standard naming convention
 
 ### Fixed
 - Fixed configuration file path resolution
