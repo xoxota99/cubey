@@ -6,6 +6,7 @@ import os
 
 from lib import camera
 from lib.motorcontroller import MotorController
+from lib.logger import setup_logging
 
 """
 Utility for creating HSV calibration data
@@ -18,8 +19,9 @@ config = {}
 with open(config_file, "r") as ymlfile:
     config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-logging.basicConfig(
-    level=logging.getLevelName(config["app"]["log_level"]), format=config["app"]["log_format"])
+# Set up logging using the centralized logger
+setup_logging(config_file)
+logger = logging.getLogger(__name__)
 
 sample_coords = config["cam"]["sample_coords"]
 calib_file = os.path.join(script_dir, config["cam"]["calibration"])
@@ -187,8 +189,9 @@ if __name__ == "__main__":
     with open(config_file, "r") as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    logging.basicConfig(
-        level=logging.getLevelName(config["app"]["log_level"]), format=config["app"]["log_format"])
+    # Set up logging using the centralized logger
+    setup_logging(config_file)
+    logger = logging.getLogger(__name__)
 
     motors = MotorController(config)
 

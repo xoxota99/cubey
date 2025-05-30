@@ -2,9 +2,11 @@ import sys
 import logging
 import time
 import yaml
+import os
 
 from lib.motorcontroller import MotorController
 from lib.scanner import Scanner
+from lib.logger import setup_logging
 import kociemba
 
 """
@@ -79,13 +81,16 @@ def solve_interactive(scanner, motors):
 
 
 if __name__ == "__main__":
-    config_file = "config.yaml"
+    # Use absolute path for configuration file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(script_dir, "config.yaml")
     config = {}
     with open(config_file, 'r') as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    logging.basicConfig(
-        level=logging.getLevelName(config['app']['log_level']), format=config['app']['log_format'])
+    # Set up logging using the centralized logger
+    setup_logging(config_file)
+    logger = logging.getLogger(__name__)
 
     scanner = Scanner(config)
     motors = MotorController(config)

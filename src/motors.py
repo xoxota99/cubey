@@ -1,6 +1,9 @@
 from lib.motorcontroller import MotorController
 from cmd import Cmd
 import yaml
+import os
+from lib.logger import setup_logging
+import logging
 
 """
 Utility for interactively commanding the Stepper motors of the robot, using typical Rubik's Cube notation:
@@ -42,9 +45,15 @@ class MyPrompt(Cmd):
 
 
 if __name__ == "__main__":
-    config_file = "config.yaml"
+    # Use absolute path for configuration file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(script_dir, "config.yaml")
     with open(config_file, 'r') as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
+        
+    # Set up logging using the centralized logger
+    setup_logging(config_file)
+    logger = logging.getLogger(__name__)
 
     motors = MotorController(config)
 

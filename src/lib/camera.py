@@ -5,6 +5,8 @@ import time
 import math
 import yaml
 from time import sleep
+import os
+from lib.logger import setup_logging
 
 """
     Camera control module, including functions for scanning and
@@ -248,6 +250,10 @@ if __name__ == "__main__":
     config = {}
     with open(config_file, 'r') as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    # Set up logging using the centralized logger
+    setup_logging(config_file)
+    logger = logging.getLogger(__name__)
 
     calib_file = os.path.join(script_dir, config['cam']['calibration'])
     calib = {}

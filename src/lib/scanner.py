@@ -5,6 +5,7 @@ import os
 
 from PIL import Image, ImageDraw
 from lib.camera import Camera
+from lib.logger import setup_logging
 
 """
     Functions for scanning, evaluating and representing the state of a cube. Depends on camera.py and stepper.py

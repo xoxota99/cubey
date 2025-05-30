@@ -2,8 +2,10 @@ from time import sleep
 import logging
 import sys
 import random
+import os
 
 from lib.motorcontroller import MotorController
+from lib.logger import setup_logging
 
 """
 Utility for scrambling / descrambling the cube
@@ -63,13 +65,16 @@ def descramble(recipe_str):
 if __name__ == "__main__":
     import yaml
 
-    config_file = "config.yaml"
+    # Use absolute path for configuration file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(script_dir, "config.yaml")
     config = {}
     with open(config_file, 'r') as ymlfile:
         config = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    logging.basicConfig(
-        level=logging.getLevelName(config['app']['log_level']), format=config['app']['log_format'])
+    # Set up logging using the centralized logger
+    setup_logging(config_file)
+    logger = logging.getLogger(__name__)
 
     mode = "S"  # scramble by default.
 

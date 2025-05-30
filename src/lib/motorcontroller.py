@@ -1,5 +1,7 @@
 from time import sleep
 import pigpio
+import logging
+from lib.logger import setup_logging
 
 """
 Controller for stepper motors.
