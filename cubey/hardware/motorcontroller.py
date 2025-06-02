@@ -8,6 +8,12 @@ from typing import Dict, Any
 
 from cubey.exceptions import MotorError
 
+try:
+    # Import GPIO library - this will fail if not on a Raspberry Pi
+    import RPi.GPIO as GPIO
+except:
+    import Mock.GPIO as GPIO
+    
 # Constants for motor directions
 CW = 1
 CCW = -1
@@ -29,22 +35,16 @@ class MotorController:
         self.motor_pins = config["motor"]["pins"]
         self.speed = config["motor"]["speed"]
         
-        try:
-            # Import GPIO library - this will fail if not on a Raspberry Pi
-            import RPi.GPIO as GPIO
-            self.GPIO = GPIO
-            self.GPIO.setmode(GPIO.BCM)
-            self.GPIO.setwarnings(False)
+        self.GPIO = GPIO
+        self.GPIO.setmode(GPIO.BCM)
+        self.GPIO.setwarnings(False)
+        
+        # Set up GPIO pins
+        for pin in self.motor_pins.values():
+            self.GPIO.setup(pin, GPIO.OUT)
+            self.GPIO.output(pin, GPIO.LOW)
             
-            # Set up GPIO pins
-            for pin in self.motor_pins.values():
-                self.GPIO.setup(pin, GPIO.OUT)
-                self.GPIO.output(pin, GPIO.LOW)
-                
-            self.logger.info("Motor controller initialized")
-        except ImportError:
-            self.logger.warning("RPi.GPIO not available - running in simulation mode")
-            self.GPIO = None
+        self.logger.info("Motor controller initialized")
             
     def execute(self, recipe_str: str) -> bool:
         """
