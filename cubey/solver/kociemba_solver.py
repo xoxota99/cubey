@@ -10,6 +10,7 @@ import kociemba
 
 from cubey.exceptions import SolverError
 
+
 class KociembaSolver:
     """
     Solver using Herbert Kociemba's two-phase algorithm
@@ -45,7 +46,8 @@ class KociembaSolver:
             solution = kociemba.solve(state)
             end_time = time.time()
             
-            self.logger.info(f"Solution found in {end_time - start_time:.3f} seconds: {solution}")
+            self.logger.info(f"Solution found in {end_time - start_time:.3f}"
+                             "seconds: {solution}")
             return solution
         except Exception as e:
             self.logger.error(f"Error solving cube: {e}")
@@ -62,7 +64,8 @@ class KociembaSolver:
             True if the state is valid, False otherwise
         """
         if not state or len(state) != 54:
-            self.logger.error(f"Invalid state length: {len(state) if state else 0}, expected 54")
+            self.logger.error(f"Invalid state length: {len(state) if state else 0}"
+                              ", expected 54")
             return False
             
         # Check if the state contains only valid colors
@@ -74,7 +77,8 @@ class KociembaSolver:
         # Check if the state has the correct number of each color
         for color in valid_colors:
             if state.count(color) != 9:
-                self.logger.error(f"Invalid color count for {color}: {state.count(color)}, expected 9")
+                self.logger.error(f"Invalid color count for {color}: "
+                                  "{state.count(color)}, expected 9")
                 return False
                 
         return True
