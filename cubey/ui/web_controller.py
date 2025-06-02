@@ -14,6 +14,7 @@ from cubey.solver.kociemba_solver import KociembaSolver
 from cubey.solver.scrambler import Scrambler
 from cubey.config import get_merged_config
 
+
 class WebController:
     """
     Controller for the web interface
@@ -43,8 +44,8 @@ class WebController:
             Flask application
         """
         app = Flask(__name__, 
-                   template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
-                   static_folder=os.path.join(os.path.dirname(__file__), 'static'))
+                    template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
+                    static_folder=os.path.join(os.path.dirname(__file__), 'static'))
         
         # Configure CSRF protection
         from flask_wtf.csrf import CSRFProtect
@@ -128,7 +129,8 @@ class WebController:
             Result dictionary
         """
         if not self.status['last_scan']:
-            return {'success': False, 'error': 'No scan available. Please scan the cube first.'}
+            return {'success': False, 'error': 'No scan available. '
+                    'Please scan the cube first.'}
             
         self.status['state'] = 'solving'
         self.status['error'] = None
@@ -208,6 +210,7 @@ class WebController:
             self.status['error'] = str(e)
             return {'success': False, 'error': str(e)}
             
+            
 def create_app(config_path: Optional[str] = None) -> Flask:
     """
     Create the Flask application
@@ -221,6 +224,7 @@ def create_app(config_path: Optional[str] = None) -> Flask:
     config = get_merged_config(config_path)
     controller = WebController(config)
     return controller.create_app()
+    
     
 def main(host: str = '0.0.0.0', port: int = 5000, config_path: Optional[str] = None) -> None:
     """

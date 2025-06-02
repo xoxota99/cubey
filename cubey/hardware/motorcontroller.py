@@ -18,6 +18,7 @@ except:
 CW = GPIO.LOW
 CCW = GPIO.HIGH
 
+
 class MotorController:
     """
     Controls the stepper motors that manipulate the cube
@@ -32,10 +33,12 @@ class MotorController:
         """
         self.logger = logging.getLogger(__name__)
         self.config = config
-        self.face_pins = config["motor"]["face_pins"]
-        self.disable_pin = config["motor"]["disable_pin"]
-        self.direction_pin = config["motor"]["direction_pin"]
-        self.speed = config["motor"]["speed"]
+        
+        # Get motor configuration
+        self.face_pins = config["motors"]["face_pins"]
+        self.disable_pin = config["motors"]["disable_pin"]
+        self.direction_pin = config["motors"]["direction_pin"]
+        self.speed = config["motors"]["speed"]
         
         self.GPIO = GPIO
         self.GPIO.setmode(GPIO.BCM)

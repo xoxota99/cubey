@@ -13,6 +13,7 @@ from cubey.solver.kociemba_solver import KociembaSolver
 from cubey.solver.scrambler import scramble_cube
 from cubey.hardware.motors import run_interactive_mode
 
+
 class CLIController:
     """
     Controller for the command-line interface
@@ -55,8 +56,8 @@ class CLIController:
             self.logger.error(f"Unexpected error: {e}")
             return 1
             
-    def _solve_automatic(self, scanner: Scanner, solver: KociembaSolver, 
-                        motors: MotorController, state: Optional[str] = None) -> int:
+    def _solve_automatic(self, scanner: Scanner, solver: KociembaSolver,
+                         motors: MotorController, state: Optional[str] = None) -> int:
         """
         Solve the cube automatically
         
@@ -105,8 +106,8 @@ class CLIController:
         
         return 0
         
-    def _solve_interactive(self, scanner: Scanner, solver: KociembaSolver, 
-                          motors: MotorController) -> int:
+    def _solve_interactive(self, scanner: Scanner, solver: KociembaSolver,
+                           motors: MotorController) -> int:
         """
         Solve the cube interactively
         

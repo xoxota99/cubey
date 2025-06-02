@@ -72,35 +72,34 @@ def validate_motor_config(config: Dict[str, Any]) -> List[str]:
         List of error messages (empty if valid)
     """
     errors = []
-    speed: 100  # milliseconds per step
  
     required_fields = ['speed', 'face_pins', 'disable_pin', 'direction_pin']
     
     for field in required_fields:
         if field not in config:
-            errors.append(f"Missing required field 'motor.{field}'")
+            errors.append(f"Missing required field in motor configuration: '{field}'")
     
     if 'speed' in config and not isinstance(config['speed'], int):
-        errors.append("'motor.speed' must be an integer")
+        errors.append("Motor 'speed' must be an integer")
     
     if 'face_pins' in config:
         if not isinstance(config['face_pins'], dict):
-            errors.append("'motor.face_pins' must be a dictionary")
+            errors.append("Motor 'face_pins' must be a dictionary")
         else:
             required_pins = ['U', 'R', 'F', 'D', 'L', 'B']
             for pin in required_pins:
                 if pin not in config['face_pins']:
-                    errors.append(f"Missing required pin 'motor.face_pins.{pin}'")
+                    errors.append(f"Missing required pin in motor configuration: 'face_pins.{pin}'")
                 elif not isinstance(config['face_pins'][pin], int):
-                    errors.append(f"'motor.face_pins.{pin}' must be an integer")
+                    errors.append(f"Motor 'face_pins.{pin}' must be an integer")
     
     if 'disable_pin' in config:
         if not isinstance(config['disable_pin'], int):
-            errors.append(f"'motor.disable_pin' must be an integer")
+            errors.append("Motor 'disable_pin' must be an integer")
     
     if 'direction_pin' in config:
         if not isinstance(config['direction_pin'], int):
-            errors.append(f"'motor.direction_pin' must be an integer")
+            errors.append("Motor 'direction_pin' must be an integer")
     
     return errors
 
@@ -238,7 +237,7 @@ def validate_config(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
     errors = []
     
     # Check required sections
-    required_sections = ['cam', 'motor']
+    required_sections = ['cam', 'motors']
     for section in required_sections:
         if section not in config:
             errors.append(f"Missing required section '{section}'")
@@ -248,8 +247,8 @@ def validate_config(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
         errors.extend(validate_camera_config(config['cam']))
     
     # Validate motor configuration
-    if 'motor' in config:
-        errors.extend(validate_motor_config(config['motor']))
+    if 'motors' in config:
+        errors.extend(validate_motor_config(config['motors']))
     
     # Validate web configuration
     if 'web' in config:

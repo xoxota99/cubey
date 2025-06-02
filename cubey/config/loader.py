@@ -106,10 +106,18 @@ def get_env_config() -> Dict[str, Any]:
         env_config.setdefault("cam", {})
         env_config["cam"]["calibration"] = os.environ["CUBEY_CAMERA_CALIBRATION"]
     
-    # Motor configuration
-    if "CUBEY_MOTOR_SPEED" in os.environ:
-        env_config.setdefault("motor", {})
-        env_config["motor"]["speed"] = int(os.environ["CUBEY_MOTOR_SPEED"])
+    # Motors configuration
+    if "CUBEY_MOTORS_SPEED" in os.environ:
+        env_config.setdefault("motors", {})
+        env_config["motors"]["speed"] = int(os.environ["CUBEY_MOTORS_SPEED"])
+    
+    if "CUBEY_MOTORS_DISABLE_PIN" in os.environ:
+        env_config.setdefault("motors", {})
+        env_config["motors"]["disable_pin"] = int(os.environ["CUBEY_MOTORS_DISABLE_PIN"])
+        
+    if "CUBEY_MOTORS_DIRECTION_PIN" in os.environ:
+        env_config.setdefault("motors", {})
+        env_config["motors"]["direction_pin"] = int(os.environ["CUBEY_MOTORS_DIRECTION_PIN"])
     
     # Web configuration
     if "CUBEY_WEB_HOST" in os.environ:
