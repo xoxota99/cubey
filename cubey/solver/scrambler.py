@@ -4,7 +4,7 @@ Scrambler module for the Cubey robot
 
 import logging
 import random
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 from cubey.hardware.motorcontroller import MotorController
 

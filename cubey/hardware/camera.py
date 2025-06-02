@@ -3,9 +3,7 @@ Camera module for the Cubey robot
 """
 
 import logging
-import os
-import time
-from typing import Dict, Any, List, Tuple, Optional, Union
+from typing import Dict, Any, List, Tuple, Optional
 
 import numpy as np
 import cv2

@@ -4,7 +4,7 @@ Kociemba solver for the Cubey robot
 
 import logging
 import time
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 
 import kociemba
 

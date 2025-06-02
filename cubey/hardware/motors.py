@@ -4,9 +4,7 @@ Motors module for the Cubey robot
 
 import logging
 from cmd import Cmd
-import yaml
-import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 from cubey.hardware.motorcontroller import MotorController
 

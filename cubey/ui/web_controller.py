@@ -4,12 +4,10 @@ Web interface controller for Cubey
 
 import logging
 import os
-import time
 from typing import Dict, Any, Optional
 
 from flask import Flask, render_template, request, jsonify
 
-from cubey.exceptions import CubeyError
 from cubey.hardware.motorcontroller import MotorController
 from cubey.solver.scanner import Scanner
 from cubey.solver.kociemba_solver import KociembaSolver

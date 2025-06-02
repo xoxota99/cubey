@@ -3,10 +3,7 @@ Scanner for the Cubey robot
 """
 
 import logging
-import time
-from typing import Dict, Any, List, Optional, Tuple
-
-import numpy as np
+from typing import Dict, Any, List, Optional
 
 from cubey.exceptions import ScannerError
 from cubey.hardware.camera import Camera

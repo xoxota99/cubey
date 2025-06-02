@@ -3,16 +3,14 @@
 Command-line interface for Cubey
 """
 
-import os
 import sys
 import argparse
 import logging
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 
 from cubey.config import get_merged_config
 from cubey.utils.logging_config import setup_logging, get_logger
 from cubey.utils.error_handler import handle_errors, setup_global_exception_handler
-from cubey.exceptions import CubeyError
 from cubey.ui.cli_controller import CLIController
 from cubey.ui.web_controller import main as run_web_server
 

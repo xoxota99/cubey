@@ -5,11 +5,10 @@ Calibration module for the Cubey robot
 import logging
 import os
 import yaml
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 import numpy as np
 
-from cubey.exceptions import CalibrationError
 from cubey.hardware.camera import Camera
 from cubey.hardware.motorcontroller import MotorController
 

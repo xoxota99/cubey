@@ -3,15 +3,14 @@ Command-line interface controller for Cubey
 """
 
 import logging
-import sys
 import time
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Any, Optional
 
 from cubey.exceptions import CubeyError
 from cubey.hardware.motorcontroller import MotorController
 from cubey.solver.scanner import Scanner
 from cubey.solver.kociemba_solver import KociembaSolver
-from cubey.solver.scrambler import scramble_cube, descramble_cube
+from cubey.solver.scrambler import scramble_cube
 from cubey.core.cube_solver import solve_cube
 from cubey.hardware.motors import run_interactive_mode
 
