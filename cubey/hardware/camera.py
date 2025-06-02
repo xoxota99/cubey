@@ -68,14 +68,17 @@ class Camera:
         self.logger = logging.getLogger(__name__)
         self.config = config
         self.calib_data = calib_data
-        self.sample_coords = config["cam"]["sample_coords"]
-        self.sample_aperture = config["cam"]["sample_aperture"]
-        self.warmup_frames = config["cam"]["warmup_frames"]
-        self.flip_camera = config["cam"].get("flip_camera", False)
-        self.flip_code = config["cam"].get("flip_code", 0)
+        
+        # Get camera configuration
+        cam_config = config["cam"]
+        self.sample_coords = cam_config["sample_coords"]
+        self.sample_aperture = cam_config["sample_aperture"]
+        self.warmup_frames = cam_config["warmup_frames"]
+        self.flip_camera = cam_config["flip_camera"]
+        self.flip_code = cam_config["flip_code"]
         
         try:
-            self.vidcap = cv2.VideoCapture(config["cam"]["camera_deviceID"])
+            self.vidcap = cv2.VideoCapture(cam_config["camera_deviceID"])
             
             if not self.vidcap.isOpened():
                 raise CameraError("Failed to open camera")

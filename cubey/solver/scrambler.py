@@ -107,8 +107,9 @@ def scramble_cube(config: Dict[str, Any], motors: MotorController, moves: Option
     logger = logging.getLogger(__name__)
     
     # Get scramble parameters from config
-    min_moves = config.get("scrambler", {}).get("min_moves", 20)
-    max_moves = config.get("scrambler", {}).get("max_moves", 30)
+    scrambler_config = config["scrambler"]
+    min_moves = scrambler_config["min_moves"]
+    max_moves = scrambler_config["max_moves"]
     
     # Override with provided moves if specified
     if moves is not None:

@@ -4,7 +4,7 @@ Kociemba solver for the Cubey robot
 
 import logging
 import time
-from typing import Dict, Any
+from typing import Dict, Any, Set
 
 import kociemba
 
@@ -26,6 +26,11 @@ class KociembaSolver:
         self.logger = logging.getLogger(__name__)
         self.config = config
         
+        # Get solver configuration
+        self.solver_config = config["solver"]
+        self.max_time = self.solver_config["max_time"]
+        self.max_depth = self.solver_config["max_depth"]
+        
     def solve(self, state: str) -> str:
         """
         Solve the cube using Kociemba's algorithm
@@ -42,12 +47,16 @@ class KociembaSolver:
         self.logger.info(f"Solving cube with state: {state}")
         
         try:
+            # Build options string for kociemba solver
+            options = f"max_time={self.max_time} max_depth={self.max_depth}"
+            self.logger.debug(f"Using solver options: {options}")
+            
             start_time = time.time()
-            solution = kociemba.solve(state)
+            solution = kociemba.solve(state, options)
             end_time = time.time()
             
-            self.logger.info(f"Solution found in {end_time - start_time:.3f}"
-                             "seconds: {solution}")
+            self.logger.info(f"Solution found in {end_time - start_time:.3f} seconds: {solution}")
+            
             return solution
         except Exception as e:
             self.logger.error(f"Error solving cube: {e}")
@@ -64,12 +73,11 @@ class KociembaSolver:
             True if the state is valid, False otherwise
         """
         if not state or len(state) != 54:
-            self.logger.error(f"Invalid state length: {len(state) if state else 0}"
-                              ", expected 54")
+            self.logger.error(f"Invalid state length: {len(state) if state else 0}, expected 54")
             return False
             
         # Check if the state contains only valid colors
-        valid_colors = set("URFDLB")
+        valid_colors: Set[str] = set("URFDLB")
         if not all(c in valid_colors for c in state):
             self.logger.error(f"Invalid colors in state: {set(state) - valid_colors}")
             return False
@@ -77,8 +85,7 @@ class KociembaSolver:
         # Check if the state has the correct number of each color
         for color in valid_colors:
             if state.count(color) != 9:
-                self.logger.error(f"Invalid color count for {color}: "
-                                  "{state.count(color)}, expected 9")
+                self.logger.error(f"Invalid color count for {color}: {state.count(color)}, expected 9")
                 return False
                 
         return True

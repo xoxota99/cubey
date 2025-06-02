@@ -28,8 +28,9 @@ class Scanner:
         import os
         import yaml
         
+        cam_config = config["cam"]
         calib_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
-                                 "config", config["cam"]["calibration"])
+                                 "config", cam_config["calibration"])
         
         try:
             with open(calib_file, "r") as f:

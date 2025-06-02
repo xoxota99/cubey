@@ -42,13 +42,16 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     },
     "solver": {
         "max_time": 2.0,
-        "max_depth": 20,
-        "use_cache": True
+        "max_depth": 20
     },
     "scanner": {
         "use_threading": True,
         "max_workers": 4,
         "use_cache": True
+    },
+    "scrambler": {
+        "min_moves": 20,
+        "max_moves": 30
     },
     "logging": {
         "level": "INFO",
@@ -56,5 +59,11 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         "max_size": 10485760,
         "backup_count": 5
+    },
+    "web": {
+        "host": "0.0.0.0",
+        "port": 5000,
+        "debug": False,
+        "secret_key": "dev-key-change-in-production"
     }
 }
