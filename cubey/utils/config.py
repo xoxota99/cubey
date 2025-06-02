@@ -26,10 +26,10 @@ def get_config_path(config_path: Optional[str] = None) -> str:
         ConfigurationError: If the configuration file does not exist
     """
     if config_path is None:
-        # Use default config path
+        # Use default config path - now at the top level
         config_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "data",
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            "config",
             "config.yaml"
         )
     

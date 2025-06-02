@@ -31,8 +31,8 @@ class Scanner:
         import os
         import yaml
         
-        calib_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                                 "data", config["cam"]["calibration"])
+        calib_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+                                 "config", config["cam"]["calibration"])
         
         try:
             with open(calib_file, "r") as f:

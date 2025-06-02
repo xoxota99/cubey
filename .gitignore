@@ -108,3 +108,6 @@ doc/~$*
 scrap/
 .DS_Store
 *.code-workspace
+
+# Old data directory (moved to /config)
+cubey/data/

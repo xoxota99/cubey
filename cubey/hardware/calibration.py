@@ -85,8 +85,8 @@ def calibrate(config: Dict[str, Any], output_file: Optional[str] = None) -> int:
     
     try:
         # Load existing calibration data
-        calib_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                                 "data", config["cam"]["calibration"])
+        calib_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+                                 "config", config["cam"]["calibration"])
         
         with open(calib_file, "r") as f:
             calib_data = yaml.safe_load(f)
