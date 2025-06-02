@@ -5,7 +5,7 @@ Calibration module for the Cubey robot
 import logging
 import os
 import yaml
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 import numpy as np
 

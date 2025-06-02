@@ -4,7 +4,8 @@ Configuration management for Cubey
 
 import os
 import yaml
-from typing import Dict, Any, Optional, Union, List
+from typing import Dict, Any, Optional
+
 import logging
 
 from cubey.exceptions import ConfigError

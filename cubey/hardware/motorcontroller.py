@@ -4,7 +4,7 @@ Motor controller for the Cubey robot
 
 import time
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 
 from cubey.exceptions import MotorError
 
@@ -59,6 +59,34 @@ class MotorController:
         Raises:
             MotorError: If an invalid move is encountered
         """
+        self.logger.debug(f"Executing: {recipe_str}")
+        
+        # Split the recipe into individual moves
+        recipe = recipe_str.split()
+        
+        for move in recipe:
+            if len(move) == 0:
+                continue
+                
+            # Parse the move
+            face = move[0]
+            if face not in self.motor_pins:
+                raise MotorError(f"Invalid face: {face}")
+                
+            pin = self.motor_pins[face]
+            
+            # Determine the direction and angle
+            if len(move) > 1:
+                if move[1] == "'":
+                    self.rot_90(pin, CCW)
+                elif move[1] == "2":
+                    self.rot_180(pin)
+                else:
+                    raise MotorError(f"Invalid move modifier: {move[1]}")
+            else:
+                self.rot_90(pin, CW)
+                
+        return True
         
         if not recipe_str:
             return

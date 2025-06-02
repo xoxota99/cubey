@@ -8,6 +8,34 @@ from typing import Dict, Any, Optional
 
 from cubey.hardware.motorcontroller import MotorController
 
+class Scrambler:
+    """
+    Class for scrambling the cube
+    """
+    
+    def __init__(self, config: Dict[str, Any]):
+        """
+        Initialize the scrambler
+        
+        Args:
+            config: Configuration dictionary
+        """
+        self.logger = logging.getLogger(__name__)
+        self.config = config
+        
+    def scramble(self, moves: Optional[int] = None) -> str:
+        """
+        Scramble the cube
+        
+        Args:
+            moves: Optional number of moves (if None, uses config values)
+            
+        Returns:
+            Scramble sequence
+        """
+        motors = MotorController(self.config)
+        return scramble_cube(self.config, motors, moves)
+
 def generate_scramble(min_moves: int, max_moves: int) -> str:
     """
     Generate a random scramble sequence
