@@ -59,14 +59,7 @@ class MotorController:
         Raises:
             MotorError: If an invalid move is encountered
         """
-        Execute a sequence of cube moves
         
-        Args:
-            recipe_str: String of moves to execute (e.g., "F R U R' U' F'")
-            
-        Raises:
-            MotorError: If an invalid move is encountered
-        """
         if not recipe_str:
             return
             

@@ -96,6 +96,7 @@ def merge_configs(base_config: Dict[str, Any], override_config: Dict[str, Any]) 
     Args:
         base_config: Base configuration
         override_config: Configuration to override the base
+    """
         
 def merge_configs(base_config: Dict[str, Any], override_config: Dict[str, Any]) -> Dict[str, Any]:
     """
