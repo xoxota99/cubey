@@ -46,7 +46,18 @@ class MotorController:
             self.logger.warning("RPi.GPIO not available - running in simulation mode")
             self.GPIO = None
             
-    def execute(self, recipe_str: str) -> None:
+    def execute(self, recipe_str: str) -> bool:
+        """
+        Execute a sequence of cube moves
+        
+        Args:
+            recipe_str: String of moves to execute (e.g., "F R U R' U' F'")
+            
+        Returns:
+            True if successful
+            
+        Raises:
+            MotorError: If an invalid move is encountered
         """
         Execute a sequence of cube moves
         

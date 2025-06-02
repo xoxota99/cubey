@@ -4,10 +4,10 @@ Configuration management for Cubey
 
 import os
 import yaml
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union, List
 import logging
 
-from cubey.exceptions import ConfigurationError
+from cubey.exceptions import ConfigError
 from cubey.utils.config_validator import validate_config
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def get_config_path(config_path: Optional[str] = None) -> str:
         Path to the configuration file
         
     Raises:
-        ConfigurationError: If the configuration file does not exist
+        ConfigError: If the configuration file does not exist
     """
     if config_path is None:
         # Use default config path - now at the top level
@@ -34,7 +34,7 @@ def get_config_path(config_path: Optional[str] = None) -> str:
         )
     
     if not os.path.exists(config_path):
-        raise ConfigurationError(f"Configuration file not found: {config_path}")
+        raise ConfigError(f"Configuration file not found: {config_path}")
     
     return config_path
 
@@ -49,7 +49,7 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
         Configuration dictionary
         
     Raises:
-        ConfigurationError: If the configuration file cannot be loaded or is invalid
+        ConfigError: If the configuration file cannot be loaded or is invalid
     """
     config_path = get_config_path(config_path)
     
@@ -57,13 +57,12 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
     except Exception as e:
-        raise ConfigurationError(f"Failed to load configuration: {str(e)}")
+        raise ConfigError(f"Failed to load configuration: {str(e)}")
     
     # Validate the configuration
     validate_config(config)
     
     return config
-
 def get_env_config() -> Dict[str, Any]:
     """
     Get configuration from environment variables
@@ -90,6 +89,14 @@ def get_env_config() -> Dict[str, Any]:
     
     return env_config
 
+def merge_configs(base_config: Dict[str, Any], override_config: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Merge two configuration dictionaries
+    
+    Args:
+        base_config: Base configuration
+        override_config: Configuration to override the base
+        
 def merge_configs(base_config: Dict[str, Any], override_config: Dict[str, Any]) -> Dict[str, Any]:
     """
     Merge two configuration dictionaries

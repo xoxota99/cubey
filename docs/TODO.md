@@ -15,9 +15,9 @@
 
 ## Code Quality Improvements
 
-1. Type Annotations
-   • Add type hints throughout the codebase to improve IDE support and catch type errors early
-   • Consider using a type checker like mypy in the CI pipeline
+1. ~~Type Annotations~~
+   • ~~Add type hints throughout the codebase to improve IDE support and catch type errors early~~
+   • ~~Consider using a type checker like mypy in the CI pipeline~~
 
 2. Comprehensive Error Handling
    • Expand the custom exceptions in exceptions.py to cover more specific error cases

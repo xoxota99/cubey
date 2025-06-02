@@ -2,12 +2,29 @@
 Custom exceptions for the Cubey project
 """
 
+from typing import Optional, Any
+
 class CubeyError(Exception):
     """Base exception for all Cubey errors"""
-    pass
+    
+    def __init__(self, message: str, details: Optional[Any] = None) -> None:
+        """
+        Initialize the exception
+        
+        Args:
+            message: Error message
+            details: Optional additional details about the error
+        """
+        self.message = message
+        self.details = details
+        super().__init__(message)
 
 class ConfigError(CubeyError):
     """Error related to configuration"""
+    pass
+
+class ConfigurationError(ConfigError):
+    """Error related to configuration (alias for backward compatibility)"""
     pass
 
 class HardwareError(CubeyError):
