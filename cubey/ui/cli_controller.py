@@ -11,7 +11,9 @@ from cubey.exceptions import CubeyError
 from cubey.hardware.motorcontroller import MotorController
 from cubey.solver.scanner import Scanner
 from cubey.solver.kociemba_solver import KociembaSolver
-from cubey.solver.scrambler import Scrambler
+from cubey.solver.scrambler import scramble_cube, descramble_cube
+from cubey.core.cube_solver import solve_cube
+from cubey.hardware.motors import run_interactive_mode
 
 class CLIController:
     """
@@ -42,12 +44,9 @@ class CLIController:
         try:
             motors = MotorController(self.config)
             scanner = Scanner(self.config)
-            solver = KociembaSolver(self.config)
             
-            if interactive:
-                return self._solve_interactive(scanner, solver, motors)
-            else:
-                return self._solve_automatic(scanner, solver, motors, state)
+            exit_code, _ = solve_cube(self.config, scanner, motors, state, interactive)
+            return exit_code
         except CubeyError as e:
             self.logger.error(f"Error: {e}")
             return 1
@@ -163,13 +162,9 @@ class CLIController:
         """
         try:
             motors = MotorController(self.config)
-            scrambler = Scrambler(self.config)
             
-            scramble = scrambler.scramble(moves)
+            scramble = scramble_cube(self.config, motors, moves)
             self.logger.info(f"Scramble: {scramble}")
-            
-            self.logger.info("Executing scramble...")
-            motors.execute(scramble)
             self.logger.info("Done!")
             
             return 0
@@ -227,26 +222,15 @@ class CLIController:
             Exit code
         """
         try:
-            motors = MotorController(self.config)
-            
             if moves:
+                motors = MotorController(self.config)
                 self.logger.info(f"Executing moves: {moves}")
                 motors.execute(moves)
                 self.logger.info("Done!")
+                return 0
             else:
-                self.logger.info("Enter moves (e.g., 'F R U R\\' U\\' F\\'). Type 'quit' to exit.")
-                while True:
-                    try:
-                        moves = input("> ")
-                        if moves.lower() in ("quit", "exit", "q"):
-                            break
-                        motors.execute(moves)
-                    except CubeyError as e:
-                        self.logger.error(f"Error: {e}")
-                    except Exception as e:
-                        self.logger.error(f"Unexpected error: {e}")
-                        
-            return 0
+                # Run interactive mode
+                return run_interactive_mode(self.config)
         except CubeyError as e:
             self.logger.error(f"Error: {e}")
             return 1

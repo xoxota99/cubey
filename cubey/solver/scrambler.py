@@ -1,38 +1,36 @@
 """
-Scrambler for the Cubey robot
+Scrambler module for the Cubey robot
 """
 
-import random
 import logging
-from typing import Dict, Any, List, Optional
+import random
+from typing import Dict, Any, Optional, List
 
-from cubey.exceptions import CubeyError
+from cubey.hardware.motorcontroller import MotorController
 
-def generate_scramble(moves: int = 20) -> str:
+def generate_scramble(min_moves: int, max_moves: int) -> str:
     """
     Generate a random scramble sequence
     
     Args:
-        moves: Number of moves in the scramble
+        min_moves: Minimum number of moves
+        max_moves: Maximum number of moves
         
     Returns:
-        Scramble string
+        Scramble sequence as a string
     """
-    logger = logging.getLogger(__name__)
-    logger.debug(f"Generating scramble with {moves} moves")
-    
     recipe = ""
-    base = "X"  # Placeholder
-    last_base = "X"  # Placeholder
+    move_count = random.randint(min_moves, max_moves)
+    base = "X"
+    last_base = "X"
 
-    for _ in range(moves):
-        # Avoid repeating the same face
+    for _ in range(move_count):
         while base == last_base:
-            # Pick a random face
+            # pick a random face
             base = random.choice(["U", "R", "F", "D", "L", "B"])
 
         last_base = base
-        add = random.randint(0, 2)
+        add = random.randint(0, 4)
         xtra = ""
 
         if add == 1:
@@ -42,64 +40,75 @@ def generate_scramble(moves: int = 20) -> str:
 
         recipe = recipe + base + xtra + " "
 
-    logger.debug(f"Generated scramble: {recipe}")
     return recipe.strip()
 
-def descramble(recipe_str: str) -> str:
+def generate_descramble(scramble: str) -> str:
     """
-    Generate the inverse of a scramble sequence
+    Generate a descramble sequence from a scramble sequence
     
     Args:
-        recipe_str: Scramble string
+        scramble: Scramble sequence
         
     Returns:
-        Inverse scramble string
+        Descramble sequence as a string
     """
-    logger = logging.getLogger(__name__)
-    logger.debug(f"Generating inverse for scramble: {recipe_str}")
-    
-    recipe_arr = recipe_str.split()
+    recipe_arr = scramble.split()
     rec2 = ""
-    
     for step in reversed(recipe_arr):
-        if "'" in step:
+        if("'" in step):
             rec2 += step.replace("'", "") + " "
-        elif "2" in step:
-            rec2 += step + " "  # 180-degree turns are their own inverse
-        else:
+        elif ("2" not in step):
             rec2 += step + "' "
+        else:
+            rec2 += step + " "
 
-    logger.debug(f"Generated inverse: {rec2}")
     return rec2.strip()
 
-class Scrambler:
+def scramble_cube(config: Dict[str, Any], motors: MotorController, moves: Optional[int] = None) -> str:
     """
-    Class for scrambling the cube
-    """
+    Scramble the cube
     
-    def __init__(self, config: Dict[str, Any]):
-        """
-        Initialize the scrambler
+    Args:
+        config: Configuration dictionary
+        motors: Motor controller
+        moves: Optional number of moves (if None, uses config values)
         
-        Args:
-            config: Configuration dictionary
-        """
-        self.logger = logging.getLogger(__name__)
-        self.config = config
-        self.min_moves = config.get("scrambler", {}).get("min_moves", 20)
-        self.max_moves = config.get("scrambler", {}).get("max_moves", 25)
+    Returns:
+        Scramble sequence
+    """
+    logger = logging.getLogger(__name__)
+    
+    # Get scramble parameters from config
+    min_moves = config.get("scrambler", {}).get("min_moves", 20)
+    max_moves = config.get("scrambler", {}).get("max_moves", 30)
+    
+    # Override with provided moves if specified
+    if moves is not None:
+        min_moves = max_moves = moves
+    
+    # Generate and execute scramble
+    scramble = generate_scramble(min_moves, max_moves)
+    logger.info(f"Scrambling cube with sequence: {scramble}")
+    motors.execute(scramble)
+    
+    return scramble
+
+def descramble_cube(motors: MotorController, scramble: str) -> str:
+    """
+    Descramble the cube
+    
+    Args:
+        motors: Motor controller
+        scramble: Scramble sequence
         
-    def scramble(self, moves: Optional[int] = None) -> str:
-        """
-        Generate a random scramble
-        
-        Args:
-            moves: Number of moves (if None, uses the configured range)
-            
-        Returns:
-            Scramble string
-        """
-        if moves is None:
-            moves = random.randint(self.min_moves, self.max_moves)
-            
-        return generate_scramble(moves)
+    Returns:
+        Descramble sequence
+    """
+    logger = logging.getLogger(__name__)
+    
+    # Generate and execute descramble
+    descramble = generate_descramble(scramble)
+    logger.info(f"Descrambling cube with sequence: {descramble}")
+    motors.execute(descramble)
+    
+    return descramble
