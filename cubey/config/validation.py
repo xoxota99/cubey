@@ -72,8 +72,9 @@ def validate_motor_config(config: Dict[str, Any]) -> List[str]:
         List of error messages (empty if valid)
     """
     errors = []
-    
-    required_fields = ['speed', 'pins']
+    speed: 100  # milliseconds per step
+ 
+    required_fields = ['speed', 'face_pins', 'disable_pin', 'direction_pin']
     
     for field in required_fields:
         if field not in config:
@@ -82,16 +83,24 @@ def validate_motor_config(config: Dict[str, Any]) -> List[str]:
     if 'speed' in config and not isinstance(config['speed'], int):
         errors.append("'motor.speed' must be an integer")
     
-    if 'pins' in config:
-        if not isinstance(config['pins'], dict):
-            errors.append("'motor.pins' must be a dictionary")
+    if 'face_pins' in config:
+        if not isinstance(config['face_pins'], dict):
+            errors.append("'motor.face_pins' must be a dictionary")
         else:
             required_pins = ['U', 'R', 'F', 'D', 'L', 'B']
             for pin in required_pins:
-                if pin not in config['pins']:
-                    errors.append(f"Missing required pin 'motor.pins.{pin}'")
-                elif not isinstance(config['pins'][pin], int):
-                    errors.append(f"'motor.pins.{pin}' must be an integer")
+                if pin not in config['face_pins']:
+                    errors.append(f"Missing required pin 'motor.face_pins.{pin}'")
+                elif not isinstance(config['face_pins'][pin], int):
+                    errors.append(f"'motor.face_pins.{pin}' must be an integer")
+    
+    if 'disable_pin' in config:
+        if not isinstance(config['disable_pin'], int):
+            errors.append(f"'motor.disable_pin' must be an integer")
+    
+    if 'direction_pin' in config:
+        if not isinstance(config['direction_pin'], int):
+            errors.append(f"'motor.direction_pin' must be an integer")
     
     return errors
 
