@@ -5,7 +5,7 @@ Enhanced logging configuration for Cubey
 import os
 import logging
 import logging.config
-from typing import Dict, Any, Optional
+from typing import Optional
 import yaml
 
 def setup_logging(

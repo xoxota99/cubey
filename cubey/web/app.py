@@ -2,11 +2,9 @@
 import os
 import sys
 import signal
-import logging
 from flask import Flask, render_template, Response
-import yaml
-from camera import Camera
-from integration import CubeyWebIntegration, create_api_routes
+from cubey.web.camera import Camera
+from cubey.web.integration import CubeyWebIntegration, create_api_routes
 
 """
 Main web application for the cubey project

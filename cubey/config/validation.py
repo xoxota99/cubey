@@ -3,9 +3,8 @@ Configuration validation for Cubey
 """
 
 import logging
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List, Tuple
 
-from cubey.exceptions import ConfigError
 from cubey.config.schema import ConfigSchema
 
 logger = logging.getLogger(__name__)

@@ -1,47 +1,48 @@
 from flask import Flask, render_template, Response
-from camera import Camera
+from cubey.web.camera import Camera
 import signal
 import sys
+from typing import Generator
 
 app = Flask(__name__)
 cam = None
 
 
-def signal_handler(sig, frame):
+def signal_handler(sig, frame) -> None:
     print('You pressed Ctrl+C!')
-    if(cam != None):
+    if cam is not None:
         cam.stop()
     sys.exit(0)
 
 
 @app.route('/')
-def index():
+def index() -> str:
     """Video streaming home page."""
     return render_template('index.html')
 
 
 @app.route('/front')
-def front():
+def front() -> str:
     """Video streaming home page."""
     return render_template('front.html')
 
 
 @app.route('/back')
-def back():
+def back() -> str:
     """Video streaming home page."""
     return render_template('back.html')
 
 
-def gen(camera):
+def gen(camera: Camera) -> Generator[bytes, None, None]:
     """Video streaming generator function."""
     while True:
         frame = camera.get_frame()
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame if frame is not None else b'' + b'\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + (frame if frame is not None else b'') + b'\r\n')
 
 
 @app.route('/video_feed')
-def video_feed():
+def video_feed() -> Response:
     """Video streaming route. Put this in the src attribute of an img tag."""
     global cam
     cam = Camera(0)

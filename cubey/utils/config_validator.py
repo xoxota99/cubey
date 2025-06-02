@@ -1,7 +1,6 @@
 import yaml
 import os
-import logging
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Tuple
 
 """
 Configuration validator for the cubey project

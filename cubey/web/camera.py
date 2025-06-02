@@ -1,25 +1,46 @@
-import numpy as np
 import time
-from cv2 import cv2
-from frameEvent import FrameEvent
+import cv2
+from cubey.web.frameEvent import FrameEvent
 import threading
 import yaml
+import os
+from typing import Dict, Any
 
-config = {}
-with open("../config.yaml", 'r') as ymlfile:
-    config = yaml.load(ymlfile, Loader=yaml.FullLoader)
+# Load configuration from the standard location
+config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+                          "config", "config.yaml")
+config: Dict[str, Any] = {}
+try:
+    with open(config_path, 'r') as ymlfile:
+        config = yaml.safe_load(ymlfile)
+except FileNotFoundError:
+    # Fallback to default configuration
+    config = {
+        "cam": {
+            "camera_deviceID": 0, 
+            "frame_width": 640, 
+            "frame_height": 480,
+            "sample_coords": [[100, 100], [200, 200], [300, 300]],
+            "sample_aperture": 10,
+            "calibration": "default_calib.yaml"
+        }
+    }
 
-calib = {}
-calib_file = "../" + config['cam']['calibration']
-with open(calib_file, 'r') as ymlfile:
-    calib = yaml.load(ymlfile, Loader=yaml.FullLoader)
+calib: Dict[str, Any] = {}
+try:
+    calib_file = os.path.join(os.path.dirname(config_path), config['cam']['calibration'])
+    with open(calib_file, 'r') as ymlfile:
+        calib = yaml.safe_load(ymlfile)
+except (FileNotFoundError, KeyError):
+    # Fallback to empty calibration
+    calib = {}
 
 """
 Camera singleton, that publishes "frame-ready" events to any listeners.
 """
 
-default_sample_coords = config["cam"]["sample_coords"]
-sample_size = config["cam"]["sample_aperture"]
+default_sample_coords = config.get("cam", {}).get("sample_coords", [[100, 100], [200, 200], [300, 300]])
+sample_size = config.get("cam", {}).get("sample_aperture", 10)
 
 
 class Camera(object):

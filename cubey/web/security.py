@@ -2,9 +2,8 @@
 Security utilities for the web interface
 """
 
-import os
 import secrets
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Callable
 from functools import wraps
 from flask import request, Response, current_app
 

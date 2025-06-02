@@ -1,20 +1,21 @@
 import time
 import threading
+from typing import Dict, Any
 try:
     from greenlet import getcurrent as get_ident
 except ImportError:
     from _thread import get_ident
 
 
-class FrameEvent(object):
+class FrameEvent:
     """An Event-like class that signals all active clients when a new frame is
     available.
     """
 
-    def __init__(self):
-        self.events = {}
+    def __init__(self) -> None:
+        self.events: Dict[Any, Dict[str, Any]] = {}
 
-    def wait(self):
+    def wait(self) -> bool:
         """Invoked from each client's thread to wait for the next frame."""
         ident = get_ident()
         if ident not in self.events:
@@ -24,7 +25,7 @@ class FrameEvent(object):
             self.events[ident] = [threading.Event(), time.time()]
         return self.events[ident][0].wait()
 
-    def set(self):
+    def set(self) -> None:
         """Invoked by the camera thread when a new frame is available."""
         now = time.time()
         remove = None
@@ -44,6 +45,6 @@ class FrameEvent(object):
         if remove:
             del self.events[remove]
 
-    def clear(self):
+    def clear(self) -> None:
         """Invoked from each client's thread after a frame was processed."""
         self.events[get_ident()][0].clear()
