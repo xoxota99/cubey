@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
 
 from setuptools import setup, find_packages
+import os
+import re
+
+# Read the version from cubey/__init__.py
+with open(os.path.join("cubey", "__init__.py"), encoding="utf-8") as f:
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", f.read(), re.M)
+    if version_match:
+        version = version_match.group(1)
+    else:
+        raise RuntimeError("Unable to find version string in cubey/__init__.py")
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="cubey",
-    version="0.1.0",
+    version=version,
     author="Cubey Team",
     author_email="info@cubey.org",
     description="A Raspberry Pi-based Rubik's Cube solving robot",
@@ -17,6 +27,8 @@ setup(
     project_urls={
         "Bug Tracker": "https://github.com/cubey/cubey/issues",
         "Documentation": "https://cubey.github.io/cubey/",
+        "Source Code": "https://github.com/cubey/cubey",
+        "Changelog": "https://github.com/cubey/cubey/blob/main/CHANGELOG.md",
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -47,6 +59,9 @@ setup(
             "mypy>=0.931",
             "flake8>=4.0.0",
             "pre-commit>=2.17.0",
+            "build>=0.10.0",
+            "twine>=4.0.0",
+            "gitchangelog>=3.0.4",
         ],
         "docs": [
             "mkdocs>=1.2.0",

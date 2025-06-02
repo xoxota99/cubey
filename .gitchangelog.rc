@@ -1,0 +1,220 @@
+##
+## Format
+##
+##   ACTION: [AUDIENCE:] COMMIT_MSG [!TAG ...]
+##
+## Description
+##
+##   ACTION is one of 'chg', 'fix', 'new'
+##
+##       Is WHAT the change is about.
+##
+##       'chg' is for refactor, small improvement, cosmetic changes...
+##       'fix' is for bug fixes
+##       'new' is for new features, big improvement
+##
+##   AUDIENCE is optional and one of 'dev', 'usr', 'pkg', 'test', 'doc'
+##
+##       Is WHO is concerned by the change.
+##
+##       'dev'  is for developers (API changes, refactors...)
+##       'usr'  is for final users (UI changes)
+##       'pkg'  is for packagers   (packaging changes)
+##       'test' is for testers     (test only related changes)
+##       'doc'  is for doc guys    (doc only changes)
+##
+##   COMMIT_MSG is ... well ... the commit message itself.
+##
+##   TAGs are additionnal adjective as 'refactor' 'minor' 'cosmetic'
+##
+##       They are preceded with a '!' or a '@' (prefer the former, as the
+##       latter is wrongly interpreted in github.) Commonly used tags are:
+##
+##       'refactor' is obviously for refactoring code only
+##       'minor' is for a very meaningless change (a typo, adding a comment)
+##       'cosmetic' is for cosmetic driven change (re-indentation, 80-col...)
+##       'wip' is for partial functionality but complete subfunctionality.
+##
+## Example:
+##
+##   new: usr: support of bazaar implemented
+##   chg: re-indentend some lines !cosmetic
+##   new: dev: updated code to be compatible with last version of killer lib.
+##   fix: pkg: updated year of license coverage.
+##   new: test: added a bunch of test around user usability of feature X.
+##   fix: typo in spelling my name in comment. !minor
+##
+##   Please note that multi-line commit message are supported, and only the
+##   first line will be considered as the "summary" of the commit message. So
+##   tags, and other rules only applies to the summary.  The body of the commit
+##   message will be displayed in the changelog without reformatting.
+
+
+##
+## ``ignore_regexps`` is a line of regexps
+##
+## Any commit having its full commit message matching any regexp listed here
+## will be ignored and won't be reported in the changelog.
+##
+ignore_regexps = [
+    r'@minor', r'!minor',
+    r'@cosmetic', r'!cosmetic',
+    r'@refactor', r'!refactor',
+    r'@wip', r'!wip',
+    r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*[p|P]kg:',
+    r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*[d|D]ev:',
+    r'^(.{3,3}\s*:)?\s*[fF]irst commit.?\s*$',
+    r'^$',  ## ignore commits with empty messages
+]
+
+
+## ``section_regexps`` is a list of 2-tuples containing the regexp and the section
+## title to use in the changelog.
+##
+## Commit messages will be classified in sections based on their first line.
+##
+section_regexps = [
+    ('new', 'Added'),
+    ('chg', 'Changed'),
+    ('fix', 'Fixed'),
+]
+
+
+## ``body_process`` is a callable
+##
+## This callable will be given the body of the commit message as one parameter.
+## Its return value will be the commit message that will be used in the changelog.
+##
+## For instance, if you want to convert the commit message to ReST format,
+## you could use something like:
+##
+##   def process_commit_body(commit_body):
+##       return textwrap.wrap(commit_body, 72)
+##
+## Or to simply remove the commit message body, use:
+##
+##   def process_commit_body(commit_body):
+##       return ""
+##
+## If not specified, the commit message body will be used as is.
+##
+body_process = lambda x: x
+
+
+## ``subject_process`` is a callable
+##
+## This callable will be given the first line of the commit message as one parameter.
+## Its return value will be the commit message that will be used in the changelog.
+##
+## For instance, if you want to remove the commit message prefix (e.g. "[TASK]"),
+## you could use something like:
+##
+##   def process_commit_subject(commit_subject):
+##       return commit_subject.replace("[TASK]", "")
+##
+## If not specified, the commit message subject will be used as is.
+##
+subject_process = (lambda s: s.strip())
+
+
+## ``tag_filter_regexp`` is a regexp
+##
+## Tags that will be used for the changelog must match this regexp.
+##
+tag_filter_regexp = r'^v[0-9]+\.[0-9]+\.[0-9]+$'
+
+
+## ``unreleased_version_label`` is a string or a callable that outputs a string
+##
+## This label will be used as the changelog Title of the last set of changes
+## between last valid tag and HEAD if any.
+unreleased_version_label = "(unreleased)"
+
+
+## ``output_engine`` is a callable
+##
+## This will change the output format of the generated changelog file
+##
+## Available choices are:
+##
+##   - rest_py
+##
+##        Legacy pure python engine, outputs ReSTructured text.
+##        This is the default.
+##
+##   - mustache(<template_name>)
+##
+##        Template name could be any of the available templates in
+##        ``templates/mustache/*.tpl``.
+##        Requires python package ``pystache``.
+##        Examples:
+##           - mustache("markdown")
+##           - mustache("restructuredtext")
+##
+##   - makotemplate(<template_name>)
+##
+##        Template name could be any of the available templates in
+##        ``templates/mako/*.tpl``.
+##        Requires python package ``mako``.
+##        Examples:
+##           - makotemplate("restructuredtext")
+##
+output_engine = mustache("markdown")
+
+
+## ``include_merge`` is a boolean
+##
+## This option tells git-changelog whether to include merge commits in the log.
+## By default, merge commits are not included.
+include_merge = False
+
+
+## ``log_encoding`` is a string identifier
+##
+## This option tells git-changelog what encoding is outputted by ``git log``.
+## If this option is not set, the default encoding of your system is used.
+log_encoding = 'utf-8'
+
+
+## ``publish`` is a callable
+##
+## This option allows you to customize how the generated changelog is published.
+## This callable takes the content of the changelog as one parameter.
+## By default, this just prints the changelog to the standard output.
+##
+## Some examples:
+##
+##   def publish(changelog):
+##       print("Here is the changelog:")
+##       print(changelog)
+##
+##   def publish(changelog):
+##       with open("CHANGELOG.md", "w") as f:
+##           f.write(changelog)
+##
+publish = lambda s: print(s)
+
+
+## ``revs`` is a list of callable or a list of string
+##
+## callable will be called to resolve as strings and allow dynamical computation of
+## revision range. The result will be passed to git log.
+##
+## This can be useful for automation.
+##
+## If revs is None, git-changelog will automatically look for changes since the
+## last tag.
+##
+## If revs is a list of strings, git-changelog will treat each string as a revision
+## range to be passed to git log.
+##
+## If revs is a single string, git-changelog will split the string on commas and
+## treat each part as a revision range to be passed to git log.
+##
+## Here are some example values for revs:
+##
+##   revs = ["v1.0.0..HEAD"]
+##   revs = ["v1.0.0..v2.0.0", "v2.0.0..v3.0.0"]
+##   revs = "v1.0.0..v2.0.0,v2.0.0..v3.0.0"
+##
+revs = []

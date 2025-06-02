@@ -30,10 +30,10 @@
    • Avoid global state and singleton patterns where possible
    • Consider using a lightweight DI container
 
-4. Fix Remaining Import Issues
-   • Address the unused imports identified by flake8
-   • Fix import errors in web modules
-   • Add missing library stubs for dependencies
+4. ~~Fix Remaining Import Issues~~
+   • ~~Address the unused imports identified by flake8~~
+   • ~~Fix import errors in web modules~~
+   • ~~Add missing library stubs for dependencies~~
 
 ## Best Practices
 
