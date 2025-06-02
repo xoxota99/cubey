@@ -236,35 +236,38 @@ def validate_config(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
     """
     errors = []
     
-    # Check required sections
-    required_sections = ['cam', 'motors']
-    for section in required_sections:
-        if section not in config:
-            errors.append(f"Missing required section '{section}'")
-    
-    # Validate camera configuration
-    if 'cam' in config:
-        errors.extend(validate_camera_config(config['cam']))
-    
-    # Validate motor configuration
-    if 'motors' in config:
-        errors.extend(validate_motor_config(config['motors']))
-    
-    # Validate web configuration
-    if 'web' in config:
-        errors.extend(validate_web_config(config['web']))
-    
-    # Validate logging configuration
-    if 'logging' in config:
-        errors.extend(validate_logging_config(config['logging']))
-    
-    # Validate solver configuration
-    if 'solver' in config:
-        errors.extend(validate_solver_config(config['solver']))
-    
-    # Validate scrambler configuration
-    if 'scrambler' in config:
-        errors.extend(validate_scrambler_config(config['scrambler']))
+    try:
+        # Check required sections
+        required_sections = ['cam', 'motors']
+        for section in required_sections:
+            if section not in config:
+                errors.append(f"Missing required section '{section}'")
+        
+        # Validate camera configuration
+        if 'cam' in config:
+            errors.extend(validate_camera_config(config['cam']))
+        
+        # Validate motor configuration
+        if 'motors' in config:
+            errors.extend(validate_motor_config(config['motors']))
+        
+        # Validate web configuration
+        if 'web' in config:
+            errors.extend(validate_web_config(config['web']))
+        
+        # Validate logging configuration
+        if 'logging' in config:
+            errors.extend(validate_logging_config(config['logging']))
+        
+        # Validate solver configuration
+        if 'solver' in config:
+            errors.extend(validate_solver_config(config['solver']))
+        
+        # Validate scrambler configuration
+        if 'scrambler' in config:
+            errors.extend(validate_scrambler_config(config['scrambler']))
+    except Exception as e:
+        errors.append(f"Unexpected error during configuration validation: {str(e)}")
     
     return len(errors) == 0, errors
 

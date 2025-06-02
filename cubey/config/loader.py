@@ -60,6 +60,12 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     try:
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
+            
+        if config is None:
+            raise ConfigError(f"Configuration file is empty: {config_path}")
+            
+    except yaml.YAMLError as e:
+        raise ConfigError(f"Failed to parse configuration file: {str(e)}")
     except Exception as e:
         raise ConfigError(f"Failed to load configuration: {str(e)}")
     
