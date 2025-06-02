@@ -31,6 +31,7 @@ Cubey is a Raspberry Pi-based Rubik's Cube solving robot that uses computer visi
 │   │
 │   ├── config/                 # Configuration management
 │   │   ├── __init__.py
+│   │   ├── defaults.py         # Default configuration values
 │   │   ├── loader.py           # Configuration loading
 │   │   ├── schema.py           # Configuration schema
 │   │   └── validation.py       # Configuration validation
@@ -55,27 +56,26 @@ Cubey is a Raspberry Pi-based Rubik's Cube solving robot that uses computer visi
 │   │
 │   ├── utils/                  # Utility modules
 │   │   ├── __init__.py
-│   │   ├── config.py           # Configuration utilities
+│   │   ├── error_handler.py    # Error handling
 │   │   ├── logger.py           # Logging setup
-│   │   ├── logging_config.py   # Logging configuration
-│   │   ├── config_validator.py # Configuration validation
-│   │   └── profiler.py         # Performance profiling
+│   │   └── logging_config.py   # Logging configuration
 │   │
 │   └── web/                    # Web interface
 │       ├── __init__.py
 │       ├── app.py              # Flask application
 │       ├── camera.py           # Camera streaming
-│       ├── frameEvent.py       # Frame event handling
+│       ├── frame_event.py      # Frame event handling
 │       ├── integration.py      # API integration
 │       ├── security.py         # Security utilities
 │       └── webstream.py        # Video streaming
 │
 ├── docs/                       # Documentation
-│   ├── versioning.md           # Versioning strategy
-│   └── TODO.md                 # Development roadmap
+│   ├── api.md                  # API documentation
+│   ├── configuration.md        # Configuration guide
+│   └── development.md          # Development guide
 │
 ├── scripts/                    # Utility scripts
-│   ├── bump_version.py         # Version bumping script
+│   ├── install_dependencies.sh # Install system dependencies
 │   └── profile_solver.py       # Solver profiling script
 │
 ├── tests/                      # Test suite
@@ -84,14 +84,10 @@ Cubey is a Raspberry Pi-based Rubik's Cube solving robot that uses computer visi
 │   ├── test_solver.py          # Solver tests
 │   └── test_scanner.py         # Scanner tests
 │
-├── .github/                    # GitHub configuration
-│   └── workflows/              # CI/CD workflows
-│       └── release.yml         # Release workflow
-│
 ├── setup.py                    # Package setup
 ├── pyproject.toml              # Project metadata
+├── CONTRIBUTING.md             # Contribution guidelines
 ├── CHANGELOG.md                # Project changelog
-├── .gitchangelog.rc            # Changelog configuration
 └── README.md                   # This file
 ```
 
@@ -139,6 +135,9 @@ cubey scramble
 # Calibrate the scanner
 cubey calibrate
 
+# Manual control of motors
+cubey manual
+
 # Start the web interface
 cubey web
 ```
@@ -172,7 +171,7 @@ motors.execute(solution)
 Start the web server:
 
 ```bash
-cubey web
+cubey web --host 0.0.0.0 --port 5000
 ```
 
 Then open a browser to http://localhost:5000/
@@ -190,30 +189,7 @@ You can override the configuration by creating a custom config file and specifyi
 cubey --config /path/to/custom_config.yaml solve
 ```
 
-## Performance Optimization
-
-Cubey includes several performance optimizations:
-
-- Solution caching for repeated states
-- Parallel processing for image analysis
-- Asynchronous solving
-- Frame buffering for smoother camera capture
-
-You can profile the solver performance using:
-
-```bash
-python scripts/profile_solver.py
-```
-
-## Versioning
-
-Cubey follows [Semantic Versioning](https://semver.org/). To bump the version:
-
-```bash
-python scripts/bump_version.py [major|minor|patch]
-```
-
-See [docs/versioning.md](docs/versioning.md) for more details.
+All default configuration values are defined in `cubey/config/defaults.py`.
 
 ## Development
 
@@ -227,8 +203,8 @@ git clone https://github.com/cubey/cubey.git
 cd cubey
 
 # Create and activate a virtual environment
-python -m venv temp_venv
-source temp_venv/bin/activate  # On Windows: temp_venv\Scripts\activate
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install in development mode
 pip install -e ".[dev]"
