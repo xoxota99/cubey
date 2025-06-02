@@ -1,199 +1,194 @@
-import os
-import sys
-import yaml
-import logging
-from typing import Dict, Any
-from flask import Flask, request, jsonify
-import threading
+"""
+Integration module for the web interface with the main Cubey functionality.
 
-# Add parent directory to path so we can import the main modules
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+This module provides the integration between the web interface and the core
+Cubey functionality, including the scanner, solver, and motor controller.
+"""
+
+import logging
+from typing import Dict, Any, Optional, Callable, List, Tuple
+
+from flask import Flask, request, jsonify, Response
 
 from cubey.solver.scanner import Scanner
+from cubey.solver.kociemba_solver import KociembaSolver
 from cubey.hardware.motorcontroller import MotorController
-from cubey.utils.logging_config import setup_logging
-import kociemba
+from cubey.solver.scrambler import scramble_cube
 
-"""
-Integration module for the web interface with the main cubey functionality
-"""
 
 class CubeyWebIntegration:
     """
-    Class to integrate the web interface with the main cubey functionality
+    Integration class for the web interface with the main Cubey functionality.
     """
     
-    def __init__(self, config_path: str):
+    def __init__(self, config: Dict[str, Any]):
         """
-        Initialize the integration with the given configuration
+        Initialize the integration.
         
         Args:
-            config_path: Path to the configuration file
+            config: Configuration dictionary
         """
-        # Load configuration
-        with open(config_path, 'r') as ymlfile:
-            self.config = yaml.load(ymlfile, Loader=yaml.FullLoader)
-            
-        # Set up logging
-        setup_logging(config_path)
         self.logger = logging.getLogger(__name__)
+        self.config = config
         
         # Initialize components
-        self.scanner = Scanner(self.config)
-        self.motors = MotorController(self.config)
+        self.scanner = Scanner(config)
+        self.solver = KociembaSolver(config)
+        self.motors = MotorController(config)
         
-        # Status tracking
-        self.status = {
-            "state": "idle",
-            "last_scan": None,
-            "last_solution": None,
-            "error": None
-        }
+        self.logger.info("Web integration initialized")
         
-        # Lock for thread safety
-        self.lock = threading.Lock()
-        
-    def get_status(self) -> Dict[str, Any]:
-        """
-        Get the current status of the system
-        
-        Returns:
-            Dictionary with the current status
-        """
-        with self.lock:
-            return dict(self.status)
-            
     def scan_cube(self) -> Dict[str, Any]:
         """
-        Scan the cube and return the state
+        Scan the cube and return the state.
         
         Returns:
-            Dictionary with the scan result
+            Dictionary with scan results
         """
-        with self.lock:
-            self.status["state"] = "scanning"
-            self.status["error"] = None
-            
-        try:
-            state_str = self.scanner.get_state_string(self.motors)
-            
-            with self.lock:
-                if state_str is None:
-                    self.status["error"] = "Failed to get a valid cube state"
-                    self.status["state"] = "error"
-                    return {"success": False, "error": self.status["error"]}
-                    
-                self.status["last_scan"] = state_str
-                self.status["state"] = "idle"
-                return {"success": True, "state": state_str}
-                
-        except Exception as e:
-            error_msg = f"Error scanning cube: {str(e)}"
-            self.logger.error(error_msg)
-            
-            with self.lock:
-                self.status["error"] = error_msg
-                self.status["state"] = "error"
-                return {"success": False, "error": error_msg}
-    
-    def solve_cube(self) -> Dict[str, Any]:
-        """
-        Solve the cube using the last scan
+        self.logger.info("Scanning cube")
         
-        Returns:
-            Dictionary with the solve result
-        """
-        with self.lock:
-            if self.status["last_scan"] is None:
-                return {"success": False, "error": "No scan available. Please scan the cube first."}
-                
-            self.status["state"] = "solving"
-            self.status["error"] = None
-            last_scan = self.status["last_scan"]
-            
         try:
-            # Get solution
-            solution = kociemba.solve(last_scan)
+            state = self.scanner.get_state_string(self.motors)
             
-            with self.lock:
-                self.status["last_solution"] = solution
-                self.status["state"] = "executing"
+            if state is None:
+                return {"success": False, "error": "Failed to get a valid cube state"}
                 
-            # Execute solution
-            self.motors.execute(solution)
-            
-            with self.lock:
-                self.status["state"] = "idle"
-                return {"success": True, "solution": solution}
-                
+            return {"success": True, "state": state}
         except Exception as e:
-            error_msg = f"Error solving cube: {str(e)}"
-            self.logger.error(error_msg)
+            self.logger.error(f"Error scanning cube: {e}")
+            return {"success": False, "error": str(e)}
             
-            with self.lock:
-                self.status["error"] = error_msg
-                self.status["state"] = "error"
-                return {"success": False, "error": error_msg}
-    
-    def execute_move(self, move: str) -> Dict[str, Any]:
+    def solve_cube(self, state: Optional[str] = None) -> Dict[str, Any]:
         """
-        Execute a single move or sequence
+        Solve the cube and execute the solution.
         
         Args:
-            move: Move or sequence to execute
+            state: Optional cube state (if None, will scan the cube)
             
         Returns:
-            Dictionary with the execution result
+            Dictionary with solve results
         """
-        with self.lock:
-            self.status["state"] = "executing"
-            self.status["error"] = None
-            
+        self.logger.info("Solving cube")
+        
         try:
-            result = self.motors.execute(move)
-            
-            with self.lock:
-                self.status["state"] = "idle"
-                return {"success": result}
+            # Get the cube state if not provided
+            if state is None:
+                scan_result = self.scan_cube()
                 
-        except Exception as e:
-            error_msg = f"Error executing move: {str(e)}"
-            self.logger.error(error_msg)
+                if not scan_result["success"]:
+                    return scan_result
+                    
+                state = scan_result["state"]
+                
+            # Solve the cube
+            solution = self.solver.solve(state)
             
-            with self.lock:
-                self.status["error"] = error_msg
-                self.status["state"] = "error"
-                return {"success": False, "error": error_msg}
+            # Execute the solution
+            self.motors.execute(solution)
+            
+            return {"success": True, "solution": solution}
+        except Exception as e:
+            self.logger.error(f"Error solving cube: {e}")
+            return {"success": False, "error": str(e)}
+            
+    def scramble_cube(self, moves: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Scramble the cube.
+        
+        Args:
+            moves: Optional number of moves
+            
+        Returns:
+            Dictionary with scramble results
+        """
+        self.logger.info("Scrambling cube")
+        
+        try:
+            scramble = scramble_cube(self.config, self.motors, moves)
+            return {"success": True, "scramble": scramble}
+        except Exception as e:
+            self.logger.error(f"Error scrambling cube: {e}")
+            return {"success": False, "error": str(e)}
+            
+    def execute_moves(self, moves: str) -> Dict[str, Any]:
+        """
+        Execute a sequence of moves.
+        
+        Args:
+            moves: Moves to execute
+            
+        Returns:
+            Dictionary with execution results
+        """
+        self.logger.info(f"Executing moves: {moves}")
+        
+        try:
+            self.motors.execute(moves)
+            return {"success": True}
+        except Exception as e:
+            self.logger.error(f"Error executing moves: {e}")
+            return {"success": False, "error": str(e)}
 
-# Create Flask routes for the integration
+
 def create_api_routes(app: Flask, integration: CubeyWebIntegration) -> None:
     """
-    Create API routes for the integration
+    Create API routes for the web interface.
     
     Args:
         app: Flask application
         integration: CubeyWebIntegration instance
     """
-    @app.route('/api/status')
-    def api_status():
-        """Get the current status of the system"""
-        return jsonify(integration.get_status())
-        
+    
     @app.route('/api/scan', methods=['POST'])
-    def api_scan():
-        """Scan the cube"""
-        return jsonify(integration.scan_cube())
+    def api_scan() -> Response:
+        """
+        API endpoint for scanning the cube.
+        
+        Returns:
+            JSON response
+        """
+        result = integration.scan_cube()
+        return jsonify(result)
         
     @app.route('/api/solve', methods=['POST'])
-    def api_solve():
-        """Solve the cube"""
-        return jsonify(integration.solve_cube())
+    def api_solve() -> Response:
+        """
+        API endpoint for solving the cube.
         
-    @app.route('/api/move', methods=['POST'])
-    def api_move():
-        """Execute a move"""
-        data = request.get_json()
-        if not data or 'move' not in data:
-            return jsonify({"success": False, "error": "Missing 'move' parameter"}), 400
+        Returns:
+            JSON response
+        """
+        data = request.get_json() or {}
+        state = data.get('state')
+        result = integration.solve_cube(state)
+        return jsonify(result)
+        
+    @app.route('/api/scramble', methods=['POST'])
+    def api_scramble() -> Response:
+        """
+        API endpoint for scrambling the cube.
+        
+        Returns:
+            JSON response
+        """
+        data = request.get_json() or {}
+        moves = data.get('moves')
+        result = integration.scramble_cube(moves)
+        return jsonify(result)
+        
+    @app.route('/api/execute', methods=['POST'])
+    def api_execute() -> Response:
+        """
+        API endpoint for executing moves.
+        
+        Returns:
+            JSON response
+        """
+        data = request.get_json() or {}
+        moves = data.get('moves')
+        
+        if not moves:
+            return jsonify({"success": False, "error": "No moves provided"})
             
-        return jsonify(integration.execute_move(data['move']))
+        result = integration.execute_moves(moves)
+        return jsonify(result)
