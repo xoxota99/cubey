@@ -14,41 +14,85 @@ Cubey is a Raspberry Pi-based Rubik's Cube solving robot that uses computer visi
 - Web interface for remote operation
 - Command-line interface for local operation
 - Comprehensive logging and error handling
+- Performance optimizations for faster solving
 
 ## Project Structure
 
 ```
-/cubey/
+/
+├── config/                     # Configuration files
+│   ├── config.yaml             # Main configuration
+│   └── calibration.yaml        # Camera calibration
+│
 ├── cubey/                      # Main package directory
-│   ├── __init__.py             # Package initialization
+│   ├── __init__.py             # Package initialization with version
 │   ├── cli.py                  # Command-line interface
 │   ├── exceptions.py           # Custom exceptions
+│   │
+│   ├── config/                 # Configuration management
+│   │   ├── __init__.py
+│   │   ├── loader.py           # Configuration loading
+│   │   ├── schema.py           # Configuration schema
+│   │   └── validation.py       # Configuration validation
+│   │
 │   ├── hardware/               # Hardware interfaces
 │   │   ├── __init__.py
 │   │   ├── camera.py           # Camera interface
 │   │   ├── motorcontroller.py  # Motor controller
+│   │   ├── motors.py           # Interactive motor control
 │   │   └── calibration.py      # Hardware calibration
+│   │
 │   ├── solver/                 # Cube solving algorithms
 │   │   ├── __init__.py
 │   │   ├── kociemba_solver.py  # Kociemba solver
 │   │   ├── scanner.py          # Cube state scanner
 │   │   └── scrambler.py        # Cube scrambler
+│   │
 │   ├── ui/                     # User interfaces
 │   │   ├── __init__.py
 │   │   ├── cli_controller.py   # CLI controller
 │   │   └── web_controller.py   # Web interface controller
+│   │
 │   ├── utils/                  # Utility modules
 │   │   ├── __init__.py
-│   │   ├── config.py           # Configuration management
-│   │   ├── error_handler.py    # Error handling
-│   │   └── logging_config.py   # Logging configuration
-│   └── data/                   # Configuration and data files
-│       ├── config.yaml
-│       └── default_calib.yaml
-├── tests/                      # Test suite
+│   │   ├── config.py           # Configuration utilities
+│   │   ├── logger.py           # Logging setup
+│   │   ├── logging_config.py   # Logging configuration
+│   │   ├── config_validator.py # Configuration validation
+│   │   └── profiler.py         # Performance profiling
+│   │
+│   └── web/                    # Web interface
+│       ├── __init__.py
+│       ├── app.py              # Flask application
+│       ├── camera.py           # Camera streaming
+│       ├── frameEvent.py       # Frame event handling
+│       ├── integration.py      # API integration
+│       ├── security.py         # Security utilities
+│       └── webstream.py        # Video streaming
+│
 ├── docs/                       # Documentation
+│   ├── versioning.md           # Versioning strategy
+│   └── TODO.md                 # Development roadmap
+│
 ├── scripts/                    # Utility scripts
-└── ...
+│   ├── bump_version.py         # Version bumping script
+│   └── profile_solver.py       # Solver profiling script
+│
+├── tests/                      # Test suite
+│   ├── __init__.py
+│   ├── conftest.py             # Test configuration
+│   ├── test_solver.py          # Solver tests
+│   └── test_scanner.py         # Scanner tests
+│
+├── .github/                    # GitHub configuration
+│   └── workflows/              # CI/CD workflows
+│       └── release.yml         # Release workflow
+│
+├── setup.py                    # Package setup
+├── pyproject.toml              # Project metadata
+├── CHANGELOG.md                # Project changelog
+├── .gitchangelog.rc            # Changelog configuration
+└── README.md                   # This file
 ```
 
 ## Installation
@@ -105,9 +149,12 @@ cubey web
 from cubey.hardware.motorcontroller import MotorController
 from cubey.solver.scanner import Scanner
 from cubey.solver.kociemba_solver import KociembaSolver
+from cubey.config.loader import load_config
+
+# Load configuration
+config = load_config()
 
 # Initialize components
-config = {...}  # Your configuration
 scanner = Scanner(config)
 motors = MotorController(config)
 solver = KociembaSolver(config)
@@ -132,16 +179,41 @@ Then open a browser to http://localhost:5000/
 
 ## Configuration
 
-Configuration is stored in YAML files:
+Configuration is stored in YAML files in the `config/` directory:
 
-- `cubey/data/config.yaml`: Main configuration
-- `cubey/data/default_calib.yaml`: Camera calibration
+- `config/config.yaml`: Main configuration
+- `config/calibration.yaml`: Camera calibration
 
 You can override the configuration by creating a custom config file and specifying it with the `--config` option:
 
 ```bash
 cubey --config /path/to/custom_config.yaml solve
 ```
+
+## Performance Optimization
+
+Cubey includes several performance optimizations:
+
+- Solution caching for repeated states
+- Parallel processing for image analysis
+- Asynchronous solving
+- Frame buffering for smoother camera capture
+
+You can profile the solver performance using:
+
+```bash
+python scripts/profile_solver.py
+```
+
+## Versioning
+
+Cubey follows [Semantic Versioning](https://semver.org/). To bump the version:
+
+```bash
+python scripts/bump_version.py [major|minor|patch]
+```
+
+See [docs/versioning.md](docs/versioning.md) for more details.
 
 ## Development
 
@@ -155,8 +227,8 @@ git clone https://github.com/cubey/cubey.git
 cd cubey
 
 # Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv temp_venv
+source temp_venv/bin/activate  # On Windows: temp_venv\Scripts\activate
 
 # Install in development mode
 pip install -e ".[dev]"
