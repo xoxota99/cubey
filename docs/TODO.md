@@ -69,10 +69,10 @@
    • Implement security scanning for dependencies
    • Set up automated releases to PyPI
 
-3. Versioning Strategy
-   • Implement semantic versioning more explicitly
-   • Use git tags for releases
-   • Add changelog generation
+3. ~~Versioning Strategy~~
+   • ~~Implement semantic versioning more explicitly~~
+   • ~~Use git tags for releases~~
+   • ~~Add changelog generation~~
 
 ## Specific Technical Improvements
 
