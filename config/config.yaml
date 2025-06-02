@@ -1,40 +1,60 @@
-app:
-  log_level : "INFO"
-  log_format : "%(asctime)s - %(levelname)s - %(message)s"
+# Cubey Configuration
 
+# Camera settings
 cam:
-  warmup_frames : 30
-  camera_deviceID : 0
-
-  calibration : "default_calib.yaml"
-  
+  camera_deviceID: 0
+  frame_width: 640
+  frame_height: 480
+  warmup_frames: 30
+  flip_camera: false
+  flip_code: 0
+  calibration: "calibration.yaml"
+  # Within the captured frame, these are coordinates of the individual facelet centroids, where we should capture the color of the facelet when scanning.
+  sample_coords:
+    - [300, 30]
+    - [440, 40]
+    - [270, 220]
+    - [440, 220]
+    - [270, 430]
+    - [420, 440]
   # When sampling (or scanning) a coordinate in the captured image, average the color from a square 
   # of twice this width / height in pixels.
-  sample_aperture: 10 # 20x20 pixel square
+  sample_aperture: 10
+  
+  # Performance optimization settings
+  use_threading: true
+  max_workers: 4
+  frame_buffer_size: 3
 
-  sample_coords: [
-      [300, 30], [440, 40],
-      [270, 220], [440, 220],
-      [270, 430], [420, 440]
-    ]
+# Motor controller settings
+motors:
+  speed: 100  # milliseconds per step
+  face_pins:  # hardware pins that are used in order to control individual stepper motors (one for each face). Each pin refers to a specific face.
+    U: 19
+    R: 10
+    F: 3
+    D: 13
+    L: 22
+    B: 2
+  disable_pin: 6  # a common pin, shared by all steppers, that allows to disable the motor controller to save power
+  direction_pin: 26  # a common pin, shared by all steppers, that allows to set the direction of the stepper motor.
+  
+# Solver settings
+solver:
+  max_time: 2.0  # maximum time in seconds
+  max_depth: 20   # maximum search depth
+  use_cache: true # cache solutions
 
-  flip_camera: False
-  flip_code: 1       # 0 = vertical flip, 1 for horizontal, -1 for both.
+# Scanner settings
+scanner:
+  use_threading: true
+  max_workers: 4
+  use_cache: true
 
-
-stepper:
-
-  pin_map: # GPIO pin mapping to function.
-    back: 2
-    front: 3
-    left: 22
-    right: 10
-    disable: 6
-    down: 13
-    up: 19
-    dir: 26
-
-  steps_per_rev: 200
-  move_delay: 0.01   # seconds to wait between cube moves.
-  hertz: 2000       # pulses per second. Basically speed. Do not exceed 4000 Hz.
-  step_factor: 8    # 1/8 microstepping
+# Logging settings
+logging:
+  level: "INFO"
+  file: "cubey.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  max_size: 10485760  # 10MB
+  backup_count: 5

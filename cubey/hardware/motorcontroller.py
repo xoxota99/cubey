@@ -15,8 +15,8 @@ except:
     import Mock.GPIO as GPIO
     
 # Constants for motor directions
-CW = 1
-CCW = -1
+CW = GPIO.LOW
+CCW = GPIO.HIGH
 
 class MotorController:
     """
@@ -32,7 +32,9 @@ class MotorController:
         """
         self.logger = logging.getLogger(__name__)
         self.config = config
-        self.motor_pins = config["motor"]["pins"]
+        self.face_pins = config["motor"]["face_pins"]
+        self.disable_pin = config["motor"]["disable_pin"]
+        self.direction_pin = config["motor"]["direction_pin"]
         self.speed = config["motor"]["speed"]
         
         self.GPIO = GPIO
@@ -40,10 +42,16 @@ class MotorController:
         self.GPIO.setwarnings(False)
         
         # Set up GPIO pins
-        for pin in self.motor_pins.values():
+        for pin in self.face_pins.values():
             self.GPIO.setup(pin, GPIO.OUT)
             self.GPIO.output(pin, GPIO.LOW)
-            
+        
+        self.GPIO.setup(self.disable_pin, GPIO.OUT)
+        self.GPIO.output(self.disable_pin, GPIO.LOW)
+
+        self.GPIO.setup(self.direction_pin, GPIO.OUT)
+        self.GPIO.output(self.direction_pin, CW)  #CW
+
         self.logger.info("Motor controller initialized")
             
     def execute(self, recipe_str: str) -> bool:
@@ -70,10 +78,10 @@ class MotorController:
                 
             # Parse the move
             face = move[0]
-            if face not in self.motor_pins:
+            if face not in self.face_pins:
                 raise MotorError(f"Invalid face: {face}")
                 
-            pin = self.motor_pins[face]
+            pin = self.face_pins[face]
             
             # Determine the direction and angle
             if len(move) > 1:
@@ -87,35 +95,7 @@ class MotorController:
                 self.rot_90(pin, CW)
                 
         return True
-        
-        if not recipe_str:
-            return
-            
-        recipe_arr = recipe_str.split()
-        
-        for step in recipe_arr:
-            self.logger.debug(f"Executing move: {step}")
-            
-            if len(step) == 0:
-                continue
-                
-            base = step[0]
-            
-            if base not in self.motor_pins:
-                raise MotorError(f"Invalid move: {step}")
-                
-            pin = self.motor_pins[base]
-            
-            if len(step) > 1:
-                if step[1] == "'":
-                    self.rot_90(pin, CCW)
-                elif step[1] == "2":
-                    self.rot_180(pin)
-                else:
-                    raise MotorError(f"Invalid move modifier: {step}")
-            else:
-                self.rot_90(pin, CW)
-                
+    
     def rot_90(self, motor_pin: int, direction: int = CW) -> None:
         """
         Rotate a face 90 degrees
@@ -127,6 +107,9 @@ class MotorController:
         self.logger.debug(f"Rotating pin {motor_pin} 90 degrees, direction {direction}")
         
         if self.GPIO:
+            #set direction
+            self.GPIO.output(self.direction_pin,direction)
+            
             self.GPIO.output(motor_pin, self.GPIO.HIGH)
             time.sleep(self.speed / 1000.0)
             self.GPIO.output(motor_pin, self.GPIO.LOW)
@@ -142,6 +125,9 @@ class MotorController:
         self.logger.debug(f"Rotating pin {motor_pin} 180 degrees")
         
         if self.GPIO:
+            #set direction
+            self.GPIO.output(self.direction_pin,direction)
+            
             self.GPIO.output(motor_pin, self.GPIO.HIGH)
             time.sleep(self.speed * 2 / 1000.0)
             self.GPIO.output(motor_pin, self.GPIO.LOW)
@@ -151,7 +137,7 @@ class MotorController:
         Stop all motors and clean up GPIO
         """
         if self.GPIO:
-            for pin in self.motor_pins.values():
+            for pin in self.face_pins.values():
                 self.GPIO.output(pin, self.GPIO.LOW)
                 
             self.GPIO.cleanup()
