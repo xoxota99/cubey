@@ -11,7 +11,6 @@ from cubey.hardware.motorcontroller import MotorController
 from cubey.solver.scanner import Scanner
 from cubey.solver.kociemba_solver import KociembaSolver
 from cubey.solver.scrambler import scramble_cube
-from cubey.core.cube_solver import solve_cube
 from cubey.hardware.motors import run_interactive_mode
 
 class CLIController:
@@ -43,9 +42,12 @@ class CLIController:
         try:
             motors = MotorController(self.config)
             scanner = Scanner(self.config)
+            solver = KociembaSolver(self.config)
             
-            exit_code, _ = solve_cube(self.config, scanner, motors, state, interactive)
-            return exit_code
+            if interactive:
+                return self._solve_interactive(scanner, solver, motors)
+            else:
+                return self._solve_automatic(scanner, solver, motors, state)
         except CubeyError as e:
             self.logger.error(f"Error: {e}")
             return 1

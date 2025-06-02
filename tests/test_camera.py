@@ -8,7 +8,7 @@ import numpy as np
 import os
 import sys
 
-from cubey.core.camera import Camera, test_color, guess_color
+from cubey.hardware.camera import Camera, test_color, guess_color
 
 
 class TestCamera(unittest.TestCase):
