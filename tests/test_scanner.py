@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 # Add the src directory to the path so we can import the modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from lib.scanner import Scanner, get_state_from_string, get_state_img
+from cubey.solver.scanner import Scanner
 
 class TestScanner(unittest.TestCase):
     """Test cases for the Scanner class and related functions"""

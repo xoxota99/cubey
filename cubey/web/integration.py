@@ -10,10 +10,10 @@ import json
 # Add parent directory to path so we can import the main modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from lib.scanner import Scanner
-from lib.motorcontroller import MotorController
-from lib.logger import setup_logging
-import cubey
+from cubey.solver.scanner import Scanner
+from cubey.hardware.motorcontroller import MotorController
+from cubey.utils.logging_config import setup_logging
+import kociemba
 
 """
 Integration module for the web interface with the main cubey functionality
@@ -114,7 +114,7 @@ class CubeyWebIntegration:
             
         try:
             # Get solution
-            solution = cubey.kociemba.solve(last_scan)
+            solution = kociemba.solve(last_scan)
             
             with self.lock:
                 self.status["last_solution"] = solution
